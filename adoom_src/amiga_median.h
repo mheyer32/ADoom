@@ -1,1 +1,1 @@
-void median_cut (UBYTE *palette, ULONG *table, UBYTE *xlate);
+void median_cut(UBYTE *palette, ULONG *table, UBYTE *xlate);

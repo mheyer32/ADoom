@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id:$
@@ -21,13 +21,11 @@
 //  wall, wrapping around. A 1024 columns equal 360 degrees.
 //  The default sky map is 256 columns and repeats 4 times
 //  on a 320 screen?
-//  
+//
 //
 //-----------------------------------------------------------------------------
 
-static const char
-rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
-
+static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 // Needed for FRACUNIT.
 #include "m_fixed.h"
@@ -37,7 +35,6 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 #include "doomstat.h"
 
-
 #ifdef __GNUG__
 #pragma implementation "r_sky.h"
 #endif
@@ -46,24 +43,21 @@ rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 //
 // sky mapping
 //
-int			skyflatnum;
-int			skytexture;
-int			skytexturemid;
-
-
+int skyflatnum;
+int skytexture;
+int skytexturemid;
 
 //
 // R_InitSkyMap
 // Called whenever the view size changes.
 //
-void R_InitSkyMap (void)
+void R_InitSkyMap(void)
 {
-  // skyflatnum = R_FlatNumForName ( SKYFLATNAME );
-    skytexturemid = 100*FRACUNIT;
-//  if ((SCREENWIDTH==320)&&(SCREENHEIGHT==200))
-//    skytexturemid = (SCREENHEIGHT/2)*FRACUNIT;
-//  else
-////    skytexturemid = (SCREENHEIGHT/2)*FRACUNIT;
-//    skytexturemid = (SCREENWIDTH*3)*FRACUNIT/8;
+    // skyflatnum = R_FlatNumForName ( SKYFLATNAME );
+    skytexturemid = 100 * FRACUNIT;
+    //  if ((SCREENWIDTH==320)&&(SCREENHEIGHT==200))
+    //    skytexturemid = (SCREENHEIGHT/2)*FRACUNIT;
+    //  else
+    ////    skytexturemid = (SCREENHEIGHT/2)*FRACUNIT;
+    //    skytexturemid = (SCREENWIDTH*3)*FRACUNIT/8;
 }
-
