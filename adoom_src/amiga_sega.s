@@ -1,7 +1,7 @@
 		mc68020
 
-		XDEF	@Sega6
-		XDEF	@Sega3
+		XDEF	_Sega6
+		XDEF	_Sega3
 
 		section	text,code
 
@@ -9,7 +9,7 @@
 
 		cnop	0,4
 
-@Sega6		bsr.b	GetSega			; xxSAxxDUxxCBRLDU
+_Sega6		bsr.b	GetSega			; xxSAxxDUxxCBRLDU
 		swap	d0
 		bsr.b	GetSega			; xxSAxxDUxxCBRLDU
 		bsr.b	GetSega			; xxSAxxxxxxCBRLDU
@@ -22,7 +22,7 @@
 
 		cnop	0,4
 
-@Sega3		moveq	#0,d0
+_Sega3		moveq	#0,d0
 		bsr.b	GetSega
 		move.w	#$FF00,$DFF034		; SEL=1
 		rts

@@ -1,8 +1,9 @@
 		mc68020
 		section	text,code
 
+
+		include "funcdef.i"
 		include	"exec/execbase.i"
-		include "exec/funcdef.i"
 		include	"exec/exec_lib.i"
 		include	"hardware/custom.i"
 

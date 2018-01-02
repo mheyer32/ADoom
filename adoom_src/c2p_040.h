@@ -1,6 +1,7 @@
-void __asm c2p_8_040(register __a0 UBYTE *chunky_data, register __a1 PLANEPTR raster,
-                     register __a2 UBYTE *compare_buffer, register __d1 ULONG plsiz);
+#include "amiga_macros.h"
 
-void __asm c2p_6_040(register __a0 UBYTE *chunky_data, register __a1 PLANEPTR raster,
-                     register __a2 UBYTE *compare_buffer, register __a4 UBYTE *xlate, register __d1 ULONG plsiz,
-                     register __d2 BOOL video_palette_changed);
+void REGARGS c2p_8_040(REG(a0, UBYTE *chunky_data), REG(a1, PLANEPTR raster), REG(a2, UBYTE *compare_buffer),
+                       REG(d1, ULONG plsiz));
+
+void REGARGS c2p_6_040(REG(a0, UBYTE *chunky_data), REG(a1, PLANEPTR raster), REG(a2, UBYTE *compare_buffer),
+                       REG(a4, UBYTE *xlate), REG(d1, ULONG plsiz), REG(d2, BOOL video_palette_changed));

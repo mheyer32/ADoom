@@ -10,10 +10,9 @@
 *
 *   This file is public domain.
 *
-
+	include "funcdef.i"
 	include "exec/types.i"
 	include "exec/memory.i"
-	include "exec/funcdef.i"
 	include "exec/exec_lib.i"
 	include "graphics/gfx.i"
 

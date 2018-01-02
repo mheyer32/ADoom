@@ -3,28 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <clib/alib_protos.h>
 #include <devices/audio.h>
-#include <dos/dos.h>
-#include <exec/exec.h>
-#include <graphics/gfxbase.h>
-
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/graphics.h>
 
-/* #include <math.h> */
+#include <graphics/gfxbase.h>
 
 #include "z_zone.h"
-
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "w_wad.h"
-
 #include "doomdef.h"
 
-#include "doomsound.h"
+//#include "doomsound.h"
+#include "DoomSnd.h"
 
 // Any value of numChannels set
 // by the defaults code in M_misc is now clobbered by I_InitSound().
@@ -254,7 +250,7 @@ void I_InitSound(void)
 
 /**********************************************************************/
 // ... update sound buffer and audio device at runtime...
-void I_UpdateSound(void) { /* fprintf (stderr, "I_UpdateSound()\n"); */}
+void I_UpdateSound(void) { /* fprintf (stderr, "I_UpdateSound()\n"); */ }
 /**********************************************************************/
 // ... update sound buffer and audio device at runtime...
 void I_SubmitSound(void)

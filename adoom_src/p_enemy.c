@@ -27,7 +27,7 @@ static const char rcsid[] = "$Id: p_enemy.c,v 1.5 1997/02/03 22:45:11 b1 Exp $";
 
 #include <stdlib.h>
 #ifdef AMIGA
-#include <dos.h>
+#include <dos/dos.h>
 #endif
 
 #include "i_system.h"
@@ -438,7 +438,7 @@ boolean P_LookForPlayers(mobj_t* actor, boolean allaround)
     for (;; actor->lastlook = (actor->lastlook + 1) & 3) {
         if (!playeringame[actor->lastlook]) {
 #ifdef AMIGA
-            chkabort();
+// chkabort ();
 #endif
             continue;
         }

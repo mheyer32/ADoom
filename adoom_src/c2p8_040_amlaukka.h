@@ -16,7 +16,7 @@ extern void REGARGS (*c2p8_reloc(REG(a0, UBYTE *chunky), REG(a1, struct BitMap *
                                                                      REG(a1, UBYTE *raster),
                                                                      REG(a2, const UBYTE *chunky_end));
 
-extern void REGARGS *c2p8_deinit(REG(a0, void REGARGS (*c2p)(REG(a0, const UBYTE *chunky), REG(a1, UBYTE *raster),
+extern void *REGARGS c2p8_deinit(REG(a0, void REGARGS (*c2p)(REG(a0, const UBYTE *chunky), REG(a1, UBYTE *raster),
                                                              REG(a2, const UBYTE *chunky_end))),
                                  REG(a6, struct ExecBase *SysBase));
 

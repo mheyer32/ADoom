@@ -1,2 +1,2 @@
-ULONG Sega3(void);
-ULONG Sega6(void);
+extern ULONG Sega3(void);
+extern ULONG Sega6(void);

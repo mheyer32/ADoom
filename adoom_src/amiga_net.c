@@ -1,21 +1,20 @@
-#include <dos.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <arpa/inet.h>
-#include <errno.h>
+#include <devices/serial.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
-#include <unistd.h>
 
-#include <devices/serial.h>
-#include <exec/exec.h>
+#include <clib/alib_protos.h>
+#include <proto/dos.h>
 #include <proto/exec.h>
-#include <proto/socket.h>
 
 #ifdef AMIPX
 // These include file are distributed with amipx.library
@@ -65,7 +64,7 @@ static int IP_UDPsocket(void)
     // allocate a socket
     s = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (s < 0)
-        I_Error("can't create socket: %s", strerror(Errno()));
+        I_Error("can't create socket: %s", strerror(errno));
     return s;
 }
 
@@ -85,7 +84,7 @@ static void IP_BindToLocalPort(int s, int port)
 
     v = bind(s, (void *)&address, sizeof(address));
     if (v == -1)
-        I_Error("BindToPort: bind: %s", strerror(Errno()));
+        I_Error("BindToPort: bind: %s", strerror(errno));
 }
 
 /**********************************************************************/
@@ -116,8 +115,8 @@ static void IP_PacketSend(void)
     c = sendto(IP_sendsocket, (UBYTE *)&sw, doomcom->datalength, 0, (void *)&IP_sendaddress[doomcom->remotenode],
                sizeof(IP_sendaddress[doomcom->remotenode]));
     if (c == -1)
-        if (Errno() != EWOULDBLOCK)
-            I_Error("SendPacket error: %s", strerror(Errno()));
+        if (errno != EWOULDBLOCK)
+            I_Error("SendPacket error: %s", strerror(errno));
 }
 
 /**********************************************************************/
@@ -134,8 +133,8 @@ static void IP_PacketGet(void)
     fromlen = sizeof(fromaddress);
     c = recvfrom(IP_insocket, (UBYTE *)&sw, sizeof(sw), 0, (struct sockaddr *)&fromaddress, &fromlen);
     if (c == -1) {
-        if (Errno() != EWOULDBLOCK)
-            I_Error("GetPacket: %s", strerror(Errno()));
+        if (errno != EWOULDBLOCK)
+            I_Error("GetPacket: %s", strerror(errno));
         doomcom->remotenode = -1;  // no packet
         return;
     }
@@ -189,7 +188,7 @@ static int IP_GetLocalAddress (void)
   // get local address
   v = gethostname (hostname, sizeof(hostname));
   if (v == -1)
-    I_Error ("IP_GetLocalAddress : gethostname: errno %d",Errno());
+    I_Error ("IP_GetLocalAddress : gethostname: errno %d",errno);
 
   hostentry = gethostbyname (hostname);
   if (!hostentry)
@@ -245,19 +244,19 @@ static void IP_InitNetwork(int i)
     IP_BindToLocalPort(IP_insocket, htons(IP_DOOMPORT));
 
     /* set both sockets to non-blocking */
-    if (IoctlSocket(IP_insocket, FIONBIO, &trueval) == -1 || IoctlSocket(IP_sendsocket, FIONBIO, &trueval) == -1)
-        I_Error("IoctlSocket() failed: %s", strerror(Errno()));
+    if (ioctl(IP_insocket, FIONBIO, &trueval) == -1 || ioctl(IP_sendsocket, FIONBIO, &trueval) == -1)
+        I_Error("IoctlSocket() failed: %s", strerror(errno));
 }
 
 /**********************************************************************/
 static void IP_Shutdown(void)
 {
     if (IP_insocket != -1) {
-        CloseSocket(IP_insocket);
+        close(IP_insocket);
         IP_insocket = -1;
     }
     if (IP_sendsocket != -1) {
-        CloseSocket(IP_sendsocket);
+        close(IP_sendsocket);
         IP_sendsocket = -1;
     }
     if (SocketBase != NULL) {
@@ -887,7 +886,7 @@ static void IPX_LookForNodes(int numnetnodes)
         //
         // check for aborting
         //
-        chkabort();
+        // chkabort ();
 
         //
         // listen to the network

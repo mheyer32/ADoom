@@ -23,6 +23,7 @@
 #ifndef __SOUNDS__
 #define __SOUNDS__
 
+#include "doomdef.h"
 //
 // SoundFX struct.
 //

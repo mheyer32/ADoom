@@ -26,6 +26,8 @@
 #pragma interface
 #endif
 
+#include "r_defs.h"
+
 extern seg_t* curline;
 extern side_t* sidedef;
 extern line_t* linedef;

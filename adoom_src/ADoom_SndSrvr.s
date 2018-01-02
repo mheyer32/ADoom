@@ -44,9 +44,9 @@ _custom		equ	$DFF000
 ;------------------------------------------------------------------------
 
 ;		include	devpac:system.gs	; all includes/LVOs
+		include	"funcdef.i"
 
 		include	"exec/exec.i"
-		include	"exec/funcdef.i"
 		include	"exec/exec_lib.i"
 		include	"dos/dos.i"
 		include	"dos/dos_lib.i"

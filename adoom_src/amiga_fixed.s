@@ -3,13 +3,13 @@
 
 ;-----------------------------------------------------------------------
 		xdef	_FixedMul
-		xdef	@FixedMul_040
-		xdef	@FixedMul_060fpu
-		xdef	@FixedMul_060
+		xdef	_FixedMul_040
+		xdef	_FixedMul_060fpu
+		xdef	_FixedMul_060
 		xdef	_FixedDiv
-		xdef	@FixedDiv_040
-		xdef	@FixedDiv_060fpu
-		xdef	@SetFPMode
+		xdef	_FixedDiv_040
+		xdef	_FixedDiv_060fpu
+		xdef	_SetFPMode
 
 		section	text,code
 
@@ -19,7 +19,7 @@
 
 		cnop	0,4
 
-@SetFPMode	fmove.l	fpcr,d0
+_SetFPMode	fmove.l	fpcr,d0
 		or.b	#$20,d0
 		and.b	#~$10,d0
 		fmove.l	d0,fpcr
@@ -30,7 +30,7 @@
 
 ; fixed_t FixedMul (fixed_t a, fixed_t b)
 
-@FixedMul_040	muls.l	d1,d1:d0
+_FixedMul_040	muls.l	d1,d1:d0
 		move.w	d1,d0
 		swap	d0
 		rts
@@ -40,7 +40,7 @@
 
 ; special version for 68060 which otherwise traps and emulates 64-bit muls.l
 
-@FixedMul_060fpu
+_FixedMul_060fpu
 		fmove.l	d0,fp0
 		fmul.l	d1,fp0
 		fmul.s	#0.0000152587890625,fp0	; d0 * d1 / 65536 (* reciprocal)
@@ -52,7 +52,7 @@
 
 ; I'm told all Amiga 68060 accelerators have FPUs, but just in case...
 
-@FixedMul_060	movem.l d2-d5,-(sp)
+_FixedMul_060	movem.l d2-d5,-(sp)
 
 		clr.b	d5          ; clear sign tag
 		tst.l	d0          ; multiplier negative?
@@ -112,7 +112,7 @@
 
 ; fixed_t FixedDiv (fixed_t a, fixed_t b)
 
-@FixedDiv_040	movem.l	d2/d3,-(sp)
+_FixedDiv_040	movem.l	d2/d3,-(sp)
 		move.l	d0,d3
 		swap	d0
 		move.w	d0,d2
@@ -135,7 +135,7 @@
 
 ; m68060fpu fixed division
 
-@FixedDiv_060fpu
+_FixedDiv_060fpu
 		tst.l	d1
 		beq.b	3$		; check for divide by 0 !
 		fmove.l	d0,fp0

@@ -1,22 +1,22 @@
 		mc68020
 
-		xdef	@R_AddSprites
+		xdef	_R_AddSprites
 		xdef	_R_AddSprites
 
-		xdef	@R_DrawMasked
+		xdef	_R_DrawMasked
 		xdef	_R_DrawMasked
 
-		xdef	@R_DrawSprite
+		xdef	_R_DrawSprite
 		xdef	_R_DrawSprite
 
-		xdef	@R_DrawVisSprite
+		xdef	_R_DrawVisSprite
 		xdef	_R_DrawVisSprite
 
-		xdef	@R_SortVisSprites
 		xdef	_R_SortVisSprites
-		xdef	@R_NewVisSprite
+		xdef	_R_SortVisSprites
 		xdef	_R_NewVisSprite
-		xdef	@R_ClearSprites
+		xdef	_R_NewVisSprite
+		xdef	_R_ClearSprites
 		xdef	_R_ClearSprites
 
 		section	text,code
@@ -33,7 +33,7 @@
 		xref	_extralight
 		xref	_scalelight
 		xref	_spritelights
-		xref	@R_ProjectSprite
+		xref	_R_ProjectSprite
 		xref	_validcount
 
 		STRUCTURE	sector,0
@@ -55,7 +55,7 @@
 
 snext		EQU	24
 
-@R_AddSprites:
+_R_AddSprites:
 _R_AddSprites:
 		move.l	_validcount(a4),d0
 		cmp.l	st_validcount(a0),d0
@@ -88,10 +88,10 @@ _R_AddSprites:
 		move.l	d2,a0
 		move.l	snext(a0),d2
 		beq.b	.ral_Done
-		jsr	(@R_ProjectSprite)
+		jsr	(_R_ProjectSprite)
 		bra.b	.ra_Loop
 .ral_Done:
-		jsr	(@R_ProjectSprite)
+		jsr	(_R_ProjectSprite)
 .ra_AllDone:
 		move.l	(sp)+,d2
 .ra_Exit:
@@ -130,22 +130,22 @@ _R_AddSprites:
 ;-----------------------------------------------------------------------
 ; R_DrawMasked (in r_things.c) by Arto Huusko <arto.huusko@pp.qnet.fi>
 
-;;;		xref	@R_SortVisSprites
+;;;		xref	_R_SortVisSprites
 		xref	_vissprite_p	;vissprite_t*
 		xref	_vissprites	;FAR vissprite_t[MAXVISSPRITES]
 		xref	_ds_p		;drawseg_t*
 		xref	_drawsegs	;FAR drawseg_t drawsegs[MAXDRAWSEGS]
-		xref	@R_RenderMaskedSegRange
+		xref	_R_RenderMaskedSegRange
 		xref	_viewangleoffset	;int
 		xref	_vsprsortedhead	;vissprite_t
-		xref	@R_DrawPlayerSprites
-		xref	@R_PointOnSegSide
-		xref	@R_RenderMaskedSegRange
-;;;		xref	@R_DrawVisSprite
+		xref	_R_DrawPlayerSprites
+		xref	_R_PointOnSegSide
+		xref	_R_RenderMaskedSegRange
+;;;		xref	_R_DrawVisSprite
 		xref	_mfloorclip
 		xref	_mceilingclip
 		xref	_viewheight
-;;;		xref	@R_DrawSprite
+;;;		xref	_R_DrawSprite
 
 		STRUCTURE	vissprite,0
 
@@ -182,10 +182,10 @@ _R_AddSprites:
 		LABEL	ds_size
 
 		cnop	0,4
-@R_DrawMasked:
+_R_DrawMasked:
 _R_DrawMasked:
 		movem.l	a2/a3,-(sp)
-		jsr	(@R_SortVisSprites)
+		jsr	(_R_SortVisSprites)
 
 		move.l	#_vissprites,d1
 		move.l	_vissprite_p(a4),d0
@@ -196,7 +196,7 @@ _R_DrawMasked:
 		move.l	4(a3),a2
 .rdm_Loop1:
 		move.l	a2,a0
-		jsr	(@R_DrawSprite)
+		jsr	(_R_DrawSprite)
 		move.l	vp_next(a2),a2
 		cmp.l	a2,a3
 		bne.b	.rdm_Loop1
@@ -211,7 +211,7 @@ _R_DrawMasked:
 		move.l	a2,a0
 		move.l	ds_x1(a2),d0
 		move.l	ds_x2(a2),d1
-		jsr	(@R_RenderMaskedSegRange)
+		jsr	(_R_RenderMaskedSegRange)
 
 .rdml2_Skip:
 		sub.l	#ds_size,a2
@@ -220,7 +220,7 @@ _R_DrawMasked:
 
 		tst.l	_viewangleoffset(a4)
 		bne.b	.rdm_Exit
-		jsr	(@R_DrawPlayerSprites)
+		jsr	(_R_DrawPlayerSprites)
 
 .rdm_Exit:
 		movem.l	(sp)+,a2/a3
@@ -260,24 +260,24 @@ _R_DrawMasked:
 ;-----------------------------------------------------------------------
 ; R_DrawSprite (in r_things.c) by Arto Huusko <arto.huusko@pp.qnet.fi>
 
-;;;		xref	@R_SortVisSprites
+;;;		xref	_R_SortVisSprites
 		xref	_vissprite_p	;vissprite_t*
 		xref	_vissprites	;FAR vissprite_t[MAXVISSPRITES]
 		xref	_ds_p		;drawseg_t*
 		xref	_drawsegs	;FAR drawseg_t drawsegs[MAXDRAWSEGS]
-		xref	@R_RenderMaskedSegRange
+		xref	_R_RenderMaskedSegRange
 		xref	_viewangleoffset	;int
 		xref	_vsprsortedhead	;vissprite_t
-		xref	@R_DrawPlayerSprites
-		xref	@R_PointOnSegSide
-		xref	@R_RenderMaskedSegRange
-;;;		xref	@R_DrawVisSprite
+		xref	_R_DrawPlayerSprites
+		xref	_R_PointOnSegSide
+		xref	_R_RenderMaskedSegRange
+;;;		xref	_R_DrawVisSprite
 		xref	_mfloorclip
 		xref	_mceilingclip
 		xref	_viewheight
-		xref	@memcpy
+		xref	_memcpy
 
-@R_DrawSprite:
+_R_DrawSprite:
 _R_DrawSprite:
 
 		movem.l	d2-d7/a2/a3/a5/a6,-(sp)
@@ -377,7 +377,7 @@ _R_DrawSprite:
 		move.l	vp_gx(a3),d0
 		move.l	vp_gy(a3),d1
 		move.l	ds_curline(a2),a0
-		jsr		(@R_PointOnSegSide)
+		jsr		(_R_PointOnSegSide)
 		tst.l	d0
 		bne.b	.rdsl2_SkipStuff1	;all above is FALSE and PointOnSegSide is TRUE.. so the expression is false => skip
 .rdsl2_DoStuff1:
@@ -386,7 +386,7 @@ _R_DrawSprite:
 		move.l	a2,a0	;(ds,
 		move.l	d5,d0	;r1,
 		move.l	d6,d1	;r2)
-		jsr	(@R_RenderMaskedSegRange)
+		jsr	(_R_RenderMaskedSegRange)
 		bra.b	.rdsl2_Next
 
 .rdsl2_SkipStuff1:
@@ -510,7 +510,7 @@ _R_DrawSprite:
 		move.l	a0,_mceilingclip(a4)
 		move.l	a3,a0
 		movem.l	(sp)+,d2-d7/a2/a3/a5/a6
-		jmp	(@R_DrawVisSprite)
+		jmp	(_R_DrawVisSprite)
 
 
 ;void R_DrawSprite (vissprite_t* spr)
@@ -627,7 +627,7 @@ _R_DrawSprite:
 ;-----------------------------------------------------------------------
 ; R_DrawVisSprite (in r_things.c) by Arto Huusko <arto.huusko@pp.qnet.fi>
 
-		xref	@W_CacheLumpNum
+		xref	_W_CacheLumpNum
 		xref	_firstspritelump
 		xref	_dc_colormap
 		xref	_colfunc
@@ -642,7 +642,7 @@ _R_DrawSprite:
 		xref	_centeryfrac
 		xref	_FixedMul
 		xref	_dc_x
-		xref	@R_DrawMaskedColumn
+		xref	_R_DrawMaskedColumn
 		xref	_basecolfunc
 		xref	_detailshift
 
@@ -652,7 +652,7 @@ _R_DrawSprite:
 ; copies of the sprite->x1 sprite->x2
 
 		cnop	0,4
-@R_DrawVisSprite:
+_R_DrawVisSprite:
 _R_DrawVisSprite:
 
 		movem.l	d2/d7/a2/a3,-(sp)
@@ -661,7 +661,7 @@ _R_DrawVisSprite:
 		move.l	vp_patch(a0),d0
 		add.l	_firstspritelump(a4),d0
 		moveq	#101,d1	;PU_CACHE
-		jsr	(@W_CacheLumpNum)
+		jsr	(_W_CacheLumpNum)
 		move.l	d0,a3	;store patch
 
 		move.l	vp_colormap(a2),_dc_colormap(a4)
@@ -716,7 +716,7 @@ _R_DrawVisSprite:
 		swap	d0
 		rol.w	#8,d0	;SWAPLONG
 		add.l	d0,a0
-		jsr	(@R_DrawMaskedColumn)
+		jsr	(_R_DrawMaskedColumn)
 		addq.l	#1,_dc_x(a4)	;dc_x++
 		add.l	vp_xiscale(a2),d2	;frac += vis->xiscale
 		dbf	d7,.rdvs_Loop
@@ -783,7 +783,7 @@ MAXINT		equ	$7FFFFFFF
 MAXSPRITE	equ	128
 
 		cnop	0,4
-@R_SortVisSprites:
+_R_SortVisSprites:
 _R_SortVisSprites:
 		movem.l	a2/a3/a5,-(sp)
 
@@ -827,7 +827,7 @@ _R_SortVisSprites:
 		rts
 
 		cnop	0,4
-@R_NewVisSprite:
+_R_NewVisSprite:
 _R_NewVisSprite:
 		move.l	_vissprite_p(a4),d0
 		beq.b	.rn_FirstTime
@@ -856,7 +856,7 @@ _R_NewVisSprite:
 		rts
 
 		cnop	0,4
-@R_ClearSprites:
+_R_ClearSprites:
 _R_ClearSprites:
 		move.l	#_vissprites,a0
 		move.l	#0,_vissprite_p(a4)

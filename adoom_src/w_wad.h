@@ -26,6 +26,8 @@
 #pragma interface
 #endif
 
+#include <stdio.h>
+
 //
 // TYPES
 //

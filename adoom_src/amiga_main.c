@@ -30,11 +30,11 @@ char __stdiov37[] = "/AUTO/CLOSE/WAIT";
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <exec/exec.h>
 #include <workbench/icon.h>
 #include <workbench/startup.h>
 #include <workbench/workbench.h>
 
+#include <exec/execbase.h>
 #include <proto/exec.h>
 #include <proto/icon.h>
 
@@ -46,9 +46,12 @@ char __stdiov37[] = "/AUTO/CLOSE/WAIT";
 #include "m_fixed.h"
 
 /**********************************************************************/
-extern struct ExecBase *SysBase;
+struct ExecBase *SysBase = (struct ExecBase *)4;
+struct Library *IconBase = NULL;
 
 int VERSION = 110;
+
+extern int cpu_type;
 
 int cpu_type;
 
@@ -94,6 +97,8 @@ int main(int argc, char *argv[])
             I_Error("malloc(%d) failed", strlen(wb_arg->wa_Name) + 1);
         strcpy(myargv[myargc++], wb_arg->wa_Name);
     }
+    if ((IconBase = OpenLibrary("icon.library", 0)) == NULL)
+        I_Error("Can't open icon.library");
     if ((obj = GetDiskObject(myargv[0])) != NULL) {
         toolarray = obj->do_ToolTypes;
         for (i = 0; i < sizeof(flags) / sizeof(flags[0]); i++) {

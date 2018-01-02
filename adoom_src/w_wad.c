@@ -25,9 +25,9 @@ static const char rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 
 #ifdef NORMALUNIX
 #ifndef __SASC
-#include <alloca.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <malloc.h>
 #include <malloc.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -64,7 +64,7 @@ int numlumps;
 
 void** lumpcache;
 
-#ifndef __SASC
+#if !defined(__SASC) || !defined(ixemul)
 #define strcmpi strcasecmp
 
 void strupr(char* s)
@@ -428,7 +428,7 @@ void W_ReadLump(int lump, void* dest)
     // ??? I_EndRead ();
 }
 
-#ifndef AMIGA
+#if !defined(AMIGA) || 1
 //
 // W_CacheLumpNum
 //

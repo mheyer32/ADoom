@@ -9,9 +9,9 @@
 
 		XDEF    _mmu_mark
 
+		include "funcdef.i"
 		include "exec/types.i"
 		include "exec/memory.i"
-		include "exec/funcdef.i"
 		include "exec/exec_lib.i"
 		include "amiga_mmu.i"
 
