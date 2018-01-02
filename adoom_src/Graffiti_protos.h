@@ -6,9 +6,9 @@ extern "C" {
 #endif
 
 struct GRF_Screen* OpenChunkyScreen(int);
-void       CloseChunkyScreen(struct GRF_Screen* GrfStr);
-void        SetChunkyPalette(struct GRF_Screen* GrfStr,long *pal);
-void        CopyChunkyScreen(struct GRF_Screen* GrfStr,char *pic);
+void CloseChunkyScreen(struct GRF_Screen* GrfStr);
+void SetChunkyPalette(struct GRF_Screen* GrfStr, long* pal);
+void CopyChunkyScreen(struct GRF_Screen* GrfStr, char* pic);
 
 #ifdef __cplusplus
 };

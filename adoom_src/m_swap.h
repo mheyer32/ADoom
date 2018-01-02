@@ -1,4 +1,4 @@
-// Emacs style mode select   -*- C++ -*- 
+// Emacs style mode select   -*- C++ -*-
 //-----------------------------------------------------------------------------
 //
 // $Id:$
@@ -19,33 +19,26 @@
 //
 //-----------------------------------------------------------------------------
 
-
 #ifndef __M_SWAP__
 #define __M_SWAP__
-
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-
 // Endianess handling.
 // WAD files are stored little endian.
 #ifdef __BIG_ENDIAN__
-//unsigned short	SwapSHORT(unsigned short);
-//unsigned long	SwapLONG(unsigned long);
-#define SwapSHORT(x)	((x << 8) | (x >> 8))
-#define SwapLONG(x)	((x >> 24) | ((x & 0xff0000) >> 8) | \
-                         ((x & 0xff00) << 8) | ((x & 0xff) << 24))
-#define SWAPSHORT(x)	((short)SwapSHORT((unsigned short) (x)))
-#define SWAPLONG(x)     ((long)SwapLONG((unsigned long) (x)))
+// unsigned short	SwapSHORT(unsigned short);
+// unsigned long	SwapLONG(unsigned long);
+#define SwapSHORT(x) ((x << 8) | (x >> 8))
+#define SwapLONG(x) ((x >> 24) | ((x & 0xff0000) >> 8) | ((x & 0xff00) << 8) | ((x & 0xff) << 24))
+#define SWAPSHORT(x) ((short)SwapSHORT((unsigned short)(x)))
+#define SWAPLONG(x) ((long)SwapLONG((unsigned long)(x)))
 #else
-#define SWAPSHORT(x)	(x)
-#define SWAPLONG(x)     (x)
+#define SWAPSHORT(x) (x)
+#define SWAPLONG(x) (x)
 #endif
-
-
-
 
 #endif
 //-----------------------------------------------------------------------------

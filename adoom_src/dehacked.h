@@ -1,1 +1,1 @@
-extern void DE_AddDeh(char * name);
+extern void DE_AddDeh(char* name);

@@ -24,7 +24,7 @@
 #else /* of __GNUC__ */
 
 #ifdef __SASC
-#define REG(xn, parm) register __ ## xn parm
+#define REG(xn, parm) register __##xn parm
 #define REGARGS __asm
 #define SAVEDS __saveds
 #define ALIGNED __aligned
@@ -35,7 +35,7 @@
 #else /* of __SASC */
 
 #ifdef _DCC
-#define REG(xn, parm) __ ## xn parm
+#define REG(xn, parm) __## xn parm
 #define REGARGS
 #define SAVEDS __geta4
 #define FAR __far
@@ -46,6 +46,5 @@
 #endif /* __SASC */
 
 #endif /* __GNUC__ */
-
 
 #endif /* _AMIGA_MACROS_H */
