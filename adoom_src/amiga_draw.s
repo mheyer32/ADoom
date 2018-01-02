@@ -5,13 +5,14 @@
 *       This file is public domain.
 *
 
-		mc68020
+		mc68030
 
+		include "funcdef.i"
 		include "exec/types.i"
-		include "exec/funcdef.i"
 		include "exec/exec_lib.i"
 
 ;-----------------------------------------------------------------------
+
 
 SCREENWIDTH	equ	320
 
@@ -1593,7 +1594,7 @@ _R_DrawMaskedColumn:
 
 		xref	_screens	;byte* screens[5]
 
-		xref	@I_MarkRect
+		xref	_I_MarkRect
 
 		STRUCTURE	patch,0
 		 WORD	width
@@ -1653,7 +1654,7 @@ _V_DrawPatchDirect:
 		move.w	width(a2),d5
 		rol.w	#8,d5
 		move.l	d5,-(sp)
-		jsr	(@I_MarkRect)
+		jsr	(_I_MarkRect)
 		addq.l	#8,sp
 
 .vd_ScrnOK:

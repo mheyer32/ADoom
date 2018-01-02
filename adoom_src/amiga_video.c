@@ -2,21 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <cybergraphics/cybergraphics.h>
-#include <devices/gameport.h>
-#include <devices/input.h>
-#include <devices/inputevent.h>
-#include <devices/keymap.h>
-#include <devices/timer.h>
-#include <dos/dos.h>
-#include <exec/exec.h>
-#include <graphics/gfx.h>
-#include <graphics/gfxbase.h>
-#include <graphics/gfxmacros.h>
-#include <intuition/intuition.h>
-#include <libraries/asl.h>
-#include <libraries/lowlevel.h>
-
 #include <proto/asl.h>
 #include <proto/cybergraphics.h>
 #include <proto/dos.h>
@@ -27,6 +12,16 @@
 #include <proto/layers.h>
 #include <proto/lowlevel.h>
 #include <proto/timer.h>
+
+#include <clib/alib_protos.h>
+#include <cybergraphx/cybergraphics.h>
+#include <devices/gameport.h>
+#include <devices/input.h>
+#include <devices/inputevent.h>
+#include <devices/keymap.h>
+#include <devices/timer.h>
+#include <exec/execbase.h>
+#include <graphics/gfxbase.h>
 
 #ifdef GRAFFITI
 #include "graffiti.h"
@@ -44,6 +39,7 @@
 #include "m_bbox.h"
 #include "v_video.h"
 
+#include "amiga_macros.h"
 #include "amiga_median.h"
 #include "amiga_mmu.h"
 #include "amiga_sega.h"
@@ -51,21 +47,29 @@
 #include "c2p_020.h"
 #include "c2p_030.h"
 #include "c2p_040.h"
-#include "indivision.h"
 #include "r_draw.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
+#ifdef INDIVISION
+#include "indivision.h"
+#endif
+
 /*experimental_c2p_stuff***********************************************/
 extern int scaledviewwidth;
-void REGARGS (*c2p)(REG(a0, const UBYTE *chunky), REG(a1, UBYTE *raster), REG(a2, const UBYTE *chunky_end)) = NULL;
+void REGARGS (*c2p)(REG(a0, const UBYTE* chunky), REG(a1, UBYTE* raster), REG(a2, const UBYTE* chunky_end)) = NULL;
 
 /**********************************************************************/
-extern struct ExecBase *SysBase;
-struct Library *AslBase = NULL;
-struct Library *CyberGfxBase = NULL;
-struct Library *LowLevelBase = NULL;
-struct Library *KeymapBase = NULL;
+extern struct ExecBase* SysBase;
+struct Library* AslBase = NULL;
+struct Library* CyberGfxBase = NULL;
+struct Library* LowLevelBase = NULL;
+struct Library* KeymapBase = NULL;
+struct GfxBase* GfxBase = NULL;
+struct Device* TimerBase = NULL;
+struct IntuitionBase* IntuitionBase = NULL;
+
+volatile struct Custom* const custom = (struct Custom*)0xdff000;
 
 extern int cpu_type;
 
@@ -85,7 +89,9 @@ static byte ptranslate[128] = {
     0x3f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x50, 0x51,
     0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f,
 };
+#ifdef INDIVISION
 int video_indigfx = 0;  // Indivision GFX mode
+#endif
 ULONG gfxlength = 0;
 
 static struct ScreenModeRequester *video_smr = NULL;
@@ -128,7 +134,7 @@ static int video_f_cache_mode;
 static int video_c_cache_mode;
 static struct RastPort video_temprp;
 static struct BitMap video_tmp_bm = {0, 0, 0, 0, 0, {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}};
-static UWORD __chip emptypointer[] = {
+static UWORD CHIP emptypointer[] = {
     0x0000, 0x0000, /* reserved, must be NULL */
     0x0000, 0x0000, /* 1 row of image data */
     0x0000, 0x0000  /* reserved, must be NULL */
@@ -142,8 +148,9 @@ static struct Interrupt *input_handler = NULL;
 static struct MsgPort *ih_mp = NULL;
 static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
-__saveds __interrupt __asm static struct InputEvent *video_inputhandler(register __a0 struct InputEvent *ie,
-                                                                        register __a1 APTR data);
+
+static struct InputEvent* SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent* ie),
+                                                                      REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
                           '2',
@@ -269,14 +276,13 @@ static ULONG prevSega;
 static BOOL sega3_selected = FALSE;
 static BOOL sega6_selected = FALSE;
 
+static int video_graffiti = 0;
 #ifdef GRAFFITI
 struct Library *GraffitiBase = NULL;
-int video_graffiti = 0;
 static struct GRF_Screen *video_grf_screen = NULL;
 #endif
 
 /****************************************************************************/
-struct Library *TimerBase = NULL;
 static struct MsgPort *timermp = NULL;
 static struct timerequest *timerio = NULL;
 static ULONG timerclosed = TRUE;
@@ -454,7 +460,7 @@ static void video_do_fps(struct RastPort *rp, int yoffset)
 // SIGBREAKF_CTRL_F and SIGBREAKF_CTRL_C are used for synchronisation
 // with the main task.
 
-static void __saveds __interrupt video_flipscreentask(void)
+static void SAVEDS INTERRUPT video_flipscreentask(void)
 {
     ULONG sig;
     struct MsgPort *video_dispport, *video_safeport;
@@ -546,15 +552,24 @@ void I_InitGraphics(void)
     if ((KeymapBase = OpenLibrary("keymap.library", 0)) == NULL)
         I_Error("Can't open keymap.library");
 
+    if ((GfxBase = OpenLibrary("graphics.library", 0)) == NULL)
+        I_Error("Can't open graphics.library");
+
+    if ((IntuitionBase = OpenLibrary("intuition.library", 0)) == NULL)
+        I_Error("Can't open intuition.library");
+
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
         I_Error("Can't open topaz8 font");
 
     if ((timermp = CreatePort(NULL, 0)) == NULL)
         I_Error("Can't create messageport!");
+
     if ((timerio = (struct timerequest *)CreateExtIO(timermp, sizeof(struct timerequest))) == NULL)
         I_Error("Can't create External IO!");
+
     if (timerclosed = OpenDevice(TIMERNAME, UNIT_ECLOCK, (struct IORequest *)timerio, 0))
         I_Error("Can't open timer.device!");
+
     TimerBase = (struct Library *)timerio->tr_node.io_Device;
     eclocks_per_second = ReadEClock(&start_time);
 
@@ -570,6 +585,7 @@ void I_InitGraphics(void)
         video_depth = 8;
     } else {
 #endif
+#ifdef INDIVISION
         if (video_indigfx != 0) {
             printf("Indivision GFX screen: %d x %d (8bit)\n", SCREENWIDTH, SCREENHEIGHT);
 
@@ -633,8 +649,10 @@ void I_InitGraphics(void)
 
             i = TimeDelay(UNIT_VBLANK, 2, 0);
             indivision_initscreen(0xdff0ac, video_indigfx - 1);
+        } else
+#endif
+        {
 
-        } else {
             if (AslBase == NULL) {
                 if ((AslBase = OpenLibrary("asl.library", 37L)) == NULL ||
                     (video_smr = AllocAslRequestTags(ASL_ScreenModeRequest, TAG_DONE)) == NULL) {
@@ -846,7 +864,7 @@ void I_InitGraphics(void)
     else
         idcmp = IDCMP_RAWKEY;
     wflags = WFLG_ACTIVATE | WFLG_BORDERLESS | WFLG_RMBTRAP | WFLG_NOCAREREFRESH | WFLG_SIMPLE_REFRESH;
-    if (M_CheckParm("-mouse") != NULL) {
+    if (M_CheckParm("-mouse")) {
         video_is_using_mouse = TRUE;
         if (!video_is_using_inputhandler) {
             idcmp |= IDCMP_MOUSEMOVE | IDCMP_DELTAMOVE | IDCMP_MOUSEBUTTONS;
@@ -917,13 +935,13 @@ void I_InitGraphics(void)
         xlate[0x66] = KEY_RCTRL;
     }
 
-    if (M_CheckParm("-sega3") != NULL)
+    if (M_CheckParm("-sega3"))
         sega3_selected = TRUE;
 
-    if (M_CheckParm("-sega6") != NULL)
+    if (M_CheckParm("-sega6"))
         sega6_selected = TRUE;
 
-    if (M_CheckParm("-joypad") != NULL) {
+    if (M_CheckParm("-joypad")) {
         if ((LowLevelBase = OpenLibrary("lowlevel.library", 0)) == NULL)
             I_Error("-joypad option specified and can't open lowlevel.library");
 
@@ -982,6 +1000,7 @@ void I_ShutdownGraphics(void)
 {
     int depth, i, config_done;
 
+#ifdef INDIVISION
     if (video_indigfx != 0) {
         config_done = 0;
 
@@ -994,7 +1013,7 @@ void I_ShutdownGraphics(void)
         }
         i = TimeDelay(UNIT_VBLANK, 1, 0);
     }
-
+#endif
     if (video_screen != NULL && video_is_directcgx) {
         if (video_bitmap_handle != NULL) {
             UnLockBitMap(video_bitmap_handle);
@@ -1207,7 +1226,7 @@ void I_RecalcPalettes(void)
                                               ((UBYTE)gammatable[usegamma][palette[3 * i + 2]]);
             } else {
 #endif
-
+#ifdef INDIVISION
                 if (video_indigfx != 0) {
                     // Indivision GFX uses 15bit palette
                     for (i = 0; i < 128; i++)
@@ -1219,7 +1238,9 @@ void I_RecalcPalettes(void)
                              (((UBYTE)(gammatable[usegamma][palette[6 * i + 0]]) & 0xf8) << 13) |
                              (((UBYTE)(gammatable[usegamma][palette[6 * i + 1]]) & 0xf8) << 18) |
                              (((UBYTE)(gammatable[usegamma][palette[6 * i + 2]]) & 0xf8) << 23));
-                } else {
+                } else
+#endif
+                {
                     i = 3 * 256 - 1;
                     video_colourtable[p][i + 2] = 0;
                     do {
@@ -1309,12 +1330,14 @@ void I_FinishUpdate(void)
         return;
     }
 #endif
+#ifdef INDIVISION
     if (video_indigfx != 0) {
         start_timer();
         indivision_gfxcopy(0xdff0ac, screens[0], (long *)&video_colourtable[video_palette_index][0], 0x0, gfxlength);
         ccs_time += end_timer();  // Indivision GFX video update
         return;
     }
+#endif
     if (video_is_directcgx) {
         if (video_bitmap_handle != NULL) {
             UnLockBitMap(video_bitmap_handle);
@@ -1592,8 +1615,9 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 }
 
 /**********************************************************************/
-__saveds __interrupt __asm static struct InputEvent *video_inputhandler(register __a0 struct InputEvent *ie,
-                                                                        register __a1 APTR data)
+//
+static struct InputEvent* SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
+                                                                      REG(a1, APTR data))
 {
     event_t event;
     static event_t mouseevent = {0};

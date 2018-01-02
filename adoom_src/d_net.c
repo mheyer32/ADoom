@@ -450,7 +450,7 @@ void CheckAbort(void)
             I_Error("Network game synchronization aborted.");
     }
 #ifdef __SASC
-    chkabort();
+// chkabort ();
 #endif
 }
 

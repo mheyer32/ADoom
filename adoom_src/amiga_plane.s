@@ -1,12 +1,12 @@
 		mc68020
 
-		xdef	@R_MakeSpans
+;		xdef	@R_MakeSpans
 		xdef	_R_MakeSpans
 
-		xdef	@R_DrawPlanes
+;		xdef	@R_DrawPlanes
 		xdef	_R_DrawPlanes
 
-		xdef	@R_MapPlane
+;		xdef	@R_MapPlane
 		xdef	_R_MapPlane
 
 		section	text,code
@@ -306,9 +306,9 @@ visplane_size	equ	28
 		xref    _dc_source
 		xref	_colfunc
 
-		xref	@W_CacheLumpNum
-		xref	@Z_ChangeTag2
-		xref	@R_GetColumn
+		xref	W_CacheLumpNum
+		xref	_Z_ChangeTag2
+		xref	R_GetColumn
 
 
 		cnop	0,4
@@ -343,7 +343,7 @@ _R_DrawPlanes:
 		move.l	_firstflat(a4),d0
 		add.l	(a0,d1.l*4),d0	; D1 contains picnum, A0 array of ints
 		moveq	#1,d1		; PU_STATIC
-		jsr	(@W_CacheLumpNum)
+		jsr	(_W_CacheLumpNum)
 		move.l	d0,_ds_source(a4)
 
 		move.l	height(a2),d0
@@ -394,13 +394,13 @@ _R_DrawPlanes:
 		move.w	(a3),d5
 		move.w	(a5)+,d4
 		move.w	(a5),d6
-		jsr	(@R_MakeSpans)	; passes d2/d3/d4/d5/d6
+		jsr	(_R_MakeSpans)	; passes d2/d3/d4/d5/d6
 		addq.l	#1,d2
 		dbf	d7,.rdl_MSLoop
 
 		move.l	_ds_source(a4),a0
 		moveq	#101,d0		; PU_STATIC
-		jsr	(@Z_ChangeTag2)
+		jsr	(_Z_ChangeTag2)
 
 .rd_Next:
 		add.l	#visplane_size,a2
@@ -449,7 +449,7 @@ _R_DrawPlanes:
 		add.l	_viewangle(a4),d1	; viewangle + xtoviewangle[x]
 		move.l	_skytexture(a4),d0
 		asr.l	d7,d1		; angle
-		jsr	(@R_GetColumn)	; R_GetColumn(skytexture,angle)
+		jsr	(_R_GetColumn)	; R_GetColumn(skytexture,angle)
 		move.l	d0,_dc_source(a4)
 		move.l	_colfunc(a4),a0
 		jsr	(a0)

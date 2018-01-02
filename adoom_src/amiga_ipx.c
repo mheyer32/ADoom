@@ -1,11 +1,11 @@
-#include <dos.h>
+#include <proto/dos.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <devices/sana2.h>
-#include <exec/exec.h>
+#include <clib/alib_protos.h>
+#include <proto/devices/sana2.h>
 #include <proto/exec.h>
 
 #include "amiga_ipx.h"
@@ -48,7 +48,7 @@ static int ecb_length(struct IPXECB *ecb)
 }
 
 /**********************************************************************/
-static BOOL __asm __interrupt __saveds CopyFromBuff(  // send
+static BOOL SAVEDS INTERRUPT REGARGS CopyFromBuff(  // send
     register __a0 UBYTE *to, register __a1 struct IPXECB *ecb, register __d0 LONG n)
 {
     int i, len, rem;
@@ -102,7 +102,7 @@ static BOOL __asm __interrupt __saveds CopyFromBuff(  // send
 }
 
 /**********************************************************************/
-static BOOL __asm __interrupt __saveds CopyToBuff(  // get
+static BOOL SAVEDS INTERRUPT REGARGS CopyToBuff(  // get
     register __a0 struct IPXECB *ecb, register __a1 UBYTE *from, register __d0 LONG n)
 {
     int i, rem;
@@ -125,7 +125,7 @@ static BOOL __asm __interrupt __saveds CopyToBuff(  // get
 
 /**********************************************************************/
 /*
-static BOOL __asm __interrupt __saveds PacketFilter (
+static BOOL SAVEDS INTERRUPT REGARGS  PacketFilter (
   register __a0 struct Hook *hook,
   register __a2 struct IOSana2Req *ios2,
   register __a1 APTR data)

@@ -1,15 +1,15 @@
 		mc68020
 
 		xdef	_R_RenderSegLoop
-		xdef	@R_RenderSegLoop
+		xdef	_R_RenderSegLoop
 
 		xdef	_R_PointToDist
-		xdef	@R_PointToDist
+		xdef	_R_PointToDist
 
-		xdef	@R_RenderMaskedSegRange
+		xdef	_R_RenderMaskedSegRange
 		xdef	_R_RenderMaskedSegRange
 
-		xdef	@R_ScaleFromGlobalAngle
+		xdef	_R_ScaleFromGlobalAngle
 		xdef	_R_ScaleFromGlobalAngle
 
 		include	"exec/types.i"
@@ -63,12 +63,12 @@
 		xref    _dc_source
 		xref	_viewheight
 
-		xref	@R_GetColumn
+		xref	_R_GetColumn
 
 		cnop	0,4
 
 _R_RenderSegLoop
-@R_RenderSegLoop
+_R_RenderSegLoop
 		move.l	_rw_x(a4),d0
 		cmp.l	_rw_stopx(a4),d0
 		blt.b	1$
@@ -179,7 +179,7 @@ _R_RenderSegLoop
 		move.l	d3,_dc_yh(a4)	; dc_yh = yh
 		move.l	_rw_midtexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn
-		bsr		(@R_GetColumn)
+		bsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4) ; dc_source = R_GetColumn(midtexture,texturecolumn)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc()
@@ -208,7 +208,7 @@ _R_RenderSegLoop
 		move.l	d6,_dc_yh(a4)	; dc_yh = mid
 		move.l	_rw_toptexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn, d0 = toptexture
-		bsr		(@R_GetColumn)
+		bsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4)	; dc_source = R_GetColumn(d0,d1)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc()
@@ -241,7 +241,7 @@ _R_RenderSegLoop
 		move.l	d3,_dc_yh(a4)	; dc_yh = yh
 		move.l	_rw_bottomtexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn, d0 = bottomtexture
-		bsr		(@R_GetColumn)
+		bsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4) ; dc_source = R_GetColumn(d0,d1)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc ()
@@ -291,7 +291,7 @@ ANG90		equ	$40000000
 ANGLETOFINESHIFT	equ	19
 
 _R_PointToDist:
-@R_PointToDist:
+_R_PointToDist:
 		move.l	d2,-(sp)
 		move.l	_FixedDiv(a4),a1
 
@@ -376,8 +376,8 @@ _R_PointToDist:
 		xref	_sprtopscreen
 		xref	_centeryfrac
 		xref	_FixedMul
-		xref	@R_GetColumn
-		xref	@R_DrawMaskedColumn
+		xref	_R_GetColumn
+		xref	_R_DrawMaskedColumn
 		xref	_dc_iscale
 		xref	_texturetranslation	;int *
 		xref	_textureheight	;fixed_t*
@@ -450,7 +450,7 @@ ML_DONTPEGBOTTOM equ	16	;bit number is 4
 		 WORD	sd_midtexture
 		 APTR	sd_sector
 
-@R_RenderMaskedSegRange:
+_R_RenderMaskedSegRange:
 _R_RenderMaskedSegRange:
 		movem.l	d2-d7/a2/a3/a5,-(sp)
 
@@ -589,10 +589,10 @@ _R_RenderMaskedSegRange:
 		move.l	d7,d0
 		moveq	#0,d1
 		move.w	(a3),d1
-		jsr	(@R_GetColumn)
+		jsr	(_R_GetColumn)
 		subq.l	#3,d0
 		move.l	d0,a0
-		jsr	(@R_DrawMaskedColumn)
+		jsr	(_R_DrawMaskedColumn)
 		move.w	#MAXSHORT,(a3)
 
 .rrl_SkipAll:
@@ -705,7 +705,7 @@ _R_RenderMaskedSegRange:
 ;ANG90		EQU	$40000000
 
 _R_ScaleFromGlobalAngle:
-@R_ScaleFromGlobalAngle:
+_R_ScaleFromGlobalAngle:
 		move.l	d2,-(sp)
 		add.l	#ANG90,d0
 		move.l	d0,d1

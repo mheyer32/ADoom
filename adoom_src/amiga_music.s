@@ -58,13 +58,13 @@
 		xref	_snd_MusicVolume
 		xref	_gametic
 		xref	_I_Error
-		xref	@M_CheckParm
+		xref	_M_CheckParm
 
 ;------------------------------------------------------------------------
 
+		include "funcdef.i"
 		include "exec/types.i"
 		include "exec/memory.i"
-		include "exec/funcdef.i"
 		include "exec/exec_lib.i"
 		include "dos/dos.i"
 		include "dos/dos_lib.i"
@@ -99,7 +99,7 @@ CALLDOS		macro	;FunctionName
 @I_InitMusic	movem.l	d0-d7/a0-a6,-(sp)
 
 		movea.l	#musicarg,a0
-		jsr	@M_CheckParm
+		jsr	_M_CheckParm
 		tst.l	d0
 		beq	.exit
 

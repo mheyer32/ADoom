@@ -1,7 +1,6 @@
 		mc68020
 
-		xdef	@W_CacheLumpNum
-		xdef	_W_CacheLumpNum
+;		xdef	_W_CacheLumpNum
 
 		section	text,code
 
@@ -13,15 +12,15 @@
 		xref	_numlumps	;int
 		xref	_lumpcache	;void**
 
-		xref	@W_LumpLength
-		xref	@W_ReadLump
-		xref	@Z_ChangeTag2
+		xref	W_LumpLength
+		xref	W_ReadLump
+		xref	Z_ChangeTag2
 		xref	_I_Error
-		xref	@Z_Malloc
+		xref	Z_Malloc
 
 		cnop	0,4
 _W_CacheLumpNum:
-@W_CacheLumpNum:
+_W_CacheLumpNum:
 		cmp.l	_numlumps(a4),d0
 		bpl.b	.wc_Error
 
@@ -33,7 +32,7 @@ _W_CacheLumpNum:
 		beq.b	.wc_Miss
 		move.l	(a2),a0
 		move.l	d1,d0
-		jsr	(@Z_ChangeTag2)
+		jsr	(_Z_ChangeTag2)
 		move.l	(a2),d0
 
 		move.l	(sp)+,a2
@@ -44,13 +43,13 @@ _W_CacheLumpNum:
 		movem.l	d2/d3,-(sp)
 		move.l	d0,d2
 		move.l	d1,d3
-		jsr	(@W_LumpLength)
+		jsr	(_W_LumpLength)
 		move.l	d3,d1
 		move.l	a2,a0
-		jsr	(@Z_Malloc)
+		jsr	(_Z_Malloc)
 		move.l	d2,d0
 		move.l	(a2),a0
-		jsr	(@W_ReadLump)
+		jsr	(_W_ReadLump)
 		move.l	(a2),d0
 		movem.l	(sp)+,d2/d3/a2
 		rts

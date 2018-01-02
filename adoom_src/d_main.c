@@ -491,9 +491,6 @@ void D_StartTitle(void)
     D_AdvanceDemo();
 }
 
-//      print title for every printed line
-char title[128];
-
 //
 // D_AddFile
 //
@@ -602,6 +599,8 @@ void IdentifyVersion(void)
 #endif
     sprintf(basedefault, "%s.doomrc", home);
 #endif
+
+    memset(wadfiles, 0, sizeof(wadfiles));
 
     if (M_CheckParm("-shdev")) {
         gamemode = shareware;
@@ -769,6 +768,8 @@ void D_DoomMain(void)
 {
     int p;
     char file[256];
+    //      print title for every printed line
+    char title[256];
 
     FindResponseFile();
 

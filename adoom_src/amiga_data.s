@@ -1,6 +1,6 @@
 		mc68020
 
-		xdef	@R_GetColumn
+		xdef	_R_GetColumn
 		xdef	_R_GetColumn
 
 		section	text,code
@@ -10,8 +10,8 @@
 ;-----------------------------------------------------------------------
 ; R_GetColumn (in r_data.c) by Arto Huusko <arto.huusko@pp.qnet.fi>
 
-		xref	@W_CacheLumpNum
-		xref	@R_GenerateComposite
+		xref	_W_CacheLumpNum
+		xref	_R_GenerateComposite
 		xref	_texturewidthmask	; byte*
 		xref	_texturecolumnlump	; short**
 		xref	_texturecolumnofs	; unsigned short**
@@ -25,7 +25,7 @@
 ;byte**			texturecomposite;
 
 		cnop	0,4
-@R_GetColumn:
+_R_GetColumn:
 _R_GetColumn:
 		movem.l	d2/d4,-(sp)
 
@@ -44,7 +44,7 @@ _R_GetColumn:
 		ble.b	.rg_1		; if lump >0
 
 		moveq	#101,d1		; PU_CACHE
-		jsr	(@W_CacheLumpNum)
+		jsr	(_W_CacheLumpNum)
 		add.l	d4,d0
 		movem.l	(sp)+,d2/d4
 		rts
@@ -55,7 +55,7 @@ _R_GetColumn:
 		move.l	(a0,d2.l*4),d0
 		bne.b	.rg_NotNull
 		move.l	d2,d0
-		jsr	(@R_GenerateComposite)
+		jsr	(_R_GenerateComposite)
 		move.l	_texturecomposite(a4),a0
 		move.l	(a0,d2.l*4),d0
 .rg_NotNull:

@@ -5,8 +5,9 @@
 #include <string.h>
 #include <time.h>
 
-#include <exec/exec.h>
 #include <proto/exec.h>
+#include <proto/exec.h>
+#include <proto/timer.h>
 
 #include "doomdef.h"
 #include "i_sound.h"
@@ -90,9 +91,10 @@ int I_GetTime(void)
 {
     int newtics;
     static int basetime = 0;
+
     unsigned int clock[2];
 
-    timer(clock);
+    //  timer (clock);
     if (!basetime)
         basetime = clock[0];
     newtics = (clock[0] - basetime) * TICRATE + clock[1] * TICRATE / 1000000;
