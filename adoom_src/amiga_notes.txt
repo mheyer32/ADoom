@@ -1,0 +1,813 @@
+========================================================================
+v1.4  8 Jan 2011
+------------------------------------------------------------------------
+Added Indivision gfx support. Included indivision.h, indivision.s and
+modified amiga_main.c and amiga_video.c.
+
+========================================================================
+v1.3  4 Feb 2001
+------------------------------------------------------------------------
+Added -inputhandler option and corresponding tooltype.
+
+------------------------------------------------------------------------
+Explicitly set topaz8 font with SetFont() after InitRastPort() in
+amiga_video.c.  Otherwise crash on exit with -fps was still possible.
+
+------------------------------------------------------------------------
+Fixed bug in DrawVisSprite() in amiga_things.s that caused other
+players to be rendered in the wrong colours in net play.
+
+------------------------------------------------------------------------
+Increased MAXVISSPRITES in r_things.h from 128 to 256.
+
+------------------------------------------------------------------------
+Added -waddir option and associated tooltype as suggested by Joseph
+Fenton.
+
+------------------------------------------------------------------------
+Fixed bug in PCX snapshot code as suggested by Joseph Fenton.
+
+------------------------------------------------------------------------
+Tidied up "[.......]" display in initialisation in r_data.c.
+
+------------------------------------------------------------------------
+Added -no7wire option for 3-wire null-modem cables.
+
+------------------------------------------------------------------------
+Set skytexturemid to 100*FRACUNIT in r_sky.c to fix sky tiling bug.
+
+------------------------------------------------------------------------
+Replaced SwapSHORT and SwapLONG in m_swap.c with macros in m_swap.h.
+
+------------------------------------------------------------------------
+Modified amiga_sound.c to use doomsound.library instead of
+ADoom_SndSrvr.  Added amiga_sound.h and amiga_sound.fd.
+
+------------------------------------------------------------------------
+Fixed some problems with -directcgx.  Framebuffer pointer in f_wipe.c
+and am_map.c was cached.  That failed when CGFX moved the frame
+buffer.  Fixed.  D_Display() called I_StartUpdate when the update had
+already been started.  Fixed in d_main.c.  I_ShutdownSound() tried
+to write to stderr while the bitmap was locked.  Fixed.
+
+------------------------------------------------------------------------
+Colours of other players in network play fixed.
+
+------------------------------------------------------------------------
+V1.2 crashed on FPU-less 68LC060 because incorrectly checked for
+AFB_68881 instead of AFF_68881 on 68060 in amiga_main.c.  Fixed.
+
+------------------------------------------------------------------------
+TCP/IP error checking code in amiga_net.c didn't work correctly
+because it was linked against the wrong errno variable.  Changed it to
+use the bsdsocket.library Errno() function instead.
+
+------------------------------------------------------------------------
+Fixed various problems spread across several files (mainly missing
+#ifdef AMIGA statements) to ensure the source code of ADoom still
+compiles and works under Linux x86.  It does, with added features such
+as -width/-height, -maponhu, etc.
+
+========================================================================
+v1.2 12 Mar 98
+------------------------------------------------------------------------
+Fixed bug in DrawPatchIndirectFlipped() in v_video.c that caused crash
+in DOOM2 Finale.
+
+------------------------------------------------------------------------
+Applied bug patches from Cyril Deble for rotatemap and maponhu.  Use
+'z' to cycle through map types.
+
+------------------------------------------------------------------------
+DIRECTCGX and DEH weren't recognised as tooltypes.  Fixed in
+amiga_main.c.
+
+------------------------------------------------------------------------
+Added support for Graffiti gfx adaptor in amiga_video.c and
+amiga_main.c using graffiti.library.  New options -graffiti (for
+320x256) and -graffiti2 (for 640x256, AGA only).  I can't test these
+options properly because I don't have a Graffiti board.
+
+------------------------------------------------------------------------
+Made bug-fix to R_DrawPlanes() in amiga_draw.s as suggested by Arto
+Huusko.  Fixes glitch with first sky column.
+
+------------------------------------------------------------------------
+Attempted to implement Graffiti support using graffiti.library in
+amiga_video.c and v_video.c.  New options -graffiti (320x256) and
+-graffiti2 (640x256, AGA only).  I'm told, however, that it doesn't
+work, perhaps because of the Window that is opened for IDCMP input.
+
+------------------------------------------------------------------------
+Explicitly set topaz8 font.  The -fps option may have crashed before
+if a larger font was used and text overflowed the bitmap.
+
+------------------------------------------------------------------------
+Translate keys '<' to ',' and '>' to '.' so SHIFT and strafe work at
+the same time.  Numeric keys '1'..'9' and '0' are translated directly
+from the raw keycode instead of using MapRawKey() so you don't need
+SHIFT to change weapons on French keyboards.  The DEL key is now the
+same as F11 (change gamma) instead of KEY_BACKSPACE.
+
+------------------------------------------------------------------------
+Changed "if (french)" to "if (language==french)" in several places in
+wi_stuff.c and hu_stuff.c because french is always 1.  This appears to
+have fixed problems with cooperative network play beyond level 1 and
+also keymap translation for messages in network play.
+
+------------------------------------------------------------------------
+Fixed bug in st_stuff.c that caused IDCLEVnn cheat to fail with
+commercial WADs.  (Variable epsd was set to 0 instead of 1.)
+
+------------------------------------------------------------------------
+Split amiga_draw.s into several files: amiga_draw.s; amiga_things.s;
+amiga_segs.s; amiga_data.s; amiga_sight.s; amiga_plane.s.
+
+------------------------------------------------------------------------
+Applied patches supplied by Arto Huusko to several amiga_*.s routines.
+Added some more assembly routines from Arto too.
+
+------------------------------------------------------------------------
+Changed smakefile to assemble *.s files with PhxAss v4.37 instead of
+with Macro68 and asm.  Made minor changes to several *.s files so they
+assembled with PhxAss, e.g, QUAD directive -> CNOP 0,4.
+
+------------------------------------------------------------------------
+Added -rawkey option in amiga_video.c for translating keys the old way
+with a static table.
+
+------------------------------------------------------------------------
+Replaced amiga_sound.c with version from Joe Fenton which LoadSeg()s a
+separate ADoom_SndSrvr module for music and sound effects.  This
+module does proper stereo panning with sound effects and can play up
+to 16 sounds at once.  The file amiga_music.c is no longer used.
+
+========================================================================
+v1.1 20 Feb 98
+------------------------------------------------------------------------
+Restored MAXVISSPRITES, MAXDRAWSEGS and MAXVISPLANES to their original
+values.  They took up too much memory and often caused structures to be
+allocated in chipmem, slowing the game down.
+
+------------------------------------------------------------------------
+Explicitly declare KeymapBase in amiga_video.c and explicitly open and
+close keymap.library.  Otherwise SAS/C tries to open v38 of
+keymap.library (because __oslibversion == 38 in amiga_main.c) and this
+fails in OS3.0 which comes with only v37 of keymap.library.
+
+------------------------------------------------------------------------
+Increased MAXSPECIALCROSS in p_enemy.c from 8 to 20 to match p_map.c.
+(With the original value of 8, array indices go out of bounds in
+p_map.c.)
+
+========================================================================
+v1.0 19 Feb 98
+------------------------------------------------------------------------
+Changed amiga_video.c to pre-calculate amiga colourtables for all
+possible palettes for a given gamma level.  Added new routine
+I_RecalcPalettes().  Added another argument to I_SetPalette().  Change
+all places where I_SetPalette() is called and also where usegamma is
+modified.  Fixed bug with colour 0.
+
+------------------------------------------------------------------------
+Added support for different display resolutions.  Added -width and
+-height options in v_video.c.  SCREENWIDTH and SCREENHEIGHT are now
+variables.  All static arrays with size dependent on SCREENWIDTH and
+SCREENHEIGHT are now dynamically allocated.  In particular,
+openings[], floorclip[], ceilingclip[], spanstart[], spanstop[],
+yslope[], distscale[], cachedheight[], cacheddistance[],
+cachedxstep[], cachedystep[], xtoviewangle[], negonearray[],
+screenheightarray[], ylookup[], ylookup2[], columnofs[] and
+FUZZOFFSET[] are now pointers instead of arrays.  Dynamically
+initialise FUZZOFFSET[] table.  Also the top[] and bottom[] arrays in
+visplane_t are now pointers to shorts instead of arrays of bytes.  Row
+index no longer fits in a byte.  Changed many lea instructions in
+amiga_draw.s to movea.l instructions to handle pointers instead of
+arrays.
+
+Many occurrances of SCREENWIDTH and SCREENHEIGHT changed to 320 and
+200 respectively because they refer to, e.g, fixed data read from
+file.  On the other hand, many constants changed to formulas involving
+SCREENWIDTH and SCREENHEIGHT because they deal with display offsets.
+
+Added V_DrawPatchInDirect() and V_DrawPatchInDirectFlipped() functions
+to v_video.c which stretch a patch while rendering to display.  Used
+these for stretching init/help/finale screens and for stretching icons
+and text.
+
+Modified R_DrawViewBorder() in r_draw.c to draw border around sides of
+status bar.
+
+Many of the ideas and code snippets for high resolution modes came
+from v0.47 of DOSDOOM, a DOS port of LinuxDOOM by Chi Hoang
+(cyhoang@acs.ucalgary.ca).
+
+Modified C2P routines to handle large displays.  Chip buffers are now
+dynamically allocated in amiga_video.c.  Very long blits are split
+into smaller blits that the blitter can cope with.
+
+Changed the vertical scale for rendering the sky so it doesn't "wrap
+around" in high resolution modes.  New variable: pspriteiscale2.
+
+------------------------------------------------------------------------
+Added dehacked.c from Cyril Deble <Cyril.Deble@inforoute.cgs.fr> for
+parsing .DEH format patch files.  Called from d_main.c.
+
+------------------------------------------------------------------------
+Rewrote keyboard handling routine.  Now call keymap.library
+MapRawKey() for raw keycodes < 0x40.  Translate numeric keypad keys to
+different codes.
+
+------------------------------------------------------------------------
+Call cybergraphics.library BestCModeIDTags() to find best mode (if
+cybergraphics.library was successfully opened).
+
+------------------------------------------------------------------------
+Added I_MarkRect() to amiga_video.c to record dirtybox.  Every
+rendering function that used to call V_MarkRect() now calls
+I_MarkRect() to record the rectangle that was dirtied.  The main 3D
+viewwindow is the only thing not so marked.  I_FinishUpdate() uses
+this information to minimise the amount of copying with WPA8() or
+C2P().  (Unfortunately most C2P routines still convert the entire
+display because they don't handle offset and modulo.)
+
+------------------------------------------------------------------------
+Had another go at getting -directcgx working properly with
+double-buffering.  Double-buffering uses a double-height Screen and
+ScrollVPort(), not ChangeScreenBuffer().  Not everyone has the latest
+version of CyberGraphX which supports ChangeScreenBuffer() yet.
+
+The main problem I had before is that I forgot to recalculate the
+ylookup[] and ylookup2[] arrays of screen addresses whenever the
+buffer flipped.  So ADoom always rendered the 3D view into the same
+buffer.
+
+At the end of each frame with -directcgx, the dirtybox is copied to
+the other buffer with ClipBlit().  That's because text, icons, status
+bar, etc, must be rendered into both buffers.  The 3D viewwindow is
+not copied unless it falls within the dirtybox.  Hopefully ClipBlit()
+uses the gfx-card's blitter because both the src and dest are in the
+CyberGraphX Window.
+
+I'm still stymied at being unable to read displayed information back
+from a CyberGraphX Window, as is done by the wipe routine at the start
+of each level (I_ReadScreen()).  ReadPixelArray8() from the hidden
+part of a CyberGraphX Window seems to return junk.  Is this a bug in
+cybergraphics.library?  LockBitMapTags() followed by memcpy() from the
+framebuffer also seems to return junk.  Is the GVP Spectrum 28/24
+framebuffer write-only?
+
+------------------------------------------------------------------------
+Added several hand-optimised assembly replacements for various C
+routines to amiga_draw.s as emailed to me by Arto Huusko
+<arto.huusko@pp.qnet.fi>.  This resulted in a significant overrall
+speed improvement.  Modified his routines for variable display
+resolution.
+
+------------------------------------------------------------------------
+Increased some constants to allow much more complex WADs to be
+handled, e.g, MAXVISSPRITES: 128->1024, MAXDRAWSEGS: 256->1024,
+MAXVISPLANES: 128->1024.  Hopefully that didn't increase memory
+requirements too much.
+
+========================================================================
+v0.9  7 Feb 98
+------------------------------------------------------------------------
+Patched wi_stuff.c and st_lib.c to work if WIMINUS and STTMINUS lumps
+are missing from WAD file.  Those lumps are missing from some early
+registered doom wads.
+
+------------------------------------------------------------------------
+Added -rtg, -native and -ehb options in amiga_video.c in case
+autodetection fails.
+
+------------------------------------------------------------------------
+Increased priority of double-buffering subtask in amiga_video.c from 5
+to 100.
+
+------------------------------------------------------------------------
+Added call to chkabort() in P_LookForPlayers() in p_enemy.c so it's
+possible to break out of loop when try to play incompatible demo in
+registered doom.wad v1.10 with -forcedemo.
+
+------------------------------------------------------------------------
+Added code for raw network protocol over NULL-modem serial cable in
+amiga_net.c
+
+------------------------------------------------------------------------
+Made some optimisations to amiga_fixed.s as suggested by Gerald
+Schnabel <Gerri@studbox.uni-stuttgart.de>.
+
+------------------------------------------------------------------------
+Applied patches to am_map.c supplied by Cyril Deble to fix bugs with
+-rotatemap and -maponhu.
+
+------------------------------------------------------------------------
+Changed LONG() and SHORT() macros to SWAPLONG() and SWAPSHORT()
+respectively throughout all *.c and m_swap.h files to avoid conflict
+with Amiga includes.
+
+------------------------------------------------------------------------
+Added -cpu <cpu>, -rtg, -native and -ehb options and corresponding
+tooltypes for overriding default autodetection.
+
+------------------------------------------------------------------------
+W_AddFile() and W_Reload() in w_wad.c were free()ing memory using a
+fileinfo pointer that had been incremented after the fileinfo was
+malloc()ed.  Thanks to Frank Wille and Joe Fenton for spotting this.
+Fixed.  Also applied patches to amiga_median.c and amiga_video.c
+supplied by Frank Wille.
+
+------------------------------------------------------------------------
+Moved FPS counter from top-left corner of display to top right in
+amiga_video.s.
+
+------------------------------------------------------------------------
+Added SEGA controller code from Joe Fenton.  Changes to amiga_video.c
+and amiga_main.c.  New file amiga_sega.s.
+
+------------------------------------------------------------------------
+Renamed mmu.* to amiga_mmu.*.  Include amiga_mmu.i in source
+distribution.  (Was accidently left out before.)  Renamed macros.h to
+amiga_macros.h.
+
+------------------------------------------------------------------------
+Applied patches to I_SetPalette() in amiga_video.c as supplied by
+Jeroen T. Vermeulen <jtv@xs4all.nl>.
+
+------------------------------------------------------------------------
+Added ylookup2[] table to d_draw.c and used it to speed up column and
+span rendering routines in amiga_draw.s slightly.  Thanks to Danny
+Robinson <dannyr@pangea.ca> for suggesting this.
+
+------------------------------------------------------------------------
+Added IPX protocol support to amiga_net.c to use G.J. Peltenburg's
+amipx.library.  Made changes to d_net.c for calculating PC-compatible
+packet checksums.  Added -forceversion and -pcchecksum options.
+
+========================================================================
+v0.8 22 Jan 98
+------------------------------------------------------------------------
+Changed amiga_video.c to use timer.device and ReadEClock() for timing
+instead of SAS/C timer() function.  Resorted to floating-point
+arithmetic for converting eclocks to microseconds at the end, so now
+compile with MATH=IEEE.
+
+------------------------------------------------------------------------
+Lowered volume of music in amiga_music.s, got rid of clicks.  Also
+lowered volume of sound effects in amiga_sound.c.  Only the lower half
+of the volume control was being used before.
+
+------------------------------------------------------------------------
+Now compile with OPTSCHEDULE sc option.
+
+------------------------------------------------------------------------
+Added code to amiga_video.c for -fps option for displaying frames per
+second in top-left corner.
+
+------------------------------------------------------------------------
+For 68040/68060 + AGA, now use comparison buffer C2P routine if window
+is smaller than SCREENSIZE-64, else use non-comparison buffer C2P.
+
+------------------------------------------------------------------------
+Disabled "S_StartSoundAtVolume: 16bit and not pre-cached - wtf?" msg
+in s_sound.c with -nosfx.
+
+------------------------------------------------------------------------
+Added -heapsize option in amiga_system.c for specifying zone size in
+kilobytes.
+
+------------------------------------------------------------------------
+Rewrote R_RenderSegLoop() (in r_segs.c) in assembly language (to
+amiga_draw.s) and hand-optimised it a bit.
+
+------------------------------------------------------------------------
+Fixed (harmless) missing #endif in d_main.c.
+
+------------------------------------------------------------------------
+There appears to be a bug in r_things.c.  The code:
+
+    check = namelist;
+    while (*check != NULL)
+	check++;
+
+scans for a NULL which doesn't exist on the end of the namelist array
+(unless you're lucky --- it's just whatever comes after the array in
+memory).  Fixed by making the sprnames[] array 1 element longer in
+info.c and info.h and initialising the last element to NULL.  I wonder
+if this fixed the "PNAMES not found" bug.
+
+------------------------------------------------------------------------
+Compiled everything with DATA=NEAR.  This involved finding the dozen
+or so largest data structures throughout all files and declaring them
+with FAR, so the remainder fitted within 64kb.  Added the following
+lines to doomdef.h:
+
+    #ifdef __SASC
+    #define FAR __far
+    #else
+    #define FAR
+    #endif
+
+Added #include "doomdef.h" to several files to get the FAR definition.
+
+------------------------------------------------------------------------
+Applied patch supplied by Aki to DrawColumn_060() in amiga_draw.s to
+fix problem with red stairs and random pixels on 68060.
+
+------------------------------------------------------------------------
+Changed most routines in amiga_draw.s to use near A4-relative
+addressing of variables.  Couldn't figure out how to do this with
+Macro68 (because DT base for A4 is external) so used SAS/C asm
+instead.  Had to convert back to old syntax and manually optimise
+branches.
+
+------------------------------------------------------------------------
+Applied patches supplied by Cyril Deble to d_main.c and am_map.c for
+new -rotatemap and -maponhu options.
+
+========================================================================
+v0.7 16 Jan 98
+------------------------------------------------------------------------
+Version 0.6 had a serious bug in c2p8_040_amlaukka.s which caused
+crashes on 68040+AGA and 68060+AGA machines.  Fixed with patch
+supplied by Aki Laukkanen.
+
+------------------------------------------------------------------------
+Version 0.6 had a serious bug in the use_mmu cleanup code which caused
+crashes one exit when -mmu or MMU was used.  Fixed with patch supplied
+by Aki Laukkanen.
+
+------------------------------------------------------------------------
+Commenting out the Macro68 debug statements in the *.s files made the
+executable much smaller.
+
+------------------------------------------------------------------------
+The TURBO tooltype (whatever it is) isn't a flag, it takes an
+argument.  Fixed this in amiga_main.c.  Thanks to Thomas Aglassinger
+<agi@rieska.oulu.fi> for spotting this bug.
+
+========================================================================
+v0.6 15 Jan 98
+------------------------------------------------------------------------
+Applied patches to amiga_music.s as supplied by Joe Fenton.
+Also added code to set correct frequency for PAL or NTSC instead of
+assuming NTSC.
+
+------------------------------------------------------------------------
+Applied patches to column and span drawing routines in amiga_draw.s as
+supplied by Aki Laukkanen.  This fixed all the bright dots scattered
+around floors and ceilings, and the red stairs at the start.  Disabled
+various routines in r_draw.c, r_segs.c and r_things.c that are
+replaced by routines in amiga_draw.s.
+
+------------------------------------------------------------------------
+Now use FPU for FixedMul() on 68060.  Joe Fenton says "2 FP multiplies
+beat the hell out of 4 word multiplies, plus the associated adds and
+swaps".  Added SetFPMode() routine to amiga_fixed.s to set FPU
+rounding mode to "round towards minus infinity".  Otherwise WAD demos
+got out of step and went wrong when using FPU for multiply.
+
+------------------------------------------------------------------------
+In p_map.c, undid the patch I made in version 0.0 by changing line:
+
+    if (ld->special && numspechit < MAXSPECIALCROSS)
+
+back to:
+
+    if (ld->special)
+
+Instead added code in p_map.c and p_enemy.c to check bounds of all
+spechit[] array accesses.  With MAXSPECIALCROSS == 8, got lots of
+array out of bounds accesses, especially in 2nd level of DOOM II.
+Changed MAXSPECIALCROSS from 8 to 20.  That got rid of them.
+
+------------------------------------------------------------------------
+After several hours of stepping through with CPR, finally found and
+fixed the bug that made the Doom II "Dead Simple" level impossible to
+complete.  For the function pointer comparison in the line:
+
+	if (th->function.acp1 != (actionf_p1)P_MobjThinker)
+
+in p_enemy.c, SAS/C generated code which compared acp1 with the
+address of the ALV (JMP instruction) for P_MobjThinker() instead of
+the address of the P_MobjThinker() function itself.  Thus the test
+always failed, even when the function pointers were the same.  Fixed
+by compiling everything with ABSFUNCPOINTER.
+
+I reported this to Steve Krueger at SAS.  He replied:
+
+"It's not a bug, but rather a limitation of the CODE=NEAR model. We
+even document this in the manual, and provide an option to work around
+it if you still want to use CODE=NEAR. Check the manual for
+information on the ABSFUNCTIONPOINTER option.
+
+------------------------------------------------------------------------
+Found and fixed the crash on exit bug when music is enabled.  Register
+a0 wasn't initialised to _custom in FreeChannels() in amiga_music.s.
+
+------------------------------------------------------------------------
+Added -nosfx option and tooltype for disabling sound effects and
+leaving audio channels free.
+
+------------------------------------------------------------------------
+Added Aki Laukkanen's code to amiga_video.c for marking screens[0] and
+the video raster as "imprecise" with the MMU when the -mmu option is
+specified.  This should create a slight speedup for 68060.
+
+------------------------------------------------------------------------
+Started adding code for -directcgx option for rendering directly to
+framebuffer of any video card running CyberGraphX.  Discovered it
+flickers badly and needs double or triple-buffering.  Started adding
+code for double-buffering, but didn't get logic for interaction with
+I_ReadScreen() right.  Still haven't got LockBitMapTags() and
+UnLockBitMap() called from the right places, so sometimes tries to
+write to framebuffer (screens[0]) while not locked.  This may corrupt
+other screens if you flip or drag screens while running with
+-directcgx.
+
+------------------------------------------------------------------------
+Applied patches from Aki Laukkanen to get low detail mode working.
+This included substantial changes to amiga_draw.s and r_draw.c.  The
+assembly routines Aki supplied for R_DrawFuzzColumn(),
+R_DrawFuzzColumnLow(), R_DrawTranslatedColumn() and
+R_DrawTranslatedColumnLow() didn't appear to work right, so reverted
+to C versions in r_draw.c.
+
+========================================================================
+v0.5  8 Jan 98
+------------------------------------------------------------------------
+Added music code in amiga_music.s based on Joseph Fenton .MUS player.
+Changed amiga_sound.s to use only 2 channels for sound effects when
+music is enabled, and 4 channels when music is disabled.  Added
+MIDI_Instruments and MIDI_Instruments.s to archive.  MIDI_Instruments.s
+isn't actually used, but it's helpful for understanding the instrument
+format.
+
+------------------------------------------------------------------------
+Added Aki Laukkanen's latest 68040 and 68060-optimised column and span
+renderers in amiga_draw.s.  Modified r_main.c and r_draw.h to handle
+different DrawColumn_040(), DrawColumn_060(), DrawSpan_040() and
+DrawSpan_060().  Aki sent me some more fast C2P and MMU routines but I
+haven't got those working yet.
+
+------------------------------------------------------------------------
+The call to BestModeID() in amiga_video.c had an unterminated taglist.
+Fixed.
+
+------------------------------------------------------------------------
+Added Aki's 68060 versions of FixedMul() and FixedDiv() in amiga_fixed.s.
+68060 FixedDiv uses FPU.  If there is no FPU, fall back to 68040 version.
+Added code to select appropriate routines in amiga_main.c.
+Changed FixedMul() definitions in m_fixed.h to look like this:
+extern fixed_t (*FixedMul)	(fixed_t a, fixed_t b);
+extern fixed_t (*FixedDiv)	(fixed_t a, fixed_t b);
+fixed_t FixedMul_040	(fixed_t a, fixed_t b);
+fixed_t FixedMul_060	(fixed_t a, fixed_t b);
+fixed_t FixedDiv_040	(fixed_t a, fixed_t b);
+fixed_t FixedDiv_060fpu	(fixed_t a, fixed_t b);
+/* fixed_t FixedDiv2	(fixed_t a, fixed_t b); */
+
+------------------------------------------------------------------------
+Added code to amiga_video.c to check version numbers before trying to
+call BestModeID() and put up a screenmode requester.  Explicitly
+declared LowLevelBase so it doesn't try and autoopen lowlevel.library.
+
+------------------------------------------------------------------------
+Fixed I_WaitVBL() in amiga_video.c to call WaitTOF().  It's only
+called on exit to delay long enough to hear the final sound effect.
+
+========================================================================
+v0.4
+------------------------------------------------------------------------
+Gamma correction wasn't working in ECS mode.  Fixed in I_Palette()
+in amiga_video.c.
+
+------------------------------------------------------------------------
+I think I finally found the cause of the 80000003 crash on exit.  It
+was caused by 2 missing commas in the initialisation strings for
+endmsg[] in dstrings.c following the strings: "go ahead and leave. see
+if i care." and "you're lucky i don't smack\nyou for thinking about
+leaving.".  Fixed.
+
+------------------------------------------------------------------------
+Added 68020/30 optimised C2P routine in c2p_020.s.  Use blitter for
+final passes which means double-buffering is required to eliminate
+otherwise severe flicker.  Implemented double-buffering for all planar
+modes in amiga_video.c.
+
+------------------------------------------------------------------------
+Found that the last QBlit() pass finished while the main program was
+in the middle of 3D rendering.  This meant the ChangeScreenBuffer()
+call was delayed until the end of rendering.  The program felt very
+sluggish, even though the frame-rate was higher than before because
+there was a much longer delay between pressing a key and seeing the
+result happen on the screen.  To solve this I created a new subtask
+which simply calls ChangeScreenBuffer() in a loop when signalled from
+the QBlit() cleanup function.  This way the main engine is interrupted
+to call ChangeScreenBuffer() at the earliest opportunity.  Extensive
+changes are in amiga_video.c.
+
+------------------------------------------------------------------------
+Gabry (ggreco@iol.it) emailed me some CD32 joypad handling code.  I
+included it in amiga_video.c (disabled by default) but I can't test
+it.  To enable it, use the -joypad option or JOYPAD tooltype.
+
+------------------------------------------------------------------------
+Several people sent me faster replacements for R_DrawColumn() and
+R_DrawSpan() in amiga_draw.s, but so far only one of them worked
+right.
+
+========================================================================
+v0.3
+------------------------------------------------------------------------
+Low detail code doesn't work, so disabled detail level toggle in
+m_menu.c.  Previously setting low detail and then resizing screen
+corrupted graphics.
+
+------------------------------------------------------------------------
+Added ClearPointer() call before CloseWindow() in amiga_video.c.
+Let's see if that fixes the crash on exit.  Hmm, seems OK after about
+a dozen runs.  Perhaps it was a bug in CyberGraphX.  ... nope, just
+got another 80000003 crash on exit  :(
+
+------------------------------------------------------------------------
+Added code to get ProgramName in amiga_main.c.  Added definition of
+ProgramName in m_args.h and m_args.c.
+
+------------------------------------------------------------------------
+Allocated space for myargv[] in amiga_main.c and copy argv[] across.
+Parse icon tooltypes and convert to additional entries in myargv[]
+and myargc.
+
+------------------------------------------------------------------------
+Added -screenmode option to set ScreenMode in amiga_video.c
+
+------------------------------------------------------------------------
+Added -forcedemo option in g_game.c to force demos to play even if
+the version number doesn't match.
+
+------------------------------------------------------------------------
+Changed handling of $HOME in d_main.c to append a '/' if it doesn't
+already end in a '/' or a ':'.
+
+------------------------------------------------------------------------
+Added trailing slashes to definitions of DEVMAPS and DEVDATA in
+dstrings.h.
+#define DEVMAPS "devmaps/"
+#define DEVDATA "devdata/"
+
+========================================================================
+v0.2   1 Jan 1998
+------------------------------------------------------------------------
+Changed zone management code to allocate between 2Mb and 6Mb instead
+of always 6Mb.  ADoom should now work on Amigas with less memory.
+Check result of allocation.  Previous version crashed if 6Mb malloc
+failed.
+
+------------------------------------------------------------------------
+Changed handling of HOME environment variable in d_main.c
+
+------------------------------------------------------------------------
+The Amiga doesn't have F11 and F12 keys.  Changed amiga_video.c to map
+the '[' and ']' keys to F11 and F12.  Now gamma correction works.
+Also fixed keypad '+'.
+
+------------------------------------------------------------------------
+Added joystick code using gameport device in amiga_video.c.  Changed
+m_misc.c to enable usejoystick.
+
+------------------------------------------------------------------------
+Added AmiTCP networking support by writing a new version of
+amiga_net.c based on i_net.c for Linux.  Successfully worked to a PC
+running Linux with DOOM compiled from the released DOOM sources.
+Performance was really bad, with lots of jerking, even on ethernet.
+Tried improving performance by making sends non-blocking as well as
+recvs.  AmiTCP 4.3 appears to return errno==EINVAL instead of
+errno=EWOULDBLOCK for non-blocking recvfrom() and non-blocking
+sendto() --- seems pretty weird to me, or have I done something wrong?
+
+========================================================================
+v0.1  30 Dec 97
+------------------------------------------------------------------------
+Open audio.device on 4 channels and play sound effects in
+amiga_sound.c.  Cache up to 12 sound effects in chipmem at a time.
+All other sound effects are cached in fastmem.  Audio period is still
+not calculated correctly from pitch.  Separation (balance) is ignored,
+so 3D sound effects are not right.  Changed s_sound.c to pass channel
+number (cnum) to I_StartSound().  Changed m_misc.c to set 4 channels
+instead of 3.
+
+------------------------------------------------------------------------
+Deleted calls to I_UpdateSound() and I_SubmitSound() in d_main.c
+
+------------------------------------------------------------------------
+Stripped 68040-optimised AGA and ECS(EHB) C2P routines out of Flick
+v1.5 and linked them into amiga_video.c.  Changed "dirty_list"
+mechanism to a comparison buffer instead.  Added amiga_median.c for
+calculating best EHB palette and 8-bit -> 6-bit colour xlate table.
+Changed EHB C2P routine to handle colour translate table (probably not
+entirely efficiently).  These routines are not quite state-of-the-art
+(e.g, old merge macro) but they are not bad either.  Linked in 68020-
+and Akiko-optimised routines too, but they are not called yet.
+
+------------------------------------------------------------------------
+Made a minor optimisation speedup to R_DrawColumn().
+
+========================================================================
+v0.0  28 Dec 97
+------------------------------------------------------------------------
+Wrote amiga_main.c, amiga_system, amiga_sound.c, amiga_video.c,
+amiga_net.c and smakefile to replace i_main.c, i_system, i_sound.c,
+i_video.c, i_net.c and Makefile respectively.  The amiga_sound and
+amiga_net routines are dummies.
+
+------------------------------------------------------------------------
+Amiga is big-endian.  Compiled with DEFINE=__BIG_ENDIAN__.  It looks
+like the code hasn't been tested with __BIG_ENDIAN__ for a while.  The
+test in m_swap.c for whether swap routines should be included was
+around the wrong way.  SwapSHORT() returned an int instead of an
+unsigned short.
+
+------------------------------------------------------------------------
+Fixed point arithmetic routines in m_fixed.c used (long long) 64-bit
+datatype not available in SAS/C.  Replaced with assembly routines in
+amiga_fixed.s.  Added check for divide by 0 in FixedDiv() because
+Amiga crashes on divide by 0.
+
+------------------------------------------------------------------------
+The Unix function alloca() was called from r_data.c, w_wad.c and some
+other files.  I replaced with calls to malloc() and added calls to
+free() where each routine returns.
+
+------------------------------------------------------------------------
+Changed the cache routines in w_wad.c to use the more efficient
+fopen(), fread(), fseek(), fclose() instead of open(), read(),
+lseek(), close().  Changed handles from (int) to (FILE *) everywhere
+including lumpinfo_t structure in w_wad.h.  Fixed the filelength()
+function to align stat structure on 4-byte boundary.  Used SAS/C
+fileno() function to get file number from (FILE *).
+
+------------------------------------------------------------------------
+In d_main.c, changed the handling of slashes and double-dots in
+filenames to Amiga conventions.
+
+------------------------------------------------------------------------
+Moved definition of RANGECHECK from doomdef.h to smakefile.  Disabled
+SNDSERV and SNDINTR in doomdef.h.
+
+------------------------------------------------------------------------
+SAS/C 6.58 appeared to generate bad code for the line:
+
+    offsetangle = abs(rw_normalangle-rw_angle1);
+
+in r_segs.c, resulting in corrupted graphics.  This took me hours to
+track down.  Putting printf() instructions before and after, the code
+calulated abs(1073741824-1927746431)=1073741824 instead of the correct
+answer of 854004607.  As far as I could see, it was using the stdlib.h
+definition of abs(), which looks fine.  As a workaround, I changed
+abs() to iabs() (SAS/C function) throughout in all sources.
+
+On 5 Jan 98, Michael van Elst <mlelstv@serpens.swb.de> offered the
+following explanation:
+
+>It doesn't. It is an artefact of ANSI C. rw_normalangle is defined
+>as unsigned, rw_angle1 is defined as int. The result of the difference
+>is therefore unsigned. You need something like:
+>
+>    offsetangle = abs((int)rw_normalangle - (int)rw_angle1);
+>or  offsetangle = abs((long)rw_normalangle - (long)rw_angle1);
+>
+>and make sure that rw_normalangle fits into the positive int or
+>long values.
+>[...]
+>gcc probably doesn't use the macro but an abs(int) function. You
+>get the same with SAS/C if you #undef abs.
+
+------------------------------------------------------------------------
+Got READ enforcer hits in p_enemy.c at the line:
+
+	    ld = spechit[numspechit];
+
+Crashed badly shortly afterwards if Enforcer was not running.  As far
+as I can tell, the variable numspechit should be in the range 0..7.
+Somehow numspechit gets the value 149551680 (0x8e9fa40).  Without
+really knowing what I was doing, I attempted to fix the problem by
+changing the line:
+
+    if (ld->special)
+
+in p_map.c to:
+
+    if (ld->special && numspechit < MAXSPECIALCROSS)
+
+So far it seems to work.
+
+------------------------------------------------------------------------
+Disassembled R_DrawColumn() and R_DrawSpan() with OMD, created
+amiga_draw.s and hand-optimised a bit.
+
+------------------------------------------------------------------------
+Program still often crashes on exit   :(
+
+------------------------------------------------------------------------
