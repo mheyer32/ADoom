@@ -1,0 +1,19 @@
+Short: Source code of Amiga port of DOOM v1.4
+Author: Peter McGavin  (p.mcgavin@irl.cri.nz)
+Type: game/shoot
+Uploader: Oliver Achten  (achten@gmx.de)
+
+
+This archive contains the SAS/C Amiga source code of ADoom-1.4.  You
+don't need it to play ADoom, only if you want to try and compile it or
+look at how it works.  It can be compiled either for an Amiga using
+SAS/C or for Linux using gcc.
+
+See the file amiga_notes.txt for information about the source code.
+
+The archive contains a few files that are not used.
+
+ADoom was derived from the original ID Software Linux DOOM source
+which you can download from:
+
+   ftp://ftp.cdrom.com/pub/idgames/idstuff/source/doomsrc.zip

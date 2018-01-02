@@ -1,0 +1,184 @@
+CC=sc
+
+PHXASS=languages:phxass/bin/phxass
+
+#DBUG=DEBUG=FULL DEFINE=RANGECHECK NOSTACKCHECK
+
+#DBUG=DEBUG=FULL OPTIMIZE OPTTIME OPTSCHEDULE NOSTACKCHECK
+
+DBUG=NODEBUG OPTIMIZE OPTTIME OPTSCHEDULE NOSTACKCHECK
+
+#PDBUG=SYMDEBUG LINEDEBUG
+
+PDBUG=
+
+PFLAGS=NOEXE MACHINE=68020 OPT=2 SMALLDATA=4,-2 I=include: $(PDBUG)
+
+CFLAGS=$(DBUG) CPU=68040 NOICONS STRINGMERGE ABSFUNCPOINTER DATA=NEAR VERBOSE \
+       PARM=REG DEFINE=__BIG_ENDIAN__ DEFINE=NORMALUNIX IGNORE=79 \
+       DEFINE=strcasecmp=stricmp DEFINE=strncasecmp=strnicmp DEFINE=AMIGA \
+       DEFINE=AMIPX DEFINE=GRAFFITI MATH=IEEE
+LDFLAGS=LINK NOICONS
+LIBS=
+
+# not too sophisticated dependency
+OBJS= \
+	doomdef.o \
+	doomstat.o \
+	dstrings.o \
+	amiga_system.o \
+	amiga_sound.o \
+	amiga_video.o \
+	amiga_net.o \
+	amiga_draw.o \
+	amiga_plane.o \
+	amiga_segs.o \
+	amiga_data.o \
+	amiga_wad.o \
+	amiga_sight.o \
+	amiga_things.o \
+	amiga_median.o \
+	amiga_sega.o \
+	c2p_8_020.o \
+	c2p_6_020.o \
+	c2p_8_030.o \
+	c2p_8_040.o \
+	c2p_6_040.o \
+	c2p8_040_amlaukka.o \
+	amiga_mmu.o \
+	dehacked.o \
+	tables.o \
+	f_finale.o \
+	f_wipe.o \
+	d_main.o \
+	d_net.o \
+	d_items.o \
+	g_game.o \
+	m_menu.o \
+	m_misc.o \
+	m_argv.o \
+	m_bbox.o \
+	amiga_fixed.o \
+	m_swap.o \
+	m_cheat.o \
+	m_random.o \
+	am_map.o \
+	p_ceilng.o \
+	p_doors.o \
+	p_enemy.o \
+	p_floor.o \
+	p_inter.o \
+	p_lights.o \
+	p_map.o \
+	p_maputl.o \
+	p_plats.o \
+	p_pspr.o \
+	p_setup.o \
+	p_sight.o \
+	p_spec.o \
+	p_switch.o \
+	p_mobj.o \
+	p_telept.o \
+	p_tick.o \
+	p_saveg.o \
+	p_user.o \
+	r_bsp.o \
+	r_data.o \
+	r_draw.o \
+	r_main.o \
+	r_plane.o \
+	r_segs.o \
+	r_sky.o \
+	r_things.o \
+	w_wad.o \
+	wi_stuff.o \
+	v_video.o \
+	st_lib.o \
+	st_stuff.o \
+	hu_stuff.o \
+	hu_lib.o \
+	s_sound.o \
+	z_zone.o \
+	info.o \
+	sounds.o
+
+#	amiga_music.o \
+
+all:	 ADoom ADoom_SndSrvr
+
+clean:
+	delete *.o
+
+ADoom:	$(OBJS) amiga_main.o
+	$(CC) < with <
+	$(CFLAGS) $(LDFLAGS) $(OBJS) amiga_main.o \
+	PROGRAMNAME ADoom $(LIBS)
+<
+
+ADoom_SndSrvr: ADoom_SndSrvr.s smakefile
+	$(PHXASS) TO ADoom_SndSrvr OPT=2 I=Include: \
+		ADoom_SndSrvr.s
+
+amiga_fixed.o: amiga_fixed.s
+	$(PHXASS) $(PFLAGS) amiga_fixed.s
+
+amiga_draw.o: amiga_draw.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_draw.s
+
+amiga_plane.o: amiga_plane.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_plane.s
+
+amiga_segs.o: amiga_segs.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_segs.s
+
+amiga_data.o: amiga_data.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_data.s
+
+amiga_wad.o: amiga_wad.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_wad.s
+
+amiga_sight.o: amiga_sight.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_sight.s
+
+amiga_things.o: amiga_things.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_things.s
+
+amiga_music.o: amiga_music.s smakefile
+	$(PHXASS) $(PFLAGS) amiga_music.s
+
+c2p_8_020.o: c2p_020.s smakefile
+	$(PHXASS) $(PFLAGS) SET "depth=8" to c2p_8_020.o c2p_020.s
+
+c2p_6_020.o: c2p_020.s smakefile
+	$(PHXASS) $(PFLAGS) SET "depth=6" to c2p_6_020.o c2p_020.s
+
+c2p_8_030.o: c2p_030.s smakefile
+	$(PHXASS) $(PFLAGS) to c2p_8_030.o c2p_030.s
+
+c2p_8_040.o: c2p_040.s smakefile
+	$(PHXASS) $(PFLAGS) SET "depth=8" to c2p_8_040.o c2p_040.s
+
+c2p_6_040.o: c2p_040.s smakefile
+	$(PHXASS) $(PFLAGS) SET "depth=6" to c2p_6_040.o c2p_040.s
+
+#c2p_8_akiko.o: c2p_akiko.s smakefile
+#	macro68 $(MFLAGS) -D "depth=8" c2p_akiko.s -o c2p_8_akiko.o
+
+c2p8_040_amlaukka.o: c2p8_040_amlaukka.s smakefile
+	$(PHXASS) $(PFLAGS) c2p8_040_amlaukka.s
+
+amiga_mmu.o: amiga_mmu.s
+	$(PHXASS) $(PFLAGS) amiga_mmu.s
+
+amiga_sega.o: amiga_sega.s
+	$(PHXASS) $(PFLAGS) amiga_sega.s
+
+amiga_net.o: amiga_net.c
+	$(CC) $(CFLAGS) INCLUDEDIRECTORY=amitcp:SDK/netinclude $<
+
+%.o:	%.c
+	$(CC) $(CFLAGS) $< -o $@
+
+#############################################################
+#
+#############################################################
