@@ -298,7 +298,10 @@ static unsigned int lock_time = 0;
 static unsigned int total_frames = 0;
 
 /****************************************************************************/
-static __inline void start_timer(void) { ReadEClock(&start_time); }
+static __inline void start_timer(void)
+{
+    ReadEClock(&start_time);
+}
 /****************************************************************************/
 static __inline unsigned int end_timer(void)
 {
@@ -1310,7 +1313,9 @@ void I_StartUpdate(void)
 }
 
 /**********************************************************************/
-void I_UpdateNoBlit(void) {}
+void I_UpdateNoBlit(void)
+{
+}
 /**********************************************************************/
 void I_FinishUpdate(void)
 /* This needs optimising to copy just the parts that changed,
@@ -1538,9 +1543,13 @@ void I_ReadScreen(byte *scr)
 }
 
 /**********************************************************************/
-void I_BeginRead(void) {}
+void I_BeginRead(void)
+{
+}
 /**********************************************************************/
-void I_EndRead(void) {}
+void I_EndRead(void)
+{
+}
 /**********************************************************************/
 int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 {

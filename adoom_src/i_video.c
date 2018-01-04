@@ -361,7 +361,9 @@ void I_UpdateNoBlit(void)
 //
 // I_StartUpdate
 //
-void I_StartUpdate(void) {}
+void I_StartUpdate(void)
+{
+}
 //
 // I_FinishUpdate
 //
@@ -501,7 +503,10 @@ void I_FinishUpdate(void)
 //
 // I_ReadScreen
 //
-void I_ReadScreen(byte *scr) { memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT); }
+void I_ReadScreen(byte *scr)
+{
+    memcpy(scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
+}
 //
 // Palette stuff.
 //
@@ -546,11 +551,16 @@ void UploadNewPalette(Colormap cmap, byte *palette)
 //
 // I_RecalcPalettes
 //
-void I_RecalcPalettes(void) {}
+void I_RecalcPalettes(void)
+{
+}
 //
 // I_SetPalette
 //
-void I_SetPalette(byte *palette) { UploadNewPalette(X_cmap, palette); }
+void I_SetPalette(byte *palette)
+{
+    UploadNewPalette(X_cmap, palette);
+}
 //
 // I_MarkRect() Called by anything that renders to screens[0] (except 3D view)
 //
@@ -669,7 +679,11 @@ void I_InitGraphics(void)
         return;
     firsttime = 0;
 
+    DEBUGSTEP();
+
     signal(SIGINT, (void (*)(int))I_Quit);
+
+    DEBUGSTEP();
 
     if (M_CheckParm("-2"))
         multiply = 2;

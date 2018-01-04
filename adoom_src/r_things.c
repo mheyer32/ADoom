@@ -291,7 +291,10 @@ void R_InitSprites(char** namelist)
 // R_ClearSprites
 // Called at frame start.
 //
-void R_ClearSprites(void) { vissprite_p = vissprites; }
+void R_ClearSprites(void)
+{
+    vissprite_p = vissprites;
+}
 #endif
 
 #ifdef AMIGA

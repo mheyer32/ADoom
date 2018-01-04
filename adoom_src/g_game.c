@@ -863,7 +863,10 @@ void G_DoReborn(int playernum)
     }
 }
 
-void G_ScreenShot(void) { gameaction = ga_screenshot; }
+void G_ScreenShot(void)
+{
+    gameaction = ga_screenshot;
+}
 // DOOM Par Times
 int pars[4][10] = {{0},
                    {0, 30, 75, 120, 90, 165, 180, 180, 30, 165},

@@ -1063,7 +1063,10 @@ void A_VileChase(mobj_t* actor)
 //
 // A_VileStart
 //
-void A_VileStart(mobj_t* actor) { S_StartSound(actor, sfx_vilatk); }
+void A_VileStart(mobj_t* actor)
+{
+    S_StartSound(actor, sfx_vilatk);
+}
 //
 // A_Fire
 // Keep fire in front of player unless out of sight
@@ -1363,7 +1366,10 @@ void A_Scream(mobj_t* actor)
         S_StartSound(actor, sound);
 }
 
-void A_XScream(mobj_t* actor) { S_StartSound(actor, sfx_slop); }
+void A_XScream(mobj_t* actor)
+{
+    S_StartSound(actor, sfx_slop);
+}
 void A_Pain(mobj_t* actor)
 {
     if (actor->info->painsound)
@@ -1382,7 +1388,10 @@ void A_Fall(mobj_t* actor)
 //
 // A_Explode
 //
-void A_Explode(mobj_t* thingy) { P_RadiusAttack(thingy, thingy->target, 128); }
+void A_Explode(mobj_t* thingy)
+{
+    P_RadiusAttack(thingy, thingy->target, 128);
+}
 //
 // A_BossDeath
 // Possibly trigger special effects
@@ -1535,8 +1544,14 @@ void A_BabyMetal(mobj_t* mo)
     A_Chase(mo);
 }
 
-void A_OpenShotgun2(player_t* player, pspdef_t* psp) { S_StartSound(player->mo, sfx_dbopn); }
-void A_LoadShotgun2(player_t* player, pspdef_t* psp) { S_StartSound(player->mo, sfx_dbload); }
+void A_OpenShotgun2(player_t* player, pspdef_t* psp)
+{
+    S_StartSound(player->mo, sfx_dbopn);
+}
+void A_LoadShotgun2(player_t* player, pspdef_t* psp)
+{
+    S_StartSound(player->mo, sfx_dbload);
+}
 void A_ReFire(player_t* player, pspdef_t* psp);
 
 void A_CloseShotgun2(player_t* player, pspdef_t* psp)
@@ -1574,7 +1589,10 @@ void A_BrainAwake(mobj_t* mo)
     S_StartSound(NULL, sfx_bossit);
 }
 
-void A_BrainPain(mobj_t* mo) { S_StartSound(NULL, sfx_bospn); }
+void A_BrainPain(mobj_t* mo)
+{
+    S_StartSound(NULL, sfx_bospn);
+}
 void A_BrainScream(mobj_t* mo)
 {
     int x;
@@ -1618,7 +1636,10 @@ void A_BrainExplode(mobj_t* mo)
         th->tics = 1;
 }
 
-void A_BrainDie(mobj_t* mo) { G_ExitLevel(); }
+void A_BrainDie(mobj_t* mo)
+{
+    G_ExitLevel();
+}
 void A_BrainSpit(mobj_t* mo)
 {
     mobj_t* targ;

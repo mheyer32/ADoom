@@ -11,13 +11,13 @@
 
 #include <graphics/gfxbase.h>
 
-#include "z_zone.h"
+#include "doomdef.h"
 #include "i_sound.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_misc.h"
 #include "w_wad.h"
-#include "doomdef.h"
+#include "z_zone.h"
 
 //#include "doomsound.h"
 #include "DoomSnd.h"
@@ -250,7 +250,9 @@ void I_InitSound(void)
 
 /**********************************************************************/
 // ... update sound buffer and audio device at runtime...
-void I_UpdateSound(void) { /* fprintf (stderr, "I_UpdateSound()\n"); */ }
+void I_UpdateSound(void)
+{ /* fprintf (stderr, "I_UpdateSound()\n"); */
+}
 /**********************************************************************/
 // ... update sound buffer and audio device at runtime...
 void I_SubmitSound(void)
@@ -314,7 +316,9 @@ void I_ShutdownSound(void)
 
 /**********************************************************************/
 // Initialize number of channels
-void I_SetChannels(void) {}
+void I_SetChannels(void)
+{
+}
 /**********************************************************************/
 // Get raw data lump index for sound descriptor.
 int I_GetSfxLumpNum(sfxinfo_t *sfx)

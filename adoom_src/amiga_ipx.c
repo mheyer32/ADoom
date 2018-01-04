@@ -234,7 +234,10 @@ UWORD IPXOpenSocket(UWORD socketid)
 }
 
 /**********************************************************************/
-void IPXCloseSocket(UWORD socketid) { the_socket = 0; }
+void IPXCloseSocket(UWORD socketid)
+{
+    the_socket = 0;
+}
 /**********************************************************************/
 int IPXGetLocalTarget(struct IPXAddress *request, UBYTE reply[6])
 {
@@ -320,7 +323,9 @@ int IPXListenForPacket(struct IPXECB *ecb)
 }
 
 /**********************************************************************/
-void ScheduleIPXEvent(struct IPXECB *ecb, int ticks) {}
+void ScheduleIPXEvent(struct IPXECB *ecb, int ticks)
+{
+}
 /**********************************************************************/
 int IPXCancelEvent(struct IPXECB *ecb)
 {
@@ -346,7 +351,9 @@ int IPXGetIntervalMarker(void)
 }
 
 /**********************************************************************/
-void IPXGetInternetworkAddress(struct IPXInternetworkAddress *reply) {}
+void IPXGetInternetworkAddress(struct IPXInternetworkAddress *reply)
+{
+}
 /**********************************************************************/
 void IPXRelinquishControl(void)
 {
@@ -358,9 +365,17 @@ void IPXRelinquishControl(void)
 }
 
 /**********************************************************************/
-void IPXDisconnectFromTarget(struct IPXAddress *request) {}
+void IPXDisconnectFromTarget(struct IPXAddress *request)
+{
+}
 /**********************************************************************/
-void IPXGetLocalAddr(struct IPXAddress *reply) { memcpy(reply, &localaddress, sizeof(struct IPXAddress)); }
+void IPXGetLocalAddr(struct IPXAddress *reply)
+{
+    memcpy(reply, &localaddress, sizeof(struct IPXAddress));
+}
 /**********************************************************************/
-void _STDcleanupIPX(void) { Shutdown_IPX(); }
+void _STDcleanupIPX(void)
+{
+    Shutdown_IPX();
+}
 /**********************************************************************/

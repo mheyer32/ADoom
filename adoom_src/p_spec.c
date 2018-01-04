@@ -199,7 +199,10 @@ sector_t* getSector(int currentSector, int line, int side)
 // Given the sector number and the line number,
 //  it will tell you whether the line is two-sided or not.
 //
-int twoSided(int sector, int line) { return (sectors[sector].lines[line])->flags & ML_TWOSIDED; }
+int twoSided(int sector, int line)
+{
+    return (sectors[sector].lines[line])->flags & ML_TWOSIDED;
+}
 //
 // getNextSector()
 // Return sector_t * of sector next to current.

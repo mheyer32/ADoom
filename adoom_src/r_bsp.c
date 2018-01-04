@@ -53,7 +53,10 @@ void R_StoreWallRange(int start, int stop);
 //
 // R_ClearDrawSegs
 //
-void R_ClearDrawSegs(void) { ds_p = drawsegs; }
+void R_ClearDrawSegs(void)
+{
+    ds_p = drawsegs;
+}
 //
 // ClipWallSegment
 // Clips the given range of columns

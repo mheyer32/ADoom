@@ -320,7 +320,10 @@ void W_InitFile(char* filename)
 //
 // W_NumLumps
 //
-int W_NumLumps(void) { return numlumps; }
+int W_NumLumps(void)
+{
+    return numlumps;
+}
 //
 // W_CheckNumForName
 // Returns -1 if name not found.
@@ -457,7 +460,10 @@ void* W_CacheLumpNum(int lump, int tag)
 //
 // W_CacheLumpName
 //
-void* W_CacheLumpName(char* name, int tag) { return W_CacheLumpNum(W_GetNumForName(name), tag); }
+void* W_CacheLumpName(char* name, int tag)
+{
+    return W_CacheLumpNum(W_GetNumForName(name), tag);
+}
 //
 // W_Profile
 //

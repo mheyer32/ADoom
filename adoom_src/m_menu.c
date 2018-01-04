@@ -656,7 +656,10 @@ void M_DrawSound(void)
     M_DrawThermo(SoundDef.x, SoundDef.y + LINEHEIGHT * (music_vol + 1), 16, snd_MusicVolume);
 }
 
-void M_Sound(int choice) { M_SetupNextMenu(&SoundDef); }
+void M_Sound(int choice)
+{
+    M_SetupNextMenu(&SoundDef);
+}
 void M_SfxVol(int choice)
 {
     switch (choice) {
@@ -692,7 +695,10 @@ void M_MusicVol(int choice)
 //
 // M_DrawMainMenu
 //
-void M_DrawMainMenu(void) { V_DrawPatchInDirect(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE)); }
+void M_DrawMainMenu(void)
+{
+    V_DrawPatchInDirect(94, 2, 0, W_CacheLumpName("M_DOOM", PU_CACHE));
+}
 //
 // M_NewGame
 //
@@ -720,7 +726,10 @@ void M_NewGame(int choice)
 //
 int epi;
 
-void M_DrawEpisode(void) { V_DrawPatchInDirect(54, 38, 0, W_CacheLumpName("M_EPISOD", PU_CACHE)); }
+void M_DrawEpisode(void)
+{
+    V_DrawPatchInDirect(54, 38, 0, W_CacheLumpName("M_EPISOD", PU_CACHE));
+}
 void M_VerifyNightmare(int ch)
 {
     if (ch != 'y')
@@ -780,7 +789,10 @@ void M_DrawOptions(void)
     M_DrawThermo(OptionsDef.x, OptionsDef.y + LINEHEIGHT * (scrnsize + 1), 9, screenSize);
 }
 
-void M_Options(int choice) { M_SetupNextMenu(&OptionsDef); }
+void M_Options(int choice)
+{
+    M_SetupNextMenu(&OptionsDef);
+}
 //
 //      Toggle messages on/off
 //

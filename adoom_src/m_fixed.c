@@ -35,7 +35,10 @@ static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 // Fixme. __USE_C_FIXED__ or something.
 
-fixed_t FixedMul(fixed_t a, fixed_t b) { return ((long long)a * (long long)b) >> FRACBITS; }
+fixed_t FixedMul(fixed_t a, fixed_t b)
+{
+    return ((long long)a * (long long)b) >> FRACBITS;
+}
 //
 // FixedDiv, C version.
 //
