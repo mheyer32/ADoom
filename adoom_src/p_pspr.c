@@ -214,7 +214,10 @@ void P_FireWeapon(player_t* player)
 // P_DropWeapon
 // Player died, so put the weapon away.
 //
-void P_DropWeapon(player_t* player) { P_SetPsprite(player, ps_weapon, weaponinfo[player->readyweapon].downstate); }
+void P_DropWeapon(player_t* player)
+{
+    P_SetPsprite(player, ps_weapon, weaponinfo[player->readyweapon].downstate);
+}
 //
 // A_WeaponReady
 // The player can fire the weapon
@@ -581,9 +584,18 @@ void A_FireCGun(player_t* player, pspdef_t* psp)
 //
 // ?
 //
-void A_Light0(player_t* player, pspdef_t* psp) { player->extralight = 0; }
-void A_Light1(player_t* player, pspdef_t* psp) { player->extralight = 1; }
-void A_Light2(player_t* player, pspdef_t* psp) { player->extralight = 2; }
+void A_Light0(player_t* player, pspdef_t* psp)
+{
+    player->extralight = 0;
+}
+void A_Light1(player_t* player, pspdef_t* psp)
+{
+    player->extralight = 1;
+}
+void A_Light2(player_t* player, pspdef_t* psp)
+{
+    player->extralight = 2;
+}
 //
 // A_BFGSpray
 // Spawn a BFG explosion on every monster in view
@@ -619,7 +631,10 @@ void A_BFGSpray(mobj_t* mo)
 //
 // A_BFGsound
 //
-void A_BFGsound(player_t* player, pspdef_t* psp) { S_StartSound(player->mo, sfx_bfg); }
+void A_BFGsound(player_t* player, pspdef_t* psp)
+{
+    S_StartSound(player->mo, sfx_bfg);
+}
 //
 // P_SetupPsprites
 // Called at start of level for each player.

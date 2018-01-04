@@ -271,7 +271,10 @@ void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch)
 // V_DrawPatchDirect
 // Draws directly to the screen on the pc.
 //
-void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch) { V_DrawPatch(x, y, scrn, patch); }
+void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch)
+{
+    V_DrawPatch(x, y, scrn, patch);
+}
 #endif
 
 void  // stretches bitmap to fill screen

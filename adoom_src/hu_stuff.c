@@ -210,7 +210,10 @@ char frenchKeyMap[128] = {
     'X', 'Y', 'W', '^', '\\', '$', '^', '_', '@', 'Q', 'B', 'C', 'D', 'E', 'F',  'G', 'H', 'I', 'J', 'K', 'L', ',',
     'N', 'O', 'P', 'A', 'R',  'S', 'T', 'U', 'V', 'Z', 'X', 'Y', 'W', '^', '\\', '$', '^', 127};
 
-char ForeignTranslation(unsigned char ch) { return ch < 128 ? frenchKeyMap[ch] : ch; }
+char ForeignTranslation(unsigned char ch)
+{
+    return ch < 128 ? frenchKeyMap[ch] : ch;
+}
 void HU_Init(void)
 {
     int i;
@@ -230,7 +233,10 @@ void HU_Init(void)
     }
 }
 
-void HU_Stop(void) { headsupactive = false; }
+void HU_Stop(void)
+{
+    headsupactive = false;
+}
 void HU_Start(void)
 {
     int i;

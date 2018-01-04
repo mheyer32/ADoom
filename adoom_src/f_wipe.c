@@ -102,7 +102,10 @@ int wipe_doColorXForm(int width, int height, int ticks)
     return !changed;
 }
 
-int wipe_exitColorXForm(int width, int height, int ticks) { return 0; }
+int wipe_exitColorXForm(int width, int height, int ticks)
+{
+    return 0;
+}
 static int* y;
 
 int wipe_initMelt(int width, int height, int ticks)

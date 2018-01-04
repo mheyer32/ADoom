@@ -52,8 +52,14 @@ void I_Tactile(int on, int off, int total)
 }
 
 ticcmd_t emptycmd;
-ticcmd_t *I_BaseTiccmd(void) { return &emptycmd; }
-int I_GetHeapSize(void) { return mb_used * 1024 * 1024; }
+ticcmd_t *I_BaseTiccmd(void)
+{
+    return &emptycmd;
+}
+int I_GetHeapSize(void)
+{
+    return mb_used * 1024 * 1024;
+}
 byte *I_ZoneBase(int *size)
 {
     *size = mb_used * 1024 * 1024;
@@ -113,8 +119,12 @@ void I_WaitVBL(int count)
 #endif
 }
 
-void I_BeginRead(void) {}
-void I_EndRead(void) {}
+void I_BeginRead(void)
+{
+}
+void I_EndRead(void)
+{
+}
 byte *I_AllocLow(int length)
 {
     byte *mem;

@@ -91,7 +91,10 @@ static int use_pcchecksum = 0;
 //
 //
 //
-int NetbufferSize(void) { return (int)&(((doomdata_t *)0)->cmds[netbuffer->numtics]); }
+int NetbufferSize(void)
+{
+    return (int)&(((doomdata_t *)0)->cmds[netbuffer->numtics]);
+}
 //
 // Checksum
 //

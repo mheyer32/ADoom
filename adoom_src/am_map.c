@@ -920,7 +920,10 @@ void AM_Ticker(void)
 //
 // Clear automap frame buffer.
 //
-void AM_clearFB(int color) { memset(fb, color, f_w * f_h); }
+void AM_clearFB(int color)
+{
+    memset(fb, color, f_w * f_h);
+}
 //
 // Automap clipping of lines.
 //

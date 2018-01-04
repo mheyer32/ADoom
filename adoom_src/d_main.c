@@ -409,12 +409,18 @@ void D_PageTicker(void)
 //
 // D_PageDrawer
 //
-void D_PageDrawer(void) { V_DrawPatchInDirect(0, 0, 0, W_CacheLumpName(pagename, PU_CACHE)); }
+void D_PageDrawer(void)
+{
+    V_DrawPatchInDirect(0, 0, 0, W_CacheLumpName(pagename, PU_CACHE));
+}
 //
 // D_AdvanceDemo
 // Called after each demo or intro demosequence finishes
 //
-void D_AdvanceDemo(void) { advancedemo = true; }
+void D_AdvanceDemo(void)
+{
+    advancedemo = true;
+}
 //
 // This cycles through the demo sequences.
 // FIXME - version dependend demo numbers?

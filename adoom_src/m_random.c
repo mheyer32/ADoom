@@ -57,4 +57,7 @@ int M_Random(void)
     return rndtable[rndindex];
 }
 
-void M_ClearRandom(void) { rndindex = prndindex = 0; }
+void M_ClearRandom(void)
+{
+    rndindex = prndindex = 0;
+}
