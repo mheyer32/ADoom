@@ -878,7 +878,7 @@ void AM_doFollowPlayer(void)
 //
 void AM_updateLightLev(void)
 {
-    static nexttic = 0;
+    static int nexttic = 0;
     // static int litelevels[] = { 0, 3, 5, 6, 6, 7, 7, 7 };
     static int litelevels[] = {0, 4, 7, 10, 12, 14, 15, 15};
     static int litelevelscnt = 0;
@@ -941,9 +941,9 @@ boolean AM_clipMline(mline_t* ml, fline_t* fl)
         TOP = 8
     };
 
-    register outcode1 = 0;
-    register outcode2 = 0;
-    register outside;
+    register char outcode1 = 0;
+    register char outcode2 = 0;
+    register char outside;
 
     fpoint_t tmp;
     int dx;

@@ -6,8 +6,9 @@ CXX = m68k-amigaos-g++
 #-mcrt=clib2
 #-mcrt=nix13
 #-msmall-code
-#-Wa,-adhln -
-CFLAGS = -O0 -g -fbaserel -mcrt=clib2 -m68030 -m68881 -fomit-frame-pointer -Wimplicit -Wno-strict-prototypes -Wno-int-conversion
+#-Wa,-adhln
+#-mregparm=2
+CFLAGS = -O1 -g -fstrength-reduce -fbaserel -mcrt=clib2 -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes -Wno-int-conversion
 
 PHXASS = vasm
 PFLAGS = -Fhunk -nosym -phxass -ldots -m68030 -m68882
@@ -108,7 +109,7 @@ all:	 ADoom ADoom_SndSrvr
 clean:
 	rm *.o
 
-ADoom:	$(OBJS) amiga_main.o Makefile
+ADoom:	$(OBJS) amiga_main.o DoomSnd.h Makefile
 	$(info $(OBJS))
 	$(CC) -v $(CFLAGS) $(LDFLAGS) $(OBJS) amiga_main.o \
 	-lnet -o $(OUT)ADoom
@@ -174,7 +175,10 @@ amiga_sega.o: amiga_sega.s Makefile
 #	$(CC) $(CFLAGS) $<
 
 %.o:	%.c Makefile
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -v -c $< -o $@
+
+%.s:	%.c Makefile
+	$(CC) $(CFLAGS) -Wa,-adhln -v -c $<  > $@
 
 DoomSnd.h: doomsound.fd doomsound.h
 	fd2pragma -i doomsound.fd -c doomsound.h -s 42

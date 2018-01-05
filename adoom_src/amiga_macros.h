@@ -20,7 +20,7 @@
 #define ALIGNED __attribute__ ((aligned(4))
 #define FAR __far
 #define CHIP __chip
-#define INTERRUPT   //__interrupt
+#define INTERRUPT  //__interrupt
 #define INLINE __inline__
 #else /* of __GNUC__ */
 
@@ -36,7 +36,7 @@
 #else /* of __SASC */
 
 #ifdef _DCC
-#define REG(xn, parm) __## xn parm
+#define REG(xn, parm) __##xn parm
 #define REGARGS
 #define SAVEDS __geta4
 #define FAR __far
