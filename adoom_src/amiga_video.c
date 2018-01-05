@@ -57,7 +57,7 @@
 
 /*experimental_c2p_stuff***********************************************/
 extern int scaledviewwidth;
-void REGARGS (*c2p)(REG(a0, const UBYTE* chunky), REG(a1, UBYTE* raster), REG(a2, const UBYTE* chunky_end)) = NULL;
+static C2PFunction c2p = NULL;
 
 /**********************************************************************/
 extern struct ExecBase* SysBase;
@@ -149,7 +149,7 @@ static struct MsgPort *ih_mp = NULL;
 static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
 
-static struct InputEvent* SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent* ie),
+static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
                                                                       REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
@@ -555,10 +555,10 @@ void I_InitGraphics(void)
     if ((KeymapBase = OpenLibrary("keymap.library", 0)) == NULL)
         I_Error("Can't open keymap.library");
 
-    if ((GfxBase = OpenLibrary("graphics.library", 0)) == NULL)
+    if ((GfxBase = (struct GfxBase*)OpenLibrary("graphics.library", 0)) == NULL)
         I_Error("Can't open graphics.library");
 
-    if ((IntuitionBase = OpenLibrary("intuition.library", 0)) == NULL)
+    if ((IntuitionBase = (struct IntuitionBase*)OpenLibrary("intuition.library", 0)) == NULL)
         I_Error("Can't open intuition.library");
 
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
@@ -573,7 +573,7 @@ void I_InitGraphics(void)
     if (timerclosed = OpenDevice(TIMERNAME, UNIT_ECLOCK, (struct IORequest *)timerio, 0))
         I_Error("Can't open timer.device!");
 
-    TimerBase = (struct Library *)timerio->tr_node.io_Device;
+    TimerBase = timerio->tr_node.io_Device;
     eclocks_per_second = ReadEClock(&start_time);
 
     video_doing_fps = M_CheckParm("-fps");
@@ -928,7 +928,7 @@ void I_InitGraphics(void)
         inputhandler_is_open = TRUE;
         if ((input_handler = (struct Interrupt *)AllocMem(sizeof(struct Interrupt), MEMF_PUBLIC | MEMF_CLEAR)) == NULL)
             I_Error("AllocMem() failed");
-        input_handler->is_Code = (void (*)())video_inputhandler;
+        input_handler->is_Code = (void (*)(void))video_inputhandler;
         input_handler->is_Data = NULL;
         input_handler->is_Node.ln_Pri = 127;
         input_handler->is_Node.ln_Name = "ADoom_InputHandler";
@@ -1625,7 +1625,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 
 /**********************************************************************/
 //
-static struct InputEvent* SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
+static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
                                                                       REG(a1, APTR data))
 {
     event_t event;

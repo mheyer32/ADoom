@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     struct WBStartup *argmsg;
     struct WBArg *wb_arg;
     struct DiskObject *obj;
-    char **toolarray, *s;
+    STRPTR *toolarray, s;
     int i, p;
 
     /* these command line arguments are flags */
