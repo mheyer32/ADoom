@@ -97,34 +97,34 @@ extern void (*transcolfunc)(void);
 
 //
 // Utility functions.
-int R_PointOnSide(fixed_t x, fixed_t y, node_t* node);
+extern int R_PointOnSide(fixed_t x, fixed_t y, node_t* node);
 
-int R_PointOnSegSide(fixed_t x, fixed_t y, seg_t* line);
+extern int R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line));
 
-angle_t R_PointToAngle(fixed_t x, fixed_t y);
+extern angle_t R_PointToAngle(fixed_t x, fixed_t y);
 
-angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2);
+extern angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2);
 
-fixed_t R_PointToDist(fixed_t x, fixed_t y);
+extern fixed_t R_PointToDist(REGD0(fixed_t x), REGD1(fixed_t y));
 
-fixed_t R_ScaleFromGlobalAngle(angle_t visangle);
+extern fixed_t R_ScaleFromGlobalAngle(REGD0(angle_t visangle));
 
-subsector_t* R_PointInSubsector(fixed_t x, fixed_t y);
+extern subsector_t* R_PointInSubsector(fixed_t x, fixed_t y);
 
-void R_AddPointToBox(int x, int y, fixed_t* box);
+extern void R_AddPointToBox(int x, int y, fixed_t* box);
 
 //
 // REFRESH - the actual rendering functions.
 //
 
 // Called by G_Drawer.
-void R_RenderPlayerView(player_t* player);
+extern void R_RenderPlayerView(player_t* player);
 
 // Called by startup code.
-void R_Init(void);
+extern void R_Init(void);
 
 // Called by M_Responder.
-void R_SetViewSize(int blocks, int detail);
+extern void R_SetViewSize(int blocks, int detail);
 
 #endif
 //-----------------------------------------------------------------------------

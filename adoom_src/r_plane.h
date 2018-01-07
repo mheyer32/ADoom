@@ -24,6 +24,7 @@
 
 #include "doomdef.h"
 #include "r_data.h"
+#include "r_plane.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -52,14 +53,13 @@ void resinit_r_plane(void);  // called before anything else
 void R_InitPlanes(void);
 void R_ClearPlanes(void);
 
-void R_MapPlane(int y, int x1, int x2);
-
 #ifdef AMIGA
 #include "amiga_macros.h"
-
-void REGARGS SAVEDS R_MakeSpans(REG(d2, int x), REG(d3, int t1), REG(d4, int b1), REG(d5, int t2), REG(d6, int b2));
+void R_MapPlane(REGD0(int y), REGD1(int x1), REGD2(int x2));
+void R_MakeSpans(REG(d2, int x), REG(d3, int t1), REG(d4, int b1), REG(d5, int t2), REG(d6, int b2));
 #else
 void R_MakeSpans(int x, int t1, int b1, int t2, int b2);
+void R_MapPlane(int y, int x1, int x2);
 #endif
 
 void R_DrawPlanes(void);

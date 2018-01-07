@@ -367,7 +367,7 @@ void R_DrawMaskedColumn(column_t* column)
 #endif
 
 #ifdef AMIGA
-extern void R_DrawVisSprite(vissprite_t* vis);
+extern void R_DrawVisSprite(REGA0(vissprite_t* vis));
 #else
 //
 // R_DrawVisSprite
@@ -434,7 +434,7 @@ void R_DrawVisSprite(vissprite_t* vis, int x1, int x2)
 // Generates a vissprite for a thing
 //  if it might be visible.
 //
-void R_ProjectSprite(mobj_t* thing)
+void R_ProjectSprite(REGA0(mobj_t* thing))
 {
     fixed_t tr_x;
     fixed_t tr_y;

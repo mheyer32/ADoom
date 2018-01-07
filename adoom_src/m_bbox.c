@@ -31,13 +31,13 @@ static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #endif
 #include "m_bbox.h"
 
-void M_ClearBox(fixed_t* box)
+inline void M_ClearBox(fixed_t* box)
 {
     box[BOXTOP] = box[BOXRIGHT] = -MAXINT;
     box[BOXBOTTOM] = box[BOXLEFT] = MAXINT;
 }
 
-void M_AddToBox(fixed_t* box, fixed_t x, fixed_t y)
+void REGARGS M_AddToBox(fixed_t* box, fixed_t x, fixed_t y)
 {
     if (x < box[BOXLEFT])
         box[BOXLEFT] = x;

@@ -111,7 +111,7 @@ int startepisode;
 int startmap;
 boolean autostart;
 
-FILE* debugfile;
+FILE* debugfile = NULL;
 
 boolean advancedemo;
 
@@ -349,7 +349,6 @@ void D_DoomLoop(void)
         debugfile = fopen(filename, "w");
     }
 
-    I_InitGraphics();
 
     while (1) {
         // frame syncronous IO operations
@@ -539,8 +538,8 @@ void IdentifyVersion(void)
     char* tntwad;
 
 #ifdef NORMALUNIX
-    static char home[256];
-    static char doomwaddir[256];
+    char doomwaddir[256];
+    char home[256];
 
 #ifdef AMIGA
     if (getenv("DOOMWADDIR") != NULL) {

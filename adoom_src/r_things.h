@@ -65,18 +65,16 @@ extern fixed_t pspriteiscale;
 extern fixed_t pspritescale2;
 extern fixed_t pspriteiscale2;
 
-void R_DrawMaskedColumn(column_t* column);
+void R_DrawMaskedColumn(REGA0(column_t* column));
 
 void R_SortVisSprites(void);
 
-void R_AddSprites(sector_t* sec);
+void R_AddSprites(REGA0(sector_t* sec));
 void R_AddPSprites(void);
 void R_DrawSprites(void);
 void R_InitSprites(char** namelist);
 void R_ClearSprites(void);
 void R_DrawMasked(void);
-
-void R_ClipVisSprite(vissprite_t* vis, int xl, int xh);
 
 #endif
 //-----------------------------------------------------------------------------

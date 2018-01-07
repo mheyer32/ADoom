@@ -206,7 +206,7 @@ void R_DrawColumnInCache(column_t* patch, byte* cache, int originy, int cachehei
 //  the composite texture is created from the patches,
 //  and each column is cached.
 //
-void R_GenerateComposite(int texnum)
+void R_GenerateComposite(REGD0(int texnum))
 {
     byte* block;
     texture_t* texture;

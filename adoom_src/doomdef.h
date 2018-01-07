@@ -292,8 +292,12 @@ typedef enum {
 
 extern int debugStep;
 
+#define DEBUGPRINT(x) \
+    printf(x);        \
+    fflush(stdout);
+
 #define DEBUGSTEP()                                                                \
-    printf(">>>> debugStep %d, file %s : %d \n", debugStep++, __FILE__, __LINE__); \
+    printf(">>>> %d, %s : %d \n", debugStep++, __FUNCTION__, __LINE__); \
     fflush(stdout);
 
 #endif  // __DOOMDEF__

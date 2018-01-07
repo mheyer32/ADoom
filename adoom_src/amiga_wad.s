@@ -1,6 +1,6 @@
 		mc68020
 
-;		xdef	_W_CacheLumpNum
+		xdef	_W_CacheLumpNum
 
 		section	text,code
 
@@ -12,14 +12,14 @@
 		xref	_numlumps	;int
 		xref	_lumpcache	;void**
 
-		xref	W_LumpLength
-		xref	W_ReadLump
-		xref	Z_ChangeTag2
+		xref	_W_LumpLength
+		xref	_W_ReadLump
+		xref	_Z_ChangeTag2
 		xref	_I_Error
-		xref	Z_Malloc
+		xref	_Z_Malloc
 
 		cnop	0,4
-_W_CacheLumpNum:
+
 _W_CacheLumpNum:
 		cmp.l	_numlumps(a4),d0
 		bpl.b	.wc_Error

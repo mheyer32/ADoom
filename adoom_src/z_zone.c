@@ -160,7 +160,7 @@ void Z_Free(void *ptr)
 //
 #define MINFRAGMENT 64
 
-void *Z_Malloc(int size, int tag, void *user)
+void *Z_Malloc(REGD0(int size), REGD1(int tag), REGA0(void *user))
 {
     int extra;
     memblock_t *start;
@@ -360,7 +360,7 @@ void Z_CheckHeap(void)
 //
 // Z_ChangeTag
 //
-void Z_ChangeTag2(void *ptr, int tag)
+void Z_ChangeTag2(REGA0(void *ptr), REGD0(int tag))
 {
     memblock_t *block;
 

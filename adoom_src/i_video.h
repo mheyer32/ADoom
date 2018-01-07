@@ -23,6 +23,7 @@
 #define __I_VIDEO__
 
 #include "doomtype.h"
+#include "doomdef.h"
 
 #ifdef __GNUG__
 #pragma interface
@@ -39,7 +40,11 @@ void I_ShutdownGraphics(void);
 void I_RecalcPalettes(void);
 void I_SetPalette(byte* palette, int palette_index);
 
+#ifndef AMIGA
 void I_MarkRect(int left, int top, int width, int height);
+#else
+void REGARGS I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height));
+#endif
 
 void I_UpdateNoBlit(void);
 void I_StartUpdate(void);
