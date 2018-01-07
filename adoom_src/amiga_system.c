@@ -37,9 +37,9 @@ void I_Init(void)
     }
     SetTaskPri(FindTask(NULL), taskpriority);
 
+    I_InitGraphics();
     I_InitSound();
     I_InitMusic();
-    //  I_InitGraphics ();
 }
 
 /**********************************************************************/
@@ -92,12 +92,24 @@ int I_GetTime(void)
     int newtics;
     static int basetime = 0;
 
-    unsigned int clock[2];
+//    unsigned int clock[2];
 
-    //  timer (clock);
-    if (!basetime)
-        basetime = clock[0];
-    newtics = (clock[0] - basetime) * TICRATE + clock[1] * TICRATE / 1000000;
+//    timer(clock);
+//    if (!basetime)
+//        basetime = clock[0];
+//    newtics = (clock[0] - basetime) * TICRATE + clock[1] * TICRATE / 1000000;
+
+
+    struct timeval	tp;
+    GetSysTime(&tp);
+    if (!basetime) basetime=tp.tv_secs;
+
+#ifndef mc68060
+    newtics=(tp.tv_secs-basetime)*TICRATE + tp.tv_micro*TICRATE/1000000;
+#else
+    newtics=(tp.tv_secs-basetime)*TICRATE + ULongDiv(tp.tv_micro*TICRATE,1000000);
+#endif
+
     return newtics;
 }
 

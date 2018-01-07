@@ -26,7 +26,9 @@
 #pragma interface
 #endif
 
-void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2);
+#include "doomdef.h"
+
+void R_RenderMaskedSegRange(REGA0(drawseg_t* ds), REGD0(int x1), REGD1(int x2));
 
 #endif
 //-----------------------------------------------------------------------------

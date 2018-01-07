@@ -26,6 +26,8 @@
 #pragma interface
 #endif
 
+#include "doomdef.h"
+
 //
 // Fixed point, 32bit as 16.16.
 //
@@ -35,14 +37,14 @@
 typedef int fixed_t;
 
 #ifdef AMIGA
-extern fixed_t (*FixedMul)(fixed_t a, fixed_t b);
-extern fixed_t (*FixedDiv)(fixed_t a, fixed_t b);
+extern fixed_t (*FixedMul)(REGD0(fixed_t a), REGD1(fixed_t b));
+extern fixed_t (*FixedDiv)(REGD0(fixed_t a), REGD1(fixed_t b));
 void SetFPMode(void);
-fixed_t FixedMul_040(fixed_t a, fixed_t b);
-fixed_t FixedMul_060fpu(fixed_t a, fixed_t b);
-fixed_t FixedMul_060(fixed_t a, fixed_t b);
-fixed_t FixedDiv_040(fixed_t a, fixed_t b);
-fixed_t FixedDiv_060fpu(fixed_t a, fixed_t b);
+fixed_t FixedMul_040(REGD0(fixed_t a), REGD1(fixed_t b));
+fixed_t FixedMul_060fpu(REGD0(fixed_t a), REGD1(fixed_t b));
+fixed_t FixedMul_060(REGD0(fixed_t a), REGD1(fixed_t b));
+fixed_t FixedDiv_040(REGD0(fixed_t a), REGD1(fixed_t b));
+fixed_t FixedDiv_060fpu(REGD0(fixed_t a), REGD1(fixed_t b));
 #else
 fixed_t FixedMul(fixed_t a, fixed_t b);
 fixed_t FixedDiv(fixed_t a, fixed_t b);

@@ -213,10 +213,16 @@ void I_InitSound(void)
         }
     }
 
-    if ((GfxBase->DisplayFlags & REALLY_PAL) == 0)
-        clock_constant = 3579545; /* NTSC */
-    else
-        clock_constant = 3546895; /* PAL */
+
+    clock_constant = 3579545; /* NTSC */
+    if (GfxBase) {
+        if ((GfxBase->DisplayFlags & REALLY_PAL) == 0) {
+            clock_constant = 3546895; /* PAL */
+        }
+    } else {
+        fprintf(stderr, "I_InitSound: GfxBase is not initialized!! \n");
+    }
+
     changepitch = M_CheckParm("-changepitch");
     for (i = 0; i < 256; i++) {
         if (changepitch)

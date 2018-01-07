@@ -49,7 +49,7 @@ int sightcounts[2];
 // Returns side 0 (front), 1 (back), or 2 (on).
 //
 #ifdef AMIGA
-int P_DivlineSide(fixed_t x, fixed_t y, divline_t* node);
+int P_DivlineSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(divline_t* node));
 #else
 int P_DivlineSide(fixed_t x, fixed_t y, divline_t* node)
 {

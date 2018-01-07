@@ -1245,13 +1245,14 @@ void I_RecalcPalettes(void)
 #endif
                 {
                     i = 3 * 256 - 1;
-                    video_colourtable[p][i + 2] = 0;
+                    video_colourtable[p][i + 2] = 0; // finish the list
                     do {
                         // Better to define c locally here instead of for the whole function:
                         ULONG c = gammatable[usegamma][palette[i]];
                         c += (c << 8);
                         video_colourtable[p][i + 1] = (c << 16) + c;
                     } while (--i >= 0);
+                    //encode ""change 256 colors starting at palette index 0
                     video_colourtable[p][0] = (256 << 16) + 0;
                 }
 #ifdef GRAFFITI
@@ -1281,7 +1282,7 @@ void I_SetPalette(byte *palette, int palette_index)
 
 /**********************************************************************/
 // Called by anything that renders to screens[0] (except 3D view)
-void I_MarkRect(int left, int top, int width, int height)
+void REGARGS I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height))
 {
     M_AddToBox(dirtybox, left, top);
     M_AddToBox(dirtybox, left + width - 1, top + height - 1);

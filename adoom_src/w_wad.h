@@ -27,6 +27,7 @@
 #endif
 
 #include <stdio.h>
+#include "doomdef.h"
 
 //
 // TYPES
@@ -69,10 +70,10 @@ void W_Reload(void);
 int W_CheckNumForName(char* name);
 int W_GetNumForName(char* name);
 
-int W_LumpLength(int lump);
-void W_ReadLump(int lump, void* dest);
+int W_LumpLength(REGD0(int lump));
+void W_ReadLump(REGD0(int lump), REGA0(void* dest));
 
-void* W_CacheLumpNum(int lump, int tag);
+void* W_CacheLumpNum(REGD0(int lump), REGD1(int tag));
 void* W_CacheLumpName(char* name, int tag);
 
 #endif

@@ -386,7 +386,7 @@ int W_GetNumForName(char* name)
 // W_LumpLength
 // Returns the buffer size needed to load the given lump.
 //
-int W_LumpLength(int lump)
+int W_LumpLength(REGD0(int lump))
 {
     if (lump >= numlumps)
         I_Error("W_LumpLength: %i >= numlumps", lump);
@@ -399,7 +399,7 @@ int W_LumpLength(int lump)
 // Loads the lump into the given buffer,
 //  which must be >= W_LumpLength().
 //
-void W_ReadLump(int lump, void* dest)
+void W_ReadLump(REGD0(int lump), REGA0(void* dest))
 {
     int c;
     lumpinfo_t* l;
@@ -431,11 +431,11 @@ void W_ReadLump(int lump, void* dest)
     // ??? I_EndRead ();
 }
 
-#if !defined(AMIGA) || 1
+#if !defined(AMIGA)
 //
 // W_CacheLumpNum
 //
-void* W_CacheLumpNum(int lump, int tag)
+void* W_CacheLumpNum(REGD0(int lump), REGD1(int tag))
 {
     byte* ptr;
 
