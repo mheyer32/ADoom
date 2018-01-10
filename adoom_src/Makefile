@@ -58,6 +58,7 @@ OBJS = \
 	m_menu.o \
 	m_misc.o \
 	m_bbox.o \
+	m_fixed.o \
 	m_swap.o \
 	m_cheat.o \
 	m_random.o \
@@ -183,6 +184,10 @@ amiga_sega.o: amiga_sega.s Makefile
 DoomSnd.h: doomsound.fd doomsound.h
 	fd2pragma -i doomsound.fd -c doomsound.h -s 42
 
+
+test_fixed:	test_fixed.o amiga_fixed.o Makefile
+	$(CC) -v $(CFLAGS) $(LDFLAGS) test_fixed.o amiga_fixed.o \
+	-o $(OUT)test_fixed
 #############################################################
 #
 #############################################################

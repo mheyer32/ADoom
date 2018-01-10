@@ -33,6 +33,12 @@ static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 #endif
 #include "m_fixed.h"
 
+#if defined(AMIGA)
+
+fixed_t REGARGS (*FixedMul)(REGD0(fixed_t a), REGD1(fixed_t b));
+fixed_t REGARGS (*FixedDiv)(REGD0(fixed_t a), REGD1(fixed_t b));
+
+#else
 // Fixme. __USE_C_FIXED__ or something.
 
 fixed_t FixedMul(fixed_t a, fixed_t b)
@@ -66,3 +72,4 @@ fixed_t FixedDiv2(fixed_t a, fixed_t b)
         I_Error("FixedDiv: divide by zero");
     return (fixed_t)c;
 }
+#endif
