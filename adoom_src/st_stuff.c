@@ -926,6 +926,8 @@ void ST_drawWidgets(boolean refresh)
     // used by w_frags widget
     st_fragson = deathmatch && st_statusbaron;
 
+    DEBUGSTEP();
+
     STlib_updateNum(&w_ready, refresh);
 
     for (i = 0; i < 4; i++) {
@@ -933,13 +935,17 @@ void ST_drawWidgets(boolean refresh)
         STlib_updateNum(&w_maxammo[i], refresh);
     }
 
+    DEBUGSTEP();
     STlib_updatePercent(&w_health, refresh);
     STlib_updatePercent(&w_armor, refresh);
 
+    DEBUGSTEP();
     STlib_updateBinIcon(&w_armsbg, refresh);
 
     for (i = 0; i < 6; i++)
         STlib_updateMultIcon(&w_arms[i], refresh);
+
+    DEBUGSTEP();
 
     STlib_updateMultIcon(&w_faces, refresh);
 
@@ -947,17 +953,23 @@ void ST_drawWidgets(boolean refresh)
         STlib_updateMultIcon(&w_keyboxes[i], refresh);
 
     STlib_updateNum(&w_frags, refresh);
+
+    DEBUGSTEP();
 }
 
 void ST_doRefresh(void)
 {
     st_firsttime = false;
 
+    DEBUGSTEP();
     // draw status bar background to off-screen buff
     ST_refreshBackground();
 
+    DEBUGSTEP();
     // and refresh all widgets
     ST_drawWidgets(true);
+
+    DEBUGSTEP();
 }
 
 void ST_diffDraw(void)
@@ -1126,6 +1138,8 @@ void ST_initData(void)
 
 void ST_createWidgets(void)
 {
+    DEBUGSTEP();
+
     int i;
 
     // ready weapon ammo

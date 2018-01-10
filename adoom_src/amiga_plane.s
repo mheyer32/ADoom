@@ -269,13 +269,13 @@ _R_MakeSpans:
 ;
 ;		LABEL	visplane_size
 
-height		equ	0		; fixed
-picnum		equ	4		; int
-lightlevel	equ	8		; int
-minx		equ	12		; int
-maxx		equ	16		; int
-top		equ	20		; unsigned short* ([-1..SCREENWIDTH])
-bottom		equ	24		; unsigned short* ([-1..SCREENWIDTH])
+height			equ	0		; fixed
+picnum			equ	4		; int
+lightlevel		equ	8		; int
+minx			equ	12		; int
+maxx			equ	16		; int
+top				equ	20		; unsigned short* ([-1..SCREENWIDTH])
+bottom			equ	24		; unsigned short* ([-1..SCREENWIDTH])
 visplane_size	equ	28
 
 		xref	_visplanes		; FAR visplane_t[]

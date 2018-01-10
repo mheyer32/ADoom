@@ -396,20 +396,30 @@ void R_InitTextures(void)
     int temp2;
     int temp3;
 
+    DEBUGSTEP();
     // Load the patch names from pnames.lmp.
     name[8] = 0;
     names = W_CacheLumpName("PNAMES", PU_STATIC);
+
+    DEBUGSTEP();
+
     nummappatches = SWAPLONG(*((int*)names));
     name_p = names + 4;
     if ((patchlookup = malloc(nummappatches * sizeof(*patchlookup))) == NULL)
         I_Error("malloc(%d) failed", nummappatches * sizeof(*patchlookup));
 
+    DEBUGSTEP();
+
     for (i = 0; i < nummappatches; i++) {
         strncpy(name, name_p + i * 8, 8);
         patchlookup[i] = W_CheckNumForName(name);
     }
+
+    DEBUGSTEP();
+
     Z_Free(names);
 
+    DEBUGSTEP();
     // Load the map texture definitions from textures.lmp.
     // The data is contained in one or two lumps,
     //  TEXTURE1 for shareware, plus TEXTURE2 for commercial.
@@ -417,6 +427,8 @@ void R_InitTextures(void)
     numtextures1 = SWAPLONG(*maptex);
     maxoff = W_LumpLength(W_GetNumForName("TEXTURE1"));
     directory = maptex + 1;
+
+    DEBUGSTEP();
 
     if (W_CheckNumForName("TEXTURE2") != -1) {
         maptex2 = W_CacheLumpName("TEXTURE2", PU_STATIC);
@@ -429,6 +441,8 @@ void R_InitTextures(void)
     }
     numtextures = numtextures1 + numtextures2;
 
+    DEBUGSTEP();
+
     textures = Z_Malloc(numtextures * 4, PU_STATIC, 0);
     texturecolumnlump = Z_Malloc(numtextures * 4, PU_STATIC, 0);
     texturecolumnofs = Z_Malloc(numtextures * 4, PU_STATIC, 0);
@@ -436,6 +450,8 @@ void R_InitTextures(void)
     texturecompositesize = Z_Malloc(numtextures * 4, PU_STATIC, 0);
     texturewidthmask = Z_Malloc(numtextures * 4, PU_STATIC, 0);
     textureheight = Z_Malloc(numtextures * 4, PU_STATIC, 0);
+
+    DEBUGSTEP();
 
     totalwidth = 0;
 

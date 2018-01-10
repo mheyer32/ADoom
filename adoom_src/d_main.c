@@ -86,7 +86,7 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 //
 void D_DoomLoop(void);
 
-char* wadfiles[MAXWADFILES];
+char* wadfiles[MAXWADFILES] = {0};
 
 boolean devparm;      // started game with -devparm
 boolean nomonsters;   // checkparm of -nomonsters
@@ -192,6 +192,8 @@ void D_Display(void)
     boolean wipe;
     boolean redrawsbar;
 
+    DEBUGSTEP();
+
     if (nodrawers)
         return;  // for comparative timing / profiling
 
@@ -223,9 +225,12 @@ void D_Display(void)
     if (gamestate == GS_LEVEL && gametic)
         HU_Erase();
 
+    DEBUGSTEP();
+
     // do buffered drawing
     switch (gamestate) {
     case GS_LEVEL:
+        DEBUGSTEP();
         if (!gametic)
             break;
         /* Map On Headup Patch - CDE - 97'
@@ -241,20 +246,27 @@ void D_Display(void)
         break;
 
     case GS_INTERMISSION:
+        DEBUGSTEP();
         WI_Drawer();
         break;
 
     case GS_FINALE:
+        DEBUGSTEP();
         F_Drawer();
         break;
 
     case GS_DEMOSCREEN:
+        DEBUGSTEP();
         D_PageDrawer();
         break;
     }
 
+    DEBUGSTEP();
+
     // draw buffered stuff to screen
     I_UpdateNoBlit();
+
+    DEBUGSTEP();
 
     // draw the view directly
     if (gamestate == GS_LEVEL && (!automapactive || maponhu) && gametic)
@@ -306,6 +318,7 @@ void D_Display(void)
     M_Drawer();   // menu is drawn even on top of everything
     NetUpdate();  // send out any new accumulation
 
+    DEBUGSTEP();
     // normal update
     if (!wipe) {
         I_FinishUpdate();  // page flip or blit buffer
@@ -318,7 +331,10 @@ void D_Display(void)
 
     wipestart = I_GetTime() - 1;
 
+    DEBUGSTEP();
+
     do {
+        DEBUGSTEP();
         do {
             nowtime = I_GetTime();
             tics = nowtime - wipestart;
@@ -329,6 +345,8 @@ void D_Display(void)
         I_UpdateNoBlit();
         M_Drawer();        // menu is drawn even on top of wipes
         I_FinishUpdate();  // page flip or blit buffer
+
+        DEBUGSTEP();
     } while (!done);
 }
 
@@ -342,6 +360,8 @@ void D_DoomLoop(void)
     if (demorecording)
         G_BeginRecording();
 
+    DEBUGSTEP();
+
     if (M_CheckParm("-debugfile")) {
         char filename[20];
         sprintf(filename, "debug%i.txt", consoleplayer);
@@ -349,8 +369,15 @@ void D_DoomLoop(void)
         debugfile = fopen(filename, "w");
     }
 
+    DEBUGSTEP();
+
+//
+
+    DEBUGSTEP();
 
     while (1) {
+        DEBUGSTEP();
+
         // frame syncronous IO operations
         I_StartFrame();
 
@@ -537,6 +564,8 @@ void IdentifyVersion(void)
     char* plutoniawad;
     char* tntwad;
 
+    printf("success 5!\n");
+
 #ifdef NORMALUNIX
     char doomwaddir[256];
     char home[256];
@@ -655,6 +684,8 @@ void IdentifyVersion(void)
         return;
     }
 
+    printf("success 6!\n");
+
     if (!access(doom2wad, R_OK)) {
         gamemode = commercial;
         D_AddFile(doom2wad);
@@ -690,6 +721,8 @@ void IdentifyVersion(void)
         D_AddFile(doom1wad);
         return;
     }
+
+    printf("success 7!\n");
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
@@ -776,11 +809,15 @@ void D_DoomMain(void)
     //      print title for every printed line
     char title[256];
 
+    printf("success D_DoomMain!\n");
+
     FindResponseFile();
 
     IdentifyVersion();
 
-    setbuf(stdout, NULL);
+    printf("success 8!\n");
+
+    //  setbuf (stdout, NULL);
     modifiedgame = false;
 
     nomonsters = M_CheckParm("-nomonsters");
@@ -794,6 +831,8 @@ void D_DoomMain(void)
         deathmatch = 2;
     else if (M_CheckParm("-deathmatch"))
         deathmatch = 1;
+
+    printf("success 9!\n");
 
     switch (gamemode) {
     case retail:
@@ -849,10 +888,14 @@ void D_DoomMain(void)
         break;
     }
 
+    printf("success 10!\n");
+
     printf("%s\n", title);
 
     if (devparm)
         printf(D_DEVSTR);
+
+    printf("success 11!\n");
 
     if (M_CheckParm("-cdrom")) {
         printf(D_CDROM);
@@ -1058,8 +1101,11 @@ void D_DoomMain(void)
         break;
     }
 
+    DEBUGSTEP();
     printf("M_Init: Init miscellaneous info.\n");
+    DEBUGSTEP();
     M_Init();
+    DEBUGSTEP();
 
     printf("R_Init: Init DOOM refresh daemon - ");
     R_Init();
@@ -1079,8 +1125,11 @@ void D_DoomMain(void)
     printf("HU_Init: Setting up heads up display.\n");
     HU_Init();
 
+    DEBUGSTEP();
     printf("ST_Init: Init status bar.\n");
     ST_Init();
+
+    DEBUGSTEP();
 
     // check for a driver that wants intermission stats
     p = M_CheckParm("-statcopy");
@@ -1092,6 +1141,8 @@ void D_DoomMain(void)
         printf("External statistics registered.\n");
     }
 
+    DEBUGSTEP();
+
     // start the apropriate game based on parms
     p = M_CheckParm("-record");
 
@@ -1099,6 +1150,8 @@ void D_DoomMain(void)
         G_RecordDemo(myargv[p + 1]);
         autostart = true;
     }
+
+    DEBUGSTEP();
 
     p = M_CheckParm("-playdemo");
     if (p && p < myargc - 1) {
@@ -1113,6 +1166,8 @@ void D_DoomMain(void)
         D_DoomLoop();  // never returns
     }
 
+    DEBUGSTEP();
+
     p = M_CheckParm("-loadgame");
     if (p && p < myargc - 1) {
         if (M_CheckParm("-cdrom"))
@@ -1122,12 +1177,16 @@ void D_DoomMain(void)
         G_LoadGame(file);
     }
 
+    DEBUGSTEP();
+
     if (gameaction != ga_loadgame) {
         if (autostart || netgame)
             G_InitNew(startskill, startepisode, startmap);
         else
             D_StartTitle();  // start up intro loop
     }
+
+    DEBUGSTEP();
 
     D_DoomLoop();  // never returns
 }

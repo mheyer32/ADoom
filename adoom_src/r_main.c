@@ -188,7 +188,7 @@ int R_PointOnSide(fixed_t x, fixed_t y, node_t* node)
     return 1;
 }
 
-int R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line))
+int REGARGS R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line))
 {
     fixed_t lx;
     fixed_t ly;
@@ -774,7 +774,10 @@ void R_SetupFrame(player_t* player)
 //
 void R_RenderPlayerView(player_t* player)
 {
+    DEBUGSTEP();
     R_SetupFrame(player);
+
+    DEBUGSTEP();
 
     // Clear buffers.
     R_ClearClipSegs();
@@ -782,22 +785,38 @@ void R_RenderPlayerView(player_t* player)
     R_ClearPlanes();
     R_ClearSprites();
 
+    DEBUGSTEP();
+
     // check for new console commands.
     NetUpdate();
+
+    DEBUGSTEP();
 
     // The head node is the last node output.
     R_RenderBSPNode(numnodes - 1);
 
+    DEBUGSTEP();
+
     // Check for new console commands.
     NetUpdate();
+
+    DEBUGSTEP();
 
     R_DrawPlanes();
 
+    DEBUGSTEP();
+
     // Check for new console commands.
     NetUpdate();
+
+    DEBUGSTEP();
 
     R_DrawMasked();
 
+    DEBUGSTEP();
+
     // Check for new console commands.
     NetUpdate();
+
+    DEBUGSTEP();
 }

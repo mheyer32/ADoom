@@ -440,14 +440,14 @@ signals3	dc.l	0	; signals to Signal() othertask at cleanup
 		cnop	0,4
 
 c2p_data
-c2p_screen	dc.l	0
-c2p_scroffs	dc.l	0
+c2p_screen		dc.l	0
+c2p_scroffs		dc.l	0
 c2p_scroffs2	dc.l	0
-c2p_bplsize	dc.l	0
-c2p_pixels	dc.l	0
+c2p_bplsize		dc.l	0
+c2p_pixels		dc.l	0
 c2p_pixels16	dc.l	0
-c2p_blitbuf	dc.l	0
-c2p_chunkyy	dc.w	0
+c2p_blitbuf		dc.l	0
+c2p_chunkyy		dc.w	0
 
 ;-----------------------------------------------------------------------
 ;		section bss_c,bss_c,chip

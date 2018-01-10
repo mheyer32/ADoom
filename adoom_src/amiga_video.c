@@ -60,16 +60,16 @@ extern int scaledviewwidth;
 static C2PFunction c2p = NULL;
 
 /**********************************************************************/
-extern struct ExecBase* SysBase;
-struct Library* AslBase = NULL;
-struct Library* CyberGfxBase = NULL;
-struct Library* LowLevelBase = NULL;
-struct Library* KeymapBase = NULL;
-struct GfxBase* GfxBase = NULL;
-struct Device* TimerBase = NULL;
-struct IntuitionBase* IntuitionBase = NULL;
+extern struct ExecBase *SysBase;
+struct Library *AslBase = NULL;
+struct Library *CyberGfxBase = NULL;
+struct Library *LowLevelBase = NULL;
+struct Library *KeymapBase = NULL;
+struct GfxBase *GfxBase = NULL;
+struct Device *TimerBase = NULL;
+struct IntuitionBase *IntuitionBase = NULL;
 
-volatile struct Custom* const custom = (struct Custom*)0xdff000;
+volatile struct Custom *const custom = (struct Custom *)0xdff000;
 
 extern int cpu_type;
 
@@ -91,8 +91,8 @@ static byte ptranslate[128] = {
 };
 #ifdef INDIVISION
 int video_indigfx = 0;  // Indivision GFX mode
-#endif
 ULONG gfxlength = 0;
+#endif
 
 static struct ScreenModeRequester *video_smr = NULL;
 static struct Screen *video_screen = NULL;
@@ -538,6 +538,7 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
 // Called by D_DoomMain,
 // determines the hardware configuration
 // and sets up the video mode
+
 void I_InitGraphics(void)
 {
     int i, retries, config_done;
@@ -550,10 +551,16 @@ void I_InitGraphics(void)
     struct DimensionInfo dimsinfo;
     static struct TextAttr topaz8 = {"topaz.font", 8, FS_NORMAL, FPF_ROMFONT};
 
+    DEBUGSTEP();
+
     video_maintask = FindTask(NULL);
+
+    DEBUGSTEP();
 
     if ((KeymapBase = OpenLibrary("keymap.library", 0)) == NULL)
         I_Error("Can't open keymap.library");
+
+    DEBUGSTEP();
 
     if ((GfxBase = (struct GfxBase*)OpenLibrary("graphics.library", 0)) == NULL)
         I_Error("Can't open graphics.library");
@@ -561,8 +568,12 @@ void I_InitGraphics(void)
     if ((IntuitionBase = (struct IntuitionBase*)OpenLibrary("intuition.library", 0)) == NULL)
         I_Error("Can't open intuition.library");
 
+    DEBUGSTEP();
+
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
         I_Error("Can't open topaz8 font");
+
+    DEBUGSTEP();
 
     if ((timermp = CreatePort(NULL, 0)) == NULL)
         I_Error("Can't create messageport!");
@@ -577,6 +588,8 @@ void I_InitGraphics(void)
     eclocks_per_second = ReadEClock(&start_time);
 
     video_doing_fps = M_CheckParm("-fps");
+
+    DEBUGSTEP();
 
 #ifdef GRAFFITI
     if (video_graffiti != 0) {
@@ -655,6 +668,7 @@ void I_InitGraphics(void)
         } else
 #endif
         {
+            DEBUGSTEP();
 
             if (AslBase == NULL) {
                 if ((AslBase = OpenLibrary("asl.library", 37L)) == NULL ||
@@ -698,9 +712,14 @@ void I_InitGraphics(void)
                 }
             }
 
+            DEBUGSTEP();
+
             if ((handle = FindDisplayInfo(mode)) == NULL) {
                 I_Error("Can't FindDisplayInfo() for mode %08x", mode);
             }
+
+            DEBUGSTEP();
+
             if ((nbytes = GetDisplayInfoData(handle, (UBYTE *)&dispinfo, sizeof(struct DisplayInfo), DTAG_DISP, NULL)) <
                 40 /*sizeof(struct DisplayInfo)*/) {
                 I_Error("Can't GetDisplayInfoData() for mode %08x, got %d bytes", mode, nbytes);
@@ -724,6 +743,8 @@ void I_InitGraphics(void)
                  !video_is_cyber_mode && (dispinfo.PropertyFlags & DIPF_IS_FOREIGN) == 0);
 
             video_is_ehb_mode = ((dispinfo.PropertyFlags & DIPF_IS_EXTRAHALFBRITE) != 0);
+
+            DEBUGSTEP();
 
             /* manual overrides */
             if (M_CheckParm("-rtg"))
@@ -755,6 +776,8 @@ void I_InitGraphics(void)
             rect.MinY = 0;
             rect.MaxX = SCREENWIDTH - 1;
             rect.MaxY = SCREENHEIGHT - 1;
+
+            DEBUGSTEP();
 
             /* use the mmu hack only if cpu is 68040+ and user specified -mmu */
             if (M_CheckParm("-mmu") && cpu_type >= 68040)
@@ -794,6 +817,8 @@ void I_InitGraphics(void)
                 if (!video_is_using_blitter)
                     c2p = c2p8_reloc(screens[0], &video_bitmap[0], SysBase);
 
+                DEBUGSTEP();
+
                 if ((video_screen = OpenScreenTags(
                          NULL, SA_Type, CUSTOMSCREEN | CUSTOMBITMAP, SA_DisplayID, mode, SA_DClip, (ULONG)&rect,
                          SA_Width, SCREENWIDTH, SA_Height, SCREENHEIGHT, SA_Depth, video_depth, SA_Font, &topaz8,
@@ -823,6 +848,8 @@ void I_InitGraphics(void)
                     video_which = 1;
                     ChangeVPBitMap(&video_screen->ViewPort, &video_bitmap[0], video_db);
                 }
+
+                DEBUGSTEP();
             } else { /* non-native ScreenMode */
                 if (video_is_cyber_mode && M_CheckParm("-directcgx"))
                     video_is_directcgx = TRUE;
@@ -861,6 +888,8 @@ void I_InitGraphics(void)
     }
 #endif
 
+    DEBUGSTEP();
+
     video_is_using_inputhandler = M_CheckParm("-inputhandler");
     if (video_is_using_inputhandler)
         idcmp = 0;
@@ -875,11 +904,15 @@ void I_InitGraphics(void)
         }
     }
 
+    DEBUGSTEP();
+
     if ((video_window = OpenWindowTags(NULL, WA_Left, 0, WA_Top, 0, WA_Width, video_graffiti != 0 ? 640 : SCREENWIDTH,
                                        WA_Height, video_is_directcgx ? video_oscan_height << 1 : SCREENHEIGHT, WA_IDCMP,
                                        idcmp, WA_Flags, wflags, WA_CustomScreen, video_screen, TAG_DONE)) == NULL) {
         I_Error("OpenWindow() failed");
     }
+
+    DEBUGSTEP();
 
     InitBitMap(&video_tmp_bm, video_depth, SCREENWIDTH, 1);
     for (depth = 0; depth < video_depth; depth++)
@@ -888,6 +921,8 @@ void I_InitGraphics(void)
     video_temprp = *video_window->RPort;
     video_temprp.Layer = NULL;
     video_temprp.BitMap = &video_tmp_bm;
+
+    DEBUGSTEP();
 
     if (video_is_native_mode) {
         if (video_is_using_blitter) {
@@ -902,15 +937,22 @@ void I_InitGraphics(void)
                 I_Error("Subtask couldn't allocate sigbit");
             if ((video_chipbuff = AllocMem(2 * SCREENWIDTH * SCREENHEIGHT, MEMF_CHIP | MEMF_CLEAR)) == NULL)
                 I_Error("Out of CHIP memory allocating %d bytes", 2 * SCREENWIDTH * SCREENHEIGHT);
+
+            DEBUGSTEP();
             if (!video_is_ehb_mode)
-                c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, SCREENHEIGHT, 0, SCREENWIDTH * SCREENHEIGHT / 8,
+                printf("c2p1x1_cpu3blit1_queue_init %p", &c2p1x1_cpu3blit1_queue_init); fflush(stdout);
+                c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, SCREENHEIGHT, 0, ((unsigned)SCREENWIDTH * SCREENHEIGHT) / 8,
                                             1 << video_sigbit1, 1 << video_sigbit3, video_maintask, video_fliptask,
                                             video_chipbuff);
         }
     }
 
+    DEBUGSTEP();
+
     if (!M_CheckParm("-mousepointer"))
         SetPointer(video_window, emptypointer, 1, 16, 0, 0);
+
+    DEBUGSTEP();
 
     I_RecalcPalettes();
 
@@ -947,8 +989,9 @@ void I_InitGraphics(void)
     if (M_CheckParm("-joypad")) {
         if ((LowLevelBase = OpenLibrary("lowlevel.library", 0)) == NULL)
             I_Error("-joypad option specified and can't open lowlevel.library");
-
     } else {
+        DEBUGSTEP();
+
         if ((gameport_mp = CreatePort(NULL, 0)) == NULL ||
             (gameport_io = (struct IOStdReq *)CreateExtIO(gameport_mp, sizeof(struct IOStdReq))) == NULL ||
             OpenDevice("gameport.device", 1, (struct IORequest *)gameport_io, 0) != 0)
@@ -1208,6 +1251,7 @@ void I_RecalcPalettes(void)
     static UBYTE gpalette[3 * 256];
     static int lu_palette;
 
+    DEBUGSTEP();
     lu_palette = W_GetNumForName("PLAYPAL");
     for (p = 0; p < NUMPALETTES; p++) {
         palette = (byte *)W_CacheLumpNum(lu_palette, PU_STATIC) + p * 768;
@@ -1244,6 +1288,7 @@ void I_RecalcPalettes(void)
                 } else
 #endif
                 {
+                    DEBUGSTEP();
                     i = 3 * 256 - 1;
                     video_colourtable[p][i + 2] = 0; // finish the list
                     do {
@@ -1416,6 +1461,8 @@ void I_FinishUpdate(void)
 
     if (video_is_native_mode) {
         if (video_is_using_blitter) {
+
+            DEBUGSTEP();
             start_timer();
             Wait(1 << video_sigbit1); /* wait for prev c2p() to finish pass 3 */
             blit_time += end_timer();
@@ -1689,6 +1736,8 @@ void amiga_getevents(void)
     static event_t joyevent = {0}, mouseevent = {0};
     ULONG currSega;
     int doomkey;
+
+    DEBUGSTEP();
 
     if (video_window != NULL && video_window->UserPort != NULL) {
         while ((msg = (struct IntuiMessage *)GetMsg(video_window->UserPort)) != NULL) {

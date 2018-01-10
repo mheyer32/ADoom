@@ -97,8 +97,14 @@ int main(int argc, char *argv[])
             I_Error("malloc(%d) failed", strlen(wb_arg->wa_Name) + 1);
         strcpy(myargv[myargc++], wb_arg->wa_Name);
     }
+
+    printf("opening icon.library\n");
+
     if ((IconBase = OpenLibrary("icon.library", 0)) == NULL)
         I_Error("Can't open icon.library");
+
+    printf("success!\n");
+
     if ((obj = GetDiskObject(myargv[0])) != NULL) {
         toolarray = obj->do_ToolTypes;
         for (i = 0; i < sizeof(flags) / sizeof(flags[0]); i++) {
@@ -116,6 +122,8 @@ int main(int argc, char *argv[])
         }
         FreeDiskObject(obj);
     }
+
+    printf("success 2!\n");
 
     if (argc != myargc) {
         printf("\nIcon tooltypes translated command line to:\n\n    ");
@@ -142,19 +150,26 @@ int main(int argc, char *argv[])
         cpu_type = atoi(myargv[p + 1]);
     }
 
+    printf("success 3!\n");
+
     if (cpu_type >= 68060) {
         if ((SysBase->AttnFlags & AFF_68881) != 0) {
+            DEBUGSTEP();
             SetFPMode(); /* set FPU rounding mode to "trunc towards -infinity" */
             FixedMul = FixedMul_060fpu;
             FixedDiv = FixedDiv_060fpu;
         } else {
+            DEBUGSTEP();
             FixedMul = FixedMul_060;
             FixedDiv = FixedDiv_040;
         }
     } else {
-        FixedMul = FixedMul_040;
-        FixedDiv = FixedDiv_040;
+        DEBUGSTEP();
+        FixedMul = &FixedMul_040;
+        FixedDiv = &FixedDiv_040;
     }
+
+    printf("success 4!\n");
 
     p = M_CheckParm("-forceversion");
     if (p && p < myargc - 1)

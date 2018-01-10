@@ -7,8 +7,8 @@ CXX = m68k-amigaos-g++
 #-mcrt=nix13
 #-msmall-code
 #-Wa,-adhln
-#-mregparm=2
-CFLAGS = -O1 -g -fstrength-reduce -fbaserel -mcrt=clib2 -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes -Wno-int-conversion
+#-mregparm=4
+CFLAGS = -Ofast  -g -fstrength-reduce -fbaserel -mcrt=clib2 -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes -Wno-int-conversion
 
 PHXASS = vasm
 PFLAGS = -Fhunk -nosym -phxass -ldots -m68030 -m68882
@@ -188,6 +188,7 @@ DoomSnd.h: doomsound.fd doomsound.h
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) -v $(CFLAGS) $(LDFLAGS) test_fixed.o amiga_fixed.o \
 	-o $(OUT)test_fixed
+
 #############################################################
 #
 #############################################################

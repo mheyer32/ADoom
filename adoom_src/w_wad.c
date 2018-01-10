@@ -167,6 +167,7 @@ void W_AddFile(char* filename)
         // single lump file
         fileinfo = &singleinfo;
         singleinfo.filepos = 0;
+        //MH: FIXME: SWAPLONG seems wrong here
         singleinfo.size = SWAPLONG(filelength(fileno(handle)));
         ExtractFileBase(filename, singleinfo.name);
         numlumps++;

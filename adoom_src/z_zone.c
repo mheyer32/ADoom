@@ -160,7 +160,7 @@ void Z_Free(void *ptr)
 //
 #define MINFRAGMENT 64
 
-void *Z_Malloc(REGD0(int size), REGD1(int tag), REGA0(void *user))
+void* REGARGS Z_Malloc(REGD0(int size), REGD1(int tag), REGA0(void *user))
 {
     int extra;
     memblock_t *start;

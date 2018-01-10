@@ -99,15 +99,27 @@ extern void (*transcolfunc)(void);
 // Utility functions.
 extern int R_PointOnSide(fixed_t x, fixed_t y, node_t* node);
 
-extern int R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line));
+extern int REGARGS R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line));
 
 extern angle_t R_PointToAngle(fixed_t x, fixed_t y);
 
 extern angle_t R_PointToAngle2(fixed_t x1, fixed_t y1, fixed_t x2, fixed_t y2);
 
-extern fixed_t R_PointToDist(REGD0(fixed_t x), REGD1(fixed_t y));
+extern fixed_t REGARGS R_PointToDist(REGD0(fixed_t x), REGD1(fixed_t y));
 
-extern fixed_t R_ScaleFromGlobalAngle(REGD0(angle_t visangle));
+//inline fixed_t R_PointToDist(fixed_t _x, fixed_t _y)
+//{
+//      register REGD0(fixed_t x) = _x;
+//      register REGD1(fixed_t y) = _y;
+
+//      __asm volatile ("jsr _R_PointToDistAsm"
+//      : "+r"(x), "+r" (y)
+//      : "r"(x), "r"(y)
+//      : "a0", "a1", "cc", "memory");
+//    return x;
+//}
+
+extern fixed_t REGARGS R_ScaleFromGlobalAngle(REGD0(angle_t visangle));
 
 extern subsector_t* R_PointInSubsector(fixed_t x, fixed_t y);
 
@@ -132,3 +144,4 @@ extern void R_SetViewSize(int blocks, int detail);
 // $Log:$
 //
 //-----------------------------------------------------------------------------
+

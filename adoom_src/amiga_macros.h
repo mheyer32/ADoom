@@ -13,7 +13,7 @@
  */
 
 #ifdef __GNUC__
-#define REG(xn, parm) register parm __asm(#xn)
+#define REG(xn, parm) parm __asm(#xn)
 #define REGARGS __regargs
 #define STDARGS __stdargs
 #define SAVEDS __saveds

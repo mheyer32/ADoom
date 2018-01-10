@@ -213,6 +213,7 @@ void I_InitSound(void)
         }
     }
 
+    DEBUGSTEP();
 
     clock_constant = 3579545; /* NTSC */
     if (GfxBase) {
@@ -247,6 +248,8 @@ void I_InitSound(void)
             lengths[i] = lengths[(S_sfx[i].link - S_sfx) / sizeof(sfxinfo_t)];
         }
     }
+
+    DEBUGSTEP();
 
     fprintf(stderr, " pre-cached all sound data\n");
 

@@ -140,7 +140,6 @@ _R_AddSprites:
 		xref	_vsprsortedhead	;vissprite_t
 		xref	_R_DrawPlayerSprites
 		xref	_R_PointOnSegSide
-		xref	_R_RenderMaskedSegRange
 ;;;		xref	_R_DrawVisSprite
 		xref	_mfloorclip
 		xref	_mceilingclip

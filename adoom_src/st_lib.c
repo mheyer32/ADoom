@@ -77,6 +77,8 @@ void STlib_initNum(st_number_t* n, int x, int y, patch_t** pl, int* num, boolean
 //
 void STlib_drawNum(st_number_t* n, boolean refresh)
 {
+    DEBUGSTEP();
+
     int numdigits = n->width;
     int num = *n->num;
 
@@ -211,10 +213,13 @@ void STlib_updateBinIcon(st_binicon_t* bi, boolean refresh)
         if (y - ST_Y < 0)
             I_Error("updateBinIcon: y - ST_Y < 0");
 
-        if (*bi->val)
+        if (*bi->val) {
+            DEBUGSTEP();
             V_DrawPatch(bi->x, bi->y, FG, bi->p);
-        else
+        } else {
+            DEBUGSTEP();
             V_CopyRect(x, y - ST_Y, BG, w, h, x, y, FG);
+        }
 
         bi->oldval = *bi->val;
     }

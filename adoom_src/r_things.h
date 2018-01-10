@@ -69,7 +69,7 @@ void R_DrawMaskedColumn(REGA0(column_t* column));
 
 void R_SortVisSprites(void);
 
-void R_AddSprites(REGA0(sector_t* sec));
+extern void REGARGS R_AddSprites(REGA0(sector_t* sec));
 void R_AddPSprites(void);
 void R_DrawSprites(void);
 void R_InitSprites(char** namelist);

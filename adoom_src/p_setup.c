@@ -547,6 +547,8 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     // will be set by player think.
     players[consoleplayer].viewz = 1;
 
+    DEBUGSTEP();
+
     // Make sure all sounds are stopped before Z_FreeTags.
     S_Start();
 
@@ -558,11 +560,16 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     }
     else
 #endif
+
+        DEBUGSTEP();
+
     Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
 
+    DEBUGSTEP();
     // UNUSED W_Profile ();
     P_InitThinkers();
 
+    DEBUGSTEP();
     // if working with a devlopment map, reload it
     W_Reload();
 
@@ -580,16 +587,19 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
         lumpname[4] = 0;
     }
 
+    DEBUGSTEP();
+
     lumpnum = W_GetNumForName(lumpname);
 
     leveltime = 0;
 
+    DEBUGSTEP();
     // note: most of this ordering is important
     P_LoadBlockMap(lumpnum + ML_BLOCKMAP);
     P_LoadVertexes(lumpnum + ML_VERTEXES);
     P_LoadSectors(lumpnum + ML_SECTORS);
     P_LoadSideDefs(lumpnum + ML_SIDEDEFS);
-
+DEBUGSTEP();
     P_LoadLineDefs(lumpnum + ML_LINEDEFS);
     P_LoadSubsectors(lumpnum + ML_SSECTORS);
     P_LoadNodes(lumpnum + ML_NODES);
@@ -598,6 +608,7 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     rejectmatrix = W_CacheLumpNum(lumpnum + ML_REJECT, PU_LEVEL);
     P_GroupLines();
 
+    DEBUGSTEP();
     bodyqueslot = 0;
     deathmatch_p = deathmatchstarts;
     P_LoadThings(lumpnum + ML_THINGS);
@@ -614,12 +625,15 @@ void P_SetupLevel(int episode, int map, int playermask, skill_t skill)
     // clear special respawning que
     iquehead = iquetail = 0;
 
+    DEBUGSTEP();
+
     // set up world state
     P_SpawnSpecials();
 
     // build subsector connect matrix
     //	UNUSED P_ConnectSubsectors ();
 
+    DEBUGSTEP();
     // preload graphics
     if (precache)
         R_PrecacheLevel();

@@ -1626,46 +1626,44 @@ _V_DrawPatch:
 @V_DrawPatch:
 _V_DrawPatchDirect:
 @V_DrawPatchDirect:
-		movem.l	d3-d6/a2/a3/a5,-(sp)
+		movem.l	d0-d7/a2/a3/a5,-(sp)
 
-		move.l	d0,d3	;x
-		move.l	d1,d4	;y.. scrn in (sp), patch in a0
+		move.l	d0,d4	;x
+		move.l	d1,d5	;y.. scrn in d2, patch in a0
 
 		move.l	a0,a2	;Store patch
 		moveq	#0,d0
 		move.w	topoffset(a2),d0
 		rol.w	#8,d0	;SWAPSHORT
 		ext.l	d0
-		sub.l	d0,d4
+		sub.l	d0,d5
 		moveq	#0,d0
 		move.w	leftoffset(a2),d0
 		rol.w	#8,d0	;SWAPSHORT
 		ext.l	d0
-		sub.l	d0,d3
+		sub.l	d0,d4
 
-		move.l	32(sp),d6
+		move.l	d2,d6
 		bne.b	.vd_ScrnOK
-		move.l	d3,d0
-		move.l	d4,d1
-		moveq	#0,d5
-		move.w	height(a2),d5
-		rol.w	#8,d5
-		move.l	d5,-(sp)
-		move.w	width(a2),d5
-		rol.w	#8,d5
-		move.l	d5,-(sp)
+
+		move.l	d4,d0			; x
+		move.l	d5,d1			; z
+		moveq	#0,d2
+		move.w	width(a2),d2	; width
+		rol.w	#8,d2			; SWAPSHORT
+		move.w	height(a2),d3	; height
+		rol.w	#8,d3			; SWAPSHORT
 		jsr	(_I_MarkRect)
-		addq.l	#8,sp
 
 .vd_ScrnOK:
 		lea	_screens(a4),a0
-		move.l	(a0,d6.l*4),d5
+		move.l	(a0,d6.l*4),d7	; get start of screen address
 ;Peter... change here (quite obvious)
-		muls.l	_SCREENWIDTH(a4),d4	;y not needed further
-		add.l	d3,d5	;+x
-		add.l	d4,d5	;+y*SCREENWIDTH
+		muls.l	_SCREENWIDTH(a4),d5	;y not needed further
+		add.l	d5,d7	;+y*SCREENWIDTH
+		add.l	d4,d7	;+x
 
-		;D3=x, D5=desttop,
+		;D4=x, D7=desttop,
 		moveq	#0,d6
 		move.w	width(a2),d6
 		rol.w	#8,d6	;SWAPSHORT
@@ -1685,7 +1683,7 @@ _V_DrawPatchDirect:
 		beq.b	.vdl_Next	;last column
 
 .vdl_Loop:
-		move.l	d5,a1		;dest=desttop + 
+		move.l	d7,a1		;dest=desttop +
 
 ;... here are the other references to SCREENWIDTH
 ;	lsl.l #8,x + lsl.l #6,x is equal to 256x+64x=320x
@@ -1722,7 +1720,7 @@ _V_DrawPatchDirect:
 
 		dbf		d6,.vd_Loop
 .vd_exit:
-		movem.l	(sp)+,d3-d6/a2/a3/a5
+		movem.l	(sp)+,d0-d7/a2/a3/a5
 
 		rts
 

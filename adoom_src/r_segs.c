@@ -174,7 +174,7 @@ void R_RenderMaskedSegRange(drawseg_t* ds, int x1, int x2)
 
 #ifdef AMIGA
 
-extern void R_RenderSegLoop(void);
+extern void REGARGS R_RenderSegLoop(void);
 
 #else
 
@@ -393,6 +393,8 @@ void R_StoreWallRange(int start, int stop)
     fixed_t vtop;
     int lightnum;
 
+    DEBUGSTEP();
+
     // don't overflow and crash
     if (ds_p == &drawsegs[MAXDRAWSEGS])
         return;
@@ -416,10 +418,17 @@ void R_StoreWallRange(int start, int stop)
         offsetangle = ANG90;
 
     distangle = ANG90 - offsetangle;
+
+    DEBUGSTEP();
+
     hyp = R_PointToDist(curline->v1->x, curline->v1->y);
+
+    DEBUGSTEP();
+
     sineval = finesine[distangle >> ANGLETOFINESHIFT];
     rw_distance = FixedMul(hyp, sineval);
 
+    DEBUGSTEP();
     ds_p->x1 = rw_x = start;
     ds_p->x2 = stop;
     ds_p->curline = curline;
@@ -579,6 +588,8 @@ void R_StoreWallRange(int start, int stop)
         }
     }
 
+    DEBUGSTEP();
+
     // calculate rw_offset (only needed for textured lines)
     segtextured = midtexture | toptexture | bottomtexture | maskedtexture;
 
@@ -592,6 +603,9 @@ void R_StoreWallRange(int start, int stop)
             offsetangle = ANG90;
 
         sineval = finesine[offsetangle >> ANGLETOFINESHIFT];
+
+        DEBUGSTEP();
+
         rw_offset = FixedMul(hyp, sineval);
 
         if (rw_normalangle - rw_angle1 < ANG180)
@@ -639,6 +653,8 @@ void R_StoreWallRange(int start, int stop)
     worldtop >>= 4;
     worldbottom >>= 4;
 
+    DEBUGSTEP();
+
     topstep = -FixedMul(rw_scalestep, worldtop);
     topfrac = (centeryfrac >> 4) - FixedMul(worldtop, rw_scale);
 
@@ -667,6 +683,7 @@ void R_StoreWallRange(int start, int stop)
     if (markfloor)
         floorplane = R_CheckPlane(floorplane, rw_x, rw_stopx - 1);
 
+    DEBUGSTEP();
     R_RenderSegLoop();
 
     // save sprite clipping info

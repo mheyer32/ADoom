@@ -1,15 +1,8 @@
 		mc68020
 
 		xdef	_R_RenderSegLoop
-		xdef	_R_RenderSegLoop
-
 		xdef	_R_PointToDist
-		xdef	_R_PointToDist
-
 		xdef	_R_RenderMaskedSegRange
-		xdef	_R_RenderMaskedSegRange
-
-		xdef	_R_ScaleFromGlobalAngle
 		xdef	_R_ScaleFromGlobalAngle
 
 		include	"exec/types.i"
@@ -179,7 +172,7 @@ _R_RenderSegLoop
 		move.l	d3,_dc_yh(a4)	; dc_yh = yh
 		move.l	_rw_midtexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn
-		bsr		(_R_GetColumn)
+		jsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4) ; dc_source = R_GetColumn(midtexture,texturecolumn)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc()
@@ -208,7 +201,7 @@ _R_RenderSegLoop
 		move.l	d6,_dc_yh(a4)	; dc_yh = mid
 		move.l	_rw_toptexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn, d0 = toptexture
-		bsr		(_R_GetColumn)
+		jsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4)	; dc_source = R_GetColumn(d0,d1)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc()
@@ -241,7 +234,7 @@ _R_RenderSegLoop
 		move.l	d3,_dc_yh(a4)	; dc_yh = yh
 		move.l	_rw_bottomtexturemid(a4),_dc_texturemid(a4)
 		move.l	d5,d1		; d1 = texturecolumn, d0 = bottomtexture
-		bsr		(_R_GetColumn)
+		jsr		(_R_GetColumn)
 		move.l	d0,_dc_source(a4) ; dc_source = R_GetColumn(d0,d1)
 		movea.l	_colfunc(a4),a0
 		jsr		(a0)		; colfunc ()
@@ -290,7 +283,7 @@ DBITS		equ	16-11	;FRACBITS-SLOPEBITS
 ANG90		equ	$40000000
 ANGLETOFINESHIFT	equ	19
 
-_R_PointToDist:
+		cnop	0,4
 _R_PointToDist:
 		move.l	d2,-(sp)
 		move.l	_FixedDiv(a4),a1
@@ -313,12 +306,12 @@ _R_PointToDist:
 		move.l	d2,d1
 		jsr		(a1)
 		asr.l	#DBITS,d0
-		move.l	#_tantoangle,a0
+		move.l	_tantoangle(a4),a0
 		move.l	(a0,d0.l*4),d1
 		add.l	#ANG90,d1
 		moveq	#ANGLETOFINESHIFT,d0
 		asr.l	d0,d1
-		move.l	#_finesine,a0
+		move.l	_finesine(a4),a0
 		move.l	(a0,d1.l*4),d1
 		move.l	d2,d0
 		jsr		(a1)
@@ -450,6 +443,7 @@ ML_DONTPEGBOTTOM equ	16	;bit number is 4
 		 WORD	sd_midtexture
 		 APTR	sd_sector
 
+		cnop	0,4
 _R_RenderMaskedSegRange:
 _R_RenderMaskedSegRange:
 		movem.l	d2-d7/a2/a3/a5,-(sp)
@@ -703,6 +697,8 @@ _R_RenderMaskedSegRange:
 
 ;ANGLETOFINESHIFT	EQU	19
 ;ANG90		EQU	$40000000
+
+		cnop	0,4
 
 _R_ScaleFromGlobalAngle:
 _R_ScaleFromGlobalAngle:
