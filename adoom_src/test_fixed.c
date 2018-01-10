@@ -6,6 +6,9 @@ int main(void)
 {
     fixed_t a, b, c;
 
+    FixedMul = &FixedMul_040;
+    FixedDiv = &FixedDiv_040;
+
     a = 0x7fff0000;
     b = 0xffffffff;
     c = FixedDiv(a, b);

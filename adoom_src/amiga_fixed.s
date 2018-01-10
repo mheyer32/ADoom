@@ -1,4 +1,4 @@
-		mc68020
+		mc68030
 		fpu
 
 ;-----------------------------------------------------------------------
@@ -158,8 +158,8 @@ _FixedDiv_060fpu
 
 ; pointers to CPU-specific FixedMul and FixedDiv routine
 
-_FixedMul	ds.l	1
-_FixedDiv	ds.l	1
+;_FixedMul	ds.l	1
+;_FixedDiv	ds.l	1
 
 ;-----------------------------------------------------------------------
 		end
