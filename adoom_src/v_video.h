@@ -52,14 +52,29 @@ void V_Init(void);
 
 void V_CopyRect(int srcx, int srcy, int srcscrn, int width, int height, int destx, int desty, int destscrn);
 
-#ifndef AMIGA
+#if !defined(AMIGA)
 void V_DrawPatch(int x, int y, int scrn, patch_t* patch);
 
 void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch);
 #else
-void REGARGS V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
+void  V_DrawPatchAsm(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
 
-void REGARGS V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
+//inline void V_DrawPatch(int _x, int _y, int _scrn, patch_t* _patch)
+//{
+//      register REGD0(int x) = _x;
+//      register REGD1(int y) = _y;
+//      register REGD2(int scrn) = _scrn;
+//      register REGA0(patch_t* patch) = _patch;
+
+//      __asm volatile ("jsr _V_DrawPatchAsm"
+//      : "+r"(x), "+r" (y), "+r"(scrn), "+r"(patch)
+//      : "r"(x), "r"(y), "r"(scrn), "r"(patch)
+//      : "a1", "cc", "memory");
+//}
+
+void  V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
+
+void  V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
 #endif
 
 void  // stretches bitmap to fill screen

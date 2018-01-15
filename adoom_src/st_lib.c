@@ -214,7 +214,7 @@ void STlib_updateBinIcon(st_binicon_t* bi, boolean refresh)
             I_Error("updateBinIcon: y - ST_Y < 0");
 
         if (*bi->val) {
-            DEBUGSTEP();
+            DEBUGPRINT(("V_DrawPatch for %p", bi->p));
             V_DrawPatch(bi->x, bi->y, FG, bi->p);
         } else {
             DEBUGSTEP();

@@ -159,12 +159,12 @@ void V_CopyRect(int srcx, int srcy, int srcscrn, int width, int height, int dest
         I_MarkRect(destx, desty, width, height);
 }
 
-#ifndef AMIGA
+#if !defined(AMIGA) || 0
 //
 // V_DrawPatch
 // Masks a column based masked pic to the screen.
 //
-void V_DrawPatch(int x, int y, int scrn, patch_t* patch)
+void REGARGS V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
 {
     int count;
     int col;
@@ -266,12 +266,12 @@ void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch)
         I_MarkRect(x0, y, SWAPSHORT(patch->width), SWAPSHORT(patch->height));
 }
 
-#ifndef AMIGA
+#if !defined(AMIGA)
 //
 // V_DrawPatchDirect
 // Draws directly to the screen on the pc.
 //
-void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch)
+void REGARGS V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
 {
     V_DrawPatch(x, y, scrn, patch);
 }

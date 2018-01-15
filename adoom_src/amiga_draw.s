@@ -68,7 +68,7 @@ FRACUNIT	equ	(1<<FRACBITS)
 		xref    _dc_yl
 		xref    _dc_yh
 		xref    _dc_x
-		xref    _columnofs
+;		xref    _columnofs
 ;;		xref    _ylookup
 		xref    _ylookup2
 		xref    _dc_iscale
@@ -1623,43 +1623,53 @@ column_t
 
 		cnop	0,4
 _V_DrawPatch:
-@V_DrawPatch:
+;@V_DrawPatch:
 _V_DrawPatchDirect:
-@V_DrawPatchDirect:
-		movem.l	d0-d7/a2/a3/a5,-(sp)
+;@V_DrawPatchDirect:
+		movem.l	d2-d7/a2/a3/a5/a6,-(sp)
 
 		move.l	d0,d4	;x
 		move.l	d1,d5	;y.. scrn in d2, patch in a0
 
+		;the patch pointer seems already broken
 		move.l	a0,a2	;Store patch
+		move.l	a0,a6	;Store patch
+
 		moveq	#0,d0
 		move.w	topoffset(a2),d0
 		rol.w	#8,d0	;SWAPSHORT
 		ext.l	d0
 		sub.l	d0,d5
+
 		moveq	#0,d0
 		move.w	leftoffset(a2),d0
 		rol.w	#8,d0	;SWAPSHORT
 		ext.l	d0
 		sub.l	d0,d4
 
-		move.l	d2,d6
+		move.l	d2,d6	; screen
+		tst.b	d6
 		bne.b	.vd_ScrnOK
 
 		move.l	d4,d0			; x
 		move.l	d5,d1			; z
+
 		moveq	#0,d2
 		move.w	width(a2),d2	; width
 		rol.w	#8,d2			; SWAPSHORT
+
+		moveq	#0,d3
 		move.w	height(a2),d3	; height
 		rol.w	#8,d3			; SWAPSHORT
-		jsr	(_I_MarkRect)
+		jsr	_I_MarkRect
 
 .vd_ScrnOK:
 		lea	_screens(a4),a0
+
 		move.l	(a0,d6.l*4),d7	; get start of screen address
+
 ;Peter... change here (quite obvious)
-		muls.l	_SCREENWIDTH(a4),d5	;y not needed further
+		mulu.l	_SCREENWIDTH(a4),d5	;y not needed further
 		add.l	d5,d7	;+y*SCREENWIDTH
 		add.l	d4,d7	;+x
 
@@ -1667,20 +1677,22 @@ _V_DrawPatchDirect:
 		moveq	#0,d6
 		move.w	width(a2),d6
 		rol.w	#8,d6	;SWAPSHORT
+
 		;D6=w
-		subq.l	#1,d6	;for ; col<w
+		subq.w	#1,d6	;for ; col<w
 		lea	columnofs(a2),a3	;prepare for columnofs[col]
 
 .vd_Loop:
-		move.l	(a3)+,d0
+		move.l	(a3)+,d0	; get columnsofs[col]
 		rol.w	#8,d0
 		swap	d0
-		rol.w	#8,d0		;three instructions for SWAPLONG
+		rol.w	#8,d0		; SWAPLONG
+
 		move.l	a2,a5		;column=patch+
 		add.l	d0,a5		;... SWAPLONG(patch->columnofs[col])
 
 		cmp.b	#$FF,(a5)
-		beq.b	.vdl_Next	;last column
+		beq.b	.vdl_Next	;last post of column
 
 .vdl_Loop:
 		move.l	d7,a1		;dest=desttop +
@@ -1690,6 +1702,7 @@ _V_DrawPatchDirect:
 
 		moveq	#0,d0
 		move.b	(a5),d0		;column->topdelta*
+
 ;;;		move.l	d0,d1	;!
 ;;;		lsl.l	#8,d0	;!
 ;;;		lsl.l	#6,d1	;!
@@ -1699,28 +1712,29 @@ _V_DrawPatchDirect:
 		muls.l	_SCREENWIDTH(a4),d0
 		add.l	d0,a1
 
-		move.b	1(a5),d0
-		addq.l	#3,a5		;source
+		move.b	1(a5),d0	; length of column
+		addq.l	#3, a5		; source data of column
 		;Would it be possible to use the code from DrawColumn functions by Aki
-		;here, too??
+		;here, too??`
+
 .vdl_DrawLoop:
 		move.b	(a5)+,(a1)
 		add.l	_SCREENWIDTH(a4),a1
 		subq.b	#1,d0
 		bne.b	.vdl_DrawLoop
 
-		addq.l	#1,a5		;bump to next column..
+		addq.l	#1,a5		;bump to next post..
 		;bumped already by three and length, so one more. (column +=column->length+4)
 
-		cmp.b	#$FF,(a5)
+		cmp.b	#$FF,(a5)	; last post of column reached?
 		bne.b	.vdl_Loop
 
 .vdl_Next:
-		addq.l	#1,d5
+		addq.l	#1,d7		; desttop one pixel to the right
 
-		dbf		d6,.vd_Loop
+		dbra.w	d6,.vd_Loop	; start next colum
 .vd_exit:
-		movem.l	(sp)+,d0-d7/a2/a3/a5
+		movem.l	(sp)+,d2-d7/a2/a3/a5/a6
 
 		rts
 
