@@ -318,7 +318,7 @@ static char *mode_name(ULONG mode)
 /* Use name in DisplayInfo database if available */
 /* else manually construct the name */
 {
-    APTR handle;
+    DisplayInfoHandle handle;
     char *p;
     struct NameInfo nameinfo;
     struct DimensionInfo dimsinfo;
@@ -327,11 +327,11 @@ static char *mode_name(ULONG mode)
     p = modename;
     *p = '\0';
     if ((handle = FindDisplayInfo(mode & ~SPRITES)) != NULL) {
-        if (GetDisplayInfoData(handle, (UBYTE *)&nameinfo, sizeof(nameinfo), DTAG_NAME, NULL) >
+        if (GetDisplayInfoData(handle, (UBYTE *)&nameinfo, sizeof(nameinfo), DTAG_NAME, 0) >
             sizeof(struct QueryHeader)) {
             p += sprintf(p, "%s", nameinfo.Name);
-        } else if (GetDisplayInfoData(handle, (UBYTE *)&dimsinfo, sizeof(dimsinfo), DTAG_DIMS, NULL) >=
-                   66 /* sizeof(dimsinfo)*/) {
+        } else if (GetDisplayInfoData(handle, (UBYTE *)&dimsinfo, sizeof(dimsinfo), DTAG_DIMS, 0) >=
+                   (ULONG)66 /* sizeof(dimsinfo)*/) {
             switch (mode & MONITOR_ID_MASK) {
             case DEFAULT_MONITOR_ID:
                 p += sprintf(p, "DEFAULT:"); /* PAL or NTSC??? */
@@ -701,11 +701,11 @@ void I_InitGraphics(void)
             if ((handle = FindDisplayInfo(mode)) == NULL) {
                 I_Error("Can't FindDisplayInfo() for mode %08x", mode);
             }
-            if ((nbytes = GetDisplayInfoData(handle, (UBYTE *)&dispinfo, sizeof(struct DisplayInfo), DTAG_DISP, NULL)) <
+            if ((nbytes = GetDisplayInfoData(handle, (UBYTE *)&dispinfo, sizeof(struct DisplayInfo), DTAG_DISP, 0)) <
                 40 /*sizeof(struct DisplayInfo)*/) {
                 I_Error("Can't GetDisplayInfoData() for mode %08x, got %d bytes", mode, nbytes);
             }
-            if ((nbytes = GetDisplayInfoData(handle, (UBYTE *)&dimsinfo, sizeof(dimsinfo), DTAG_DIMS, NULL)) <
+            if ((nbytes = GetDisplayInfoData(handle, (UBYTE *)&dimsinfo, sizeof(dimsinfo), DTAG_DIMS, 0)) <
                 66 /* sizeof(dimsinfo)*/) {
                 I_Error("Can't GetDisplayInfoData() for mode %08x, got %d bytes", mode, nbytes);
             }
@@ -796,11 +796,11 @@ void I_InitGraphics(void)
 
                 if ((video_screen = OpenScreenTags(
                          NULL, SA_Type, CUSTOMSCREEN | CUSTOMBITMAP, SA_DisplayID, mode, SA_DClip, (ULONG)&rect,
-                         SA_Width, SCREENWIDTH, SA_Height, SCREENHEIGHT, SA_Depth, video_depth, SA_Font, &topaz8,
+                         SA_Width, SCREENWIDTH, SA_Height, SCREENHEIGHT, SA_Depth, video_depth, SA_Font, (ULONG)&topaz8,
                          /* SA_Draggable,FALSE, */
                          /* SA_AutoScroll,FALSE, */
                          /* SA_Exclusive,TRUE, */
-                         SA_Quiet, TRUE, SA_BitMap, &video_bitmap[0], /* custom bitmap, contiguous planes */
+                         SA_Quiet, TRUE, SA_BitMap, (ULONG)&video_bitmap[0], /* custom bitmap, contiguous planes */
                          TAG_DONE, 0)) == NULL) {
                     I_Error("OpenScreen() failed");
                 }
@@ -829,7 +829,7 @@ void I_InitGraphics(void)
                 if ((video_screen = OpenScreenTags(NULL, SA_Type, CUSTOMSCREEN, SA_DisplayID, mode, SA_DClip,
                                                    (ULONG)&rect, SA_Width, SCREENWIDTH, SA_Height,
                                                    video_is_directcgx ? video_oscan_height << 1 : SCREENHEIGHT,
-                                                   SA_Depth, video_depth, SA_Font, &topaz8,
+                                                   SA_Depth, video_depth, SA_Font, (ULONG)&topaz8,
                                                    /* SA_Draggable,FALSE, */
                                                    /* SA_AutoScroll,FALSE, */
                                                    /* SA_Exclusive,TRUE, */
@@ -839,9 +839,9 @@ void I_InitGraphics(void)
             }
 
             if (video_is_directcgx) {
-                video_bitmap_handle =
-                    LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_WIDTH, &width, LBMI_DEPTH, &depth,
-                                   LBMI_PIXFMT, &pixfmt, LBMI_BASEADDRESS, &screens[0], TAG_DONE);
+                video_bitmap_handle = LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_WIDTH, (ULONG)&width,
+                                                     LBMI_DEPTH, (ULONG)&depth, LBMI_PIXFMT, (ULONG)&pixfmt,
+                                                     LBMI_BASEADDRESS, (ULONG)&screens[0], TAG_DONE);
                 UnLockBitMap(video_bitmap_handle);
                 video_bitmap_handle = NULL;
                 screens[0] = NULL;
@@ -877,7 +877,8 @@ void I_InitGraphics(void)
 
     if ((video_window = OpenWindowTags(NULL, WA_Left, 0, WA_Top, 0, WA_Width, video_graffiti != 0 ? 640 : SCREENWIDTH,
                                        WA_Height, video_is_directcgx ? video_oscan_height << 1 : SCREENHEIGHT, WA_IDCMP,
-                                       idcmp, WA_Flags, wflags, WA_CustomScreen, video_screen, TAG_DONE)) == NULL) {
+                                       idcmp, WA_Flags, wflags, WA_CustomScreen, (ULONG)video_screen, TAG_DONE)) ==
+        NULL) {
         I_Error("OpenWindow() failed");
     }
 
@@ -968,7 +969,6 @@ void I_InitGraphics(void)
             fprintf(stderr, "Another task is using the gameport!  Joystick disabled");
             CloseDevice((struct IORequest *)gameport_io);
             gameport_is_open = FALSE;
-
         } else {
             gameport_ct = GPCT_ABSJOYSTICK;
             gameport_io->io_Command = GPD_SETCTYPE;
@@ -1300,8 +1300,8 @@ void I_StartUpdate(void)
         }
         if (video_bitmap_handle == NULL) {
             start_timer();
-            video_bitmap_handle =
-                LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_BASEADDRESS, &base_address, TAG_DONE);
+            video_bitmap_handle = LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_BASEADDRESS,
+                                                 (ULONG)&base_address, TAG_DONE);
             lock_time += end_timer();
             video_which = 1 - video_which;
             if (video_which != 0)
@@ -1375,7 +1375,6 @@ void I_FinishUpdate(void)
                 }
             }
             M_ClearBox(dirtybox);
-
         } else
             I_Error("I_FinishUpdate() called without calling I_StartUpdate() first");
 
@@ -1525,8 +1524,8 @@ void I_ReadScreen(byte *scr)
             // memcpy (scr, screens[0], SCREENWIDTH * SCREENHEIGHT);
             CopyMemQuick(screens[0], scr, SCREENWIDTH * SCREENHEIGHT);
         } else {
-            video_bitmap_handle =
-                LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_BASEADDRESS, &base_address, TAG_DONE);
+            video_bitmap_handle = LockBitMapTags(video_screen->ViewPort.RasInfo->BitMap, LBMI_BASEADDRESS,
+                                                 (ULONG)&base_address, TAG_DONE);
             // memcpy (scr, base_address + (video_which != 0 ?
             //        SCREENWIDTH * video_oscan_height: 0), SCREENWIDTH * SCREENHEIGHT);
             CopyMemQuick(base_address + (video_which != 0 ? SCREENWIDTH * video_oscan_height : 0), scr,
@@ -1620,7 +1619,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
             return 0;
     } else if (rawkey < 0x68)
         return xlate[rawkey];
-    else
+
         return 0;
 }
 
