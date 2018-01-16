@@ -8,12 +8,31 @@ CXX = m68k-amigaos-g++
 #-msmall-code
 #-Wa,-adhln
 #-mregparm=4
-CFLAGS = -Ofast  -g -fstrength-reduce -fbaserel -mcrt=clib2 -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes -Wno-int-conversion
+#-v   #verbose
+#-fstrength-reduce
+
+CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2
+CLIB_LDFLAGS = -lnet
+
+#-Wno-int-conversion is needed because sometimes pointers get passed into taglists
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL
+NOIXEMUL_LDFLAGS = -lsocket
+
+RUNTIME_CFLAGS = $(NOIXEMUL_CFLAGS)
+RUNTIME_LDFLAGS = $(NOIXEMUL_LDFLAGS)
+
+#RUNTIME_CFLAGS = $(CLIB_CFLAGS)
+#RUNTIME_LDFLAGS = $(CLIB_LDFLAGS)
+
+
+CFLAGS = $(RUNTIME_CFLAGS) -v -Ofast -fbaserel -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes
+
+CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
+
+LDFLAGS = $(RUNTIME_LDFLAGS)
 
 PHXASS = vasm
 PFLAGS = -Fhunk -nosym -phxass -ldots -m68030 -m68882
-
-CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 
 INTERMEDIATE =$(CURDIR)/build/
 OUT = $(CURDIR)/bin/
@@ -103,8 +122,6 @@ OBJS = \
 
 OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
-
-#-lnet
 all:	 ADoom ADoom_SndSrvr
 
 clean:
@@ -112,8 +129,8 @@ clean:
 
 ADoom:	$(OBJS) amiga_main.o DoomSnd.h Makefile
 	$(info $(OBJS))
-	$(CC) -v $(CFLAGS) $(LDFLAGS) $(OBJS) amiga_main.o \
-	-lnet -o $(OUT)ADoom
+	$(CC) $(CFLAGS) $(OBJS) amiga_main.o \
+	$(LDFLAGS) -o $(OUT)ADoom
 
 ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
 	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
@@ -176,17 +193,17 @@ amiga_sega.o: amiga_sega.s Makefile
 #	$(CC) $(CFLAGS) $<
 
 %.o:	%.c Makefile
-	$(CC) $(CFLAGS) -v -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 %.s:	%.c Makefile
-	$(CC) $(CFLAGS) -Wa,-adhln -v -c $<  > $@
+	$(CC) $(CFLAGS) -Wa,-adhln -c $<  > $@
 
 DoomSnd.h: doomsound.fd doomsound.h
 	fd2pragma -i doomsound.fd -c doomsound.h -s 42
 
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
-	$(CC) -v $(CFLAGS) $(LDFLAGS) test_fixed.o amiga_fixed.o \
+	$(CC) $(CFLAGS) $(LDFLAGS) test_fixed.o amiga_fixed.o \
 	-o $(OUT)test_fixed
 
 #############################################################

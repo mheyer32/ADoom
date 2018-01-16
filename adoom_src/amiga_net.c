@@ -127,11 +127,15 @@ static void IP_PacketGet(void)
 {
     int i, c;
     struct sockaddr_in fromaddress;
-    LONG fromlen;
+#if defined(CLIB2)
+    socklen_t fromlen;
+#else
+    int fromlen;
+#endif
     doomdata_t sw;
 
     fromlen = sizeof(fromaddress);
-    c = recvfrom(IP_insocket, (UBYTE *)&sw, sizeof(sw), 0, (struct sockaddr *)&fromaddress, &fromlen);
+    c = recvfrom(IP_insocket, &sw, sizeof(sw), 0, (struct sockaddr *)&fromaddress, &fromlen);
     if (c == -1) {
         if (errno != EWOULDBLOCK)
             I_Error("GetPacket: %s", strerror(errno));

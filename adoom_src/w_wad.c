@@ -64,9 +64,9 @@ int numlumps;
 
 void** lumpcache;
 
-#if !defined(__SASC) || !defined(ixemul)
 #define strcmpi strcasecmp
 
+#if defined(USECLIB2)
 void strupr(char* s)
 {
     while (*s) {
