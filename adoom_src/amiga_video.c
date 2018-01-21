@@ -60,16 +60,15 @@ extern int scaledviewwidth;
 static C2PFunction c2p = NULL;
 
 /**********************************************************************/
-extern struct ExecBase* SysBase;
-struct Library* AslBase = NULL;
-struct Library* CyberGfxBase = NULL;
-struct Library* LowLevelBase = NULL;
-struct Library* KeymapBase = NULL;
-struct GfxBase* GfxBase = NULL;
-struct Device* TimerBase = NULL;
-struct IntuitionBase* IntuitionBase = NULL;
+struct Library *AslBase = NULL;
+struct Library *CyberGfxBase = NULL;
+struct Library *LowLevelBase = NULL;
+struct Library *KeymapBase = NULL;
+struct GfxBase *GfxBase = NULL;
+struct Device *TimerBase = NULL;
+struct IntuitionBase *IntuitionBase = NULL;
 
-volatile struct Custom* const custom = (struct Custom*)0xdff000;
+volatile struct Custom *const custom = (struct Custom *)0xdff000;
 
 extern int cpu_type;
 
@@ -1620,7 +1619,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
     } else if (rawkey < 0x68)
         return xlate[rawkey];
 
-        return 0;
+    return 0;
 }
 
 /**********************************************************************/
