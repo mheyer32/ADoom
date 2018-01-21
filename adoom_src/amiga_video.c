@@ -60,7 +60,6 @@ extern int scaledviewwidth;
 static C2PFunction c2p = NULL;
 
 /**********************************************************************/
-extern struct ExecBase *SysBase;
 struct Library *AslBase = NULL;
 struct Library *CyberGfxBase = NULL;
 struct Library *LowLevelBase = NULL;

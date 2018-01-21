@@ -46,7 +46,6 @@ char __stdiov37[] = "/AUTO/CLOSE/WAIT";
 #include "m_fixed.h"
 
 /**********************************************************************/
-struct ExecBase *SysBase = (struct ExecBase *)4;
 struct Library *IconBase = NULL;
 
 int VERSION = 110;
