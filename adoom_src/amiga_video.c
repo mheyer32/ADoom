@@ -1326,7 +1326,7 @@ void I_SetPalette(byte *palette, int palette_index)
 
 /**********************************************************************/
 // Called by anything that renders to screens[0] (except 3D view)
-void REGARGS I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height))
+void I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height))
 {
     M_AddToBox(dirtybox, left, top);
     M_AddToBox(dirtybox, left + width - 1, top + height - 1);
