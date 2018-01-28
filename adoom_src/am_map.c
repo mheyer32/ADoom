@@ -36,6 +36,7 @@ static const char rcsid[] = "$Id: am_map.c,v 1.4 1997/02/03 21:24:33 b1 Exp $";
 
 // Needs access to LFB.
 #include "v_video.h"
+#include "i_video.h"
 
 // State.
 #include "doomstat.h"
@@ -290,9 +291,6 @@ extern boolean rotatemap;
 extern int maponhu;
 
 // extern byte screens[][SCREENWIDTH*SCREENHEIGHT];
-
-void I_MarkRect(int x, int y, int width, int height);
-
 //
 // Rotation in 2D.
 // Used to rotate player arrow line character.

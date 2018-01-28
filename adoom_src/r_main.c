@@ -188,7 +188,7 @@ int R_PointOnSide(fixed_t x, fixed_t y, node_t* node)
     return 1;
 }
 
-int REGARGS R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line))
+int R_PointOnSegSide(REGD0(fixed_t x), REGD1(fixed_t y), REGA0(seg_t* line))
 {
     fixed_t lx;
     fixed_t ly;

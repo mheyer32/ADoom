@@ -164,7 +164,7 @@ void V_CopyRect(int srcx, int srcy, int srcscrn, int width, int height, int dest
 // V_DrawPatch
 // Masks a column based masked pic to the screen.
 //
-void REGARGS V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
+void V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
 {
     int count;
     int col;
@@ -271,7 +271,7 @@ void V_DrawPatchFlipped(int x, int y, int scrn, patch_t* patch)
 // V_DrawPatchDirect
 // Draws directly to the screen on the pc.
 //
-void REGARGS V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
+void V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch))
 {
     V_DrawPatch(x, y, scrn, patch);
 }

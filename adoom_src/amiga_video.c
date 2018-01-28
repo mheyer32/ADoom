@@ -148,8 +148,8 @@ static struct MsgPort *ih_mp = NULL;
 static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
 
-static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                                      REG(a1, APTR data));
+static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+                                                              REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
                           '2',
@@ -1670,8 +1670,8 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 
 /**********************************************************************/
 //
-static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                                      REG(a1, APTR data))
+static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+                                                              REG(a1, APTR data))
 {
     event_t event;
     static event_t mouseevent = {0};

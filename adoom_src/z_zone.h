@@ -43,7 +43,7 @@
 #define PU_CACHE 101
 
 void Z_Init(void);
-void* REGARGS Z_Malloc(REGD0(int size), REGD1(int tag), REGA0(void *ptr));
+void* Z_Malloc(REGD0(int size), REGD1(int tag), REGA0(void *ptr));
 void Z_Free(void *ptr);
 void Z_FreeTags(int lowtag, int hightag);
 void Z_DumpHeap(int lowtag, int hightag);
