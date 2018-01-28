@@ -55,13 +55,14 @@ extern int cpu_type;
 int cpu_type;
 
 /**********************************************************************/
-int main(int argc, char *argv[])
+int STDARGS main(int argc, char *argv[])
 {
     struct WBStartup *argmsg;
     struct WBArg *wb_arg;
     struct DiskObject *obj;
     STRPTR *toolarray, s;
     int i, p;
+
 
     /* these command line arguments are flags */
     static char *flags[] = {

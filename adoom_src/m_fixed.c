@@ -35,8 +35,8 @@ static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
 #if defined(AMIGA)
 
-fixed_t REGARGS (*FixedMul)(REGD0(fixed_t a), REGD1(fixed_t b));
-fixed_t REGARGS (*FixedDiv)(REGD0(fixed_t a), REGD1(fixed_t b));
+FixedMulFunction FixedMul = NULL;
+FixedDivFunction FixedDiv = NULL;
 
 #else
 // Fixme. __USE_C_FIXED__ or something.

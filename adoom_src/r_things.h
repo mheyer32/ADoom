@@ -52,7 +52,7 @@ extern short* screenheightarray;
 //#define TYPE_FUZZ   1
 //#define TYPE_TRANSL 2
 //
-// void REGARGS R_DrawMaskedColumnAmi (REG(a0, column_t* column), REG(d0, type));
+// void R_DrawMaskedColumnAmi (REG(a0, column_t* column), REG(d0, type));
 //#endif
 
 extern short* mfloorclip;

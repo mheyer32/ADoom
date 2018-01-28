@@ -11,13 +11,13 @@
 #include "amiga_macros.h"
 #include <graphics/gfx.h>
 
-typedef void REGARGS (*C2PFunction)(REG(a0, const UBYTE *chunky),
+typedef void (*C2PFunction)(REG(a0, const UBYTE *chunky),
                             REG(a1, UBYTE *raster),
                             REG(a2, const UBYTE *chunky_end));
 
-extern C2PFunction REGARGS c2p8_reloc(REG(a0, UBYTE *chunky), REG(a1, struct BitMap *bitmap),
+extern C2PFunction c2p8_reloc(REG(a0, UBYTE *chunky), REG(a1, struct BitMap *bitmap),
                                       REG(a6, struct ExecBase *SysBase));
 
-extern void REGARGS c2p8_deinit(REG(a0, C2PFunction c2p), REG(a6, struct ExecBase *SysBase));
+extern void c2p8_deinit(REG(a0, C2PFunction c2p), REG(a6, struct ExecBase *SysBase));
 
 #endif

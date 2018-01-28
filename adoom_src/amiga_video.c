@@ -148,8 +148,8 @@ static struct MsgPort *ih_mp = NULL;
 static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
 
-static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                                      REG(a1, APTR data));
+static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+                                                              REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
                           '2',
@@ -1281,7 +1281,7 @@ void I_SetPalette(byte *palette, int palette_index)
 
 /**********************************************************************/
 // Called by anything that renders to screens[0] (except 3D view)
-void REGARGS I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height))
+void I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3, int height))
 {
     M_AddToBox(dirtybox, left, top);
     M_AddToBox(dirtybox, left + width - 1, top + height - 1);
@@ -1624,8 +1624,8 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 
 /**********************************************************************/
 //
-static struct InputEvent *SAVEDS INTERRUPT REGARGS video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                                      REG(a1, APTR data))
+static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+                                                              REG(a1, APTR data))
 {
     event_t event;
     static event_t mouseevent = {0};

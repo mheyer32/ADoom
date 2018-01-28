@@ -57,9 +57,9 @@ void V_DrawPatch(int x, int y, int scrn, patch_t* patch);
 
 void V_DrawPatchDirect(int x, int y, int scrn, patch_t* patch);
 #else
-void REGARGS V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
+void V_DrawPatch(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
 
-void REGARGS V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
+void V_DrawPatchDirect(REG(d0, int x), REG(d1, int y), REG(d2, int scrn), REG(a0, patch_t* patch));
 #endif
 
 void  // stretches bitmap to fill screen
