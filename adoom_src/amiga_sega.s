@@ -3,7 +3,7 @@
 		XDEF	_Sega6
 		XDEF	_Sega3
 
-		section	text,code
+		section	.text,code
 
 ; returns - xxSAxxxxxxCBMXYZxxSAxxDUxxCBRLDU
 

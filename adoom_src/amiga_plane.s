@@ -9,7 +9,7 @@
 ;		xdef	@R_MapPlane
 		xdef	_R_MapPlane
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 

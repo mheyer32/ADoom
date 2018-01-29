@@ -21,5 +21,5 @@
  * functions
  */
 
-extern UBYTE mmu_mark(REG(a0, void *start), REG(d0, ULONG length), REG(d1, ULONG cm),
-                      REG(a6, struct ExecBase *SysBase));
+extern UBYTE REGARGS mmu_mark(REG(a0, void *start), REG(d0, ULONG length), REG(d1, ULONG cm),
+                              REG(a6, struct ExecBase *SysBase));

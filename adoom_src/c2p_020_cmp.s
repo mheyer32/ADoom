@@ -798,7 +798,7 @@ qblitcleanup:	movem.l	a2/a6,-(sp)
 		rts
 
 ;-----------------------------------------------------------------------------
-		section	data,data
+		section	.data,data
 
 		quad
 mybltnode:	dc.l	0		; next bltnode
@@ -826,7 +826,7 @@ xlate:		dc.l	0
 force_update:	dc.w	0
 
 ;-----------------------------------------------------------------------------
-		section	segment1,bss,chip		; MUST BE IN CHIP !!!!!
+		section	.bss_chip,bss,chip		; MUST BE IN CHIP !!!!!
 
 buff2		ds.b	maxpixels	;Intermediate buffer 2
 buff3		ds.b	maxpixels	;Intermediate buffer 3

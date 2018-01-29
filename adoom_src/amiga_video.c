@@ -60,11 +60,13 @@ extern int scaledviewwidth;
 static C2PFunction c2p = NULL;
 
 /**********************************************************************/
+extern struct ExecBase *SysBase;
 struct Library *AslBase = NULL;
 struct Library *CyberGfxBase = NULL;
 struct Library *LowLevelBase = NULL;
 struct Library *KeymapBase = NULL;
 struct GfxBase *GfxBase = NULL;
+struct IORequest timereq;
 struct Device *TimerBase = NULL;
 struct IntuitionBase *IntuitionBase = NULL;
 
@@ -149,7 +151,7 @@ static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
 
 static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                              REG(a1, APTR data));
+                                                                      REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
                           '2',
@@ -282,9 +284,6 @@ static struct GRF_Screen *video_grf_screen = NULL;
 #endif
 
 /****************************************************************************/
-static struct MsgPort *timermp = NULL;
-static struct timerequest *timerio = NULL;
-static ULONG timerclosed = TRUE;
 static ULONG eclocks_per_second; /* EClock frequency in Hz */
 
 static struct EClockVal start_time;
@@ -574,16 +573,13 @@ void I_InitGraphics(void)
 
     DEBUGSTEP();
 
-    if ((timermp = CreatePort(NULL, 0)) == NULL)
-        I_Error("Can't create messageport!");
-
-    if ((timerio = (struct timerequest *)CreateExtIO(timermp, sizeof(struct timerequest))) == NULL)
-        I_Error("Can't create External IO!");
-
-    if (timerclosed = OpenDevice(TIMERNAME, UNIT_ECLOCK, (struct IORequest *)timerio, 0))
+    OpenDevice("timer.device", UNIT_ECLOCK, &timereq, 0);
+    
+    if (OpenDevice(TIMERNAME, UNIT_ECLOCK, &timereq, 0))
         I_Error("Can't open timer.device!");
 
-    TimerBase = timerio->tr_node.io_Device;
+    TimerBase = timereq.io_Device;
+    
     eclocks_per_second = ReadEClock(&start_time);
 
     video_doing_fps = M_CheckParm("-fps");
@@ -1222,23 +1218,8 @@ void I_ShutdownGraphics(void)
         CloseFont(video_topaz8font);
         video_topaz8font = NULL;
     }
-    if (!timerclosed) {
-        if (!CheckIO((struct IORequest *)timerio)) {
-            AbortIO((struct IORequest *)timerio);
-            WaitIO((struct IORequest *)timerio);
-        }
-        CloseDevice((struct IORequest *)timerio);
-        timerclosed = TRUE;
-        TimerBase = NULL;
-    }
-    if (timerio != NULL) {
-        DeleteExtIO((struct IORequest *)timerio);
-        timerio = NULL;
-    }
-    if (timermp != NULL) {
-        DeletePort(timermp);
-        timermp = NULL;
-    }
+    if (TimerBase)
+        CloseDevice(&timereq);
 }
 
 /**********************************************************************/
@@ -1671,7 +1652,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 /**********************************************************************/
 //
 static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                              REG(a1, APTR data))
+                                                                      REG(a1, APTR data))
 {
     event_t event;
     static event_t mouseevent = {0};
