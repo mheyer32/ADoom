@@ -92,7 +92,7 @@ FRACUNIT	equ	(1<<FRACBITS)
 		xref	_colormaps
 
 ;-----------------------------------------------------------------------
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 

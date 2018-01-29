@@ -1,5 +1,5 @@
 		mc68020
-		section	text,code
+		section	.text,code
 
 
 		include "funcdef.i"
@@ -782,7 +782,7 @@ qblitcleanup:	movem.l	a2/a6,-(sp)
 		rts
 
 ;-----------------------------------------------------------------------------
-		section	data,data
+		section	.data,data
 
 		cnop	0,4
 mybltnode:	dc.l	0		; next bltnode

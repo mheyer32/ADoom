@@ -1,8 +1,8 @@
 		mc68020
-		section	text,code
+		section	.text,code
 
-		include "funcdef.i"
 		include	"exec/execbase.i"
+		include "funcdef.i"
 		include	"exec/exec_lib.i"
 		include	"hardware/custom.i"
 
@@ -26,8 +26,6 @@ _LVOQBlit	equ	-276
 ;CHUNKYYMAX	equ	200
 ;		ENDC
 
-		cnop 0,4
-
 ;-----------------------------------------------------------------------
 ; d0.w  chunkyx [chunky-pixels]
 ; d1.w  chunkyy [chunky-pixels]
@@ -42,13 +40,13 @@ _LVOQBlit	equ	-276
 _c2p1x1_cpu3blit1_queue_init
 		movem.l	d2-d3,-(sp)
 		lea	(c2p_data,pc),a0
-		move.l	a3,(c2p_blitbuf-c2p_data,a0)
+		move.l	a4,(c2p_blitbuf-c2p_data,a0)
 		move.l	d6,(signals1-c2p_data,a0)
 		move.l	d7,(signals3-c2p_data,a0)
-		move.l	a1,(task-c2p_data,a0)
-		move.l	a2,(othertask-c2p_data,a0)
+		move.l	a2,(task-c2p_data,a0)
+		move.l	a3,(othertask-c2p_data,a0)
 		andi.l	#$ffff,d0
-		andi.l	#$ffff,d1
+		andi.l	#$ffff,d2
 		move.l	d5,(c2p_bplsize-c2p_data,a0)
 		move.w	d1,(c2p_chunkyy-c2p_data,a0)
 		add.w	d3,d1
@@ -440,14 +438,14 @@ signals3	dc.l	0	; signals to Signal() othertask at cleanup
 		cnop	0,4
 
 c2p_data
-c2p_screen		dc.l	0
-c2p_scroffs		dc.l	0
+c2p_screen	dc.l	0
+c2p_scroffs	dc.l	0
 c2p_scroffs2	dc.l	0
-c2p_bplsize		dc.l	0
-c2p_pixels		dc.l	0
+c2p_bplsize	dc.l	0
+c2p_pixels	dc.l	0
 c2p_pixels16	dc.l	0
-c2p_blitbuf		dc.l	0
-c2p_chunkyy		dc.w	0
+c2p_blitbuf	dc.l	0
+c2p_chunkyy	dc.w	0
 
 ;-----------------------------------------------------------------------
 ;		section bss_c,bss_c,chip

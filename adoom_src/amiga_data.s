@@ -3,7 +3,7 @@
 		xdef	_R_GetColumn
 		xdef	_R_GetColumn
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 

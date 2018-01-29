@@ -7,7 +7,7 @@
 
 		include	"exec/types.i"
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 
@@ -60,7 +60,7 @@
 
 		cnop	0,4
 
-_R_RenderSegLoop
+@R_RenderSegLoop
 _R_RenderSegLoop
 		move.l	_rw_x(a4),d0
 		cmp.l	_rw_stopx(a4),d0
@@ -306,12 +306,12 @@ _R_PointToDist:
 		move.l	d2,d1
 		jsr		(a1)
 		asr.l	#DBITS,d0
-		move.l	_tantoangle(a4),a0
+		lea	_tantoangle,a0
 		move.l	(a0,d0.l*4),d1
 		add.l	#ANG90,d1
 		moveq	#ANGLETOFINESHIFT,d0
 		asr.l	d0,d1
-		move.l	_finesine(a4),a0
+		lea	_finesine,a0
 		move.l	(a0,d1.l*4),d1
 		move.l	d2,d0
 		jsr		(a1)
@@ -444,7 +444,7 @@ ML_DONTPEGBOTTOM equ	16	;bit number is 4
 		 APTR	sd_sector
 
 		cnop	0,4
-_R_RenderMaskedSegRange:
+@R_RenderMaskedSegRange:
 _R_RenderMaskedSegRange:
 		movem.l	d2-d7/a2/a3/a5,-(sp)
 

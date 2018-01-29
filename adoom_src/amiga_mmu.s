@@ -1,6 +1,6 @@
 		mc68040
 
-		section	text,code
+		section	.text,code
 
 *
 *   mmu.s - 68040/68060 MMU control functions

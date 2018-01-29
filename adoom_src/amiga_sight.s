@@ -3,7 +3,7 @@
 		xdef	@P_DivlineSide
 		xdef	_P_DivlineSide
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 

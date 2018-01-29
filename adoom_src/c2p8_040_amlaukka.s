@@ -1,6 +1,6 @@
 		mc68020
 ;		multipass
-		section	text,code
+		section	.text,code
 
 ;		opt	0	; PhxAss optimisations break this routine
 

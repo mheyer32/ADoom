@@ -54,6 +54,7 @@ void R_InitPlanes(void);
 void R_ClearPlanes(void);
 
 #ifdef AMIGA
+//#include "amiga_macros.h"
 void R_MapPlane(REGD0(int y), REGD1(int x1), REGD2(int x2));
 void R_MakeSpans(REG(d2, int x), REG(d3, int t1), REG(d4, int b1), REG(d5, int t2), REG(d6, int b2));
 #else

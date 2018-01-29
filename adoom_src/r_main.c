@@ -105,7 +105,7 @@ angle_t* xtoviewangle;
 // fixed_t		finetangent[FINEANGLES/2];
 
 // fixed_t		finesine[5*FINEANGLES/4];
-fixed_t const * finecosine = &finesine[FINEANGLES / 4];
+fixed_t const * const finecosine = &finesine[FINEANGLES / 4];
 
 FAR lighttable_t* scalelight[LIGHTLEVELS][MAXLIGHTSCALE];
 lighttable_t* scalelightfixed[MAXLIGHTSCALE];
