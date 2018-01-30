@@ -282,9 +282,7 @@ static struct GRF_Screen *video_grf_screen = NULL;
 #endif
 
 /****************************************************************************/
-static struct MsgPort *timermp = NULL;
-static struct timerequest *timerio = NULL;
-static ULONG timerclosed = TRUE;
+struct IORequest timereq;
 static ULONG eclocks_per_second; /* EClock frequency in Hz */
 
 static struct EClockVal start_time;
@@ -563,16 +561,11 @@ void I_InitGraphics(void)
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
         I_Error("Can't open topaz8 font");
 
-    if ((timermp = CreatePort(NULL, 0)) == NULL)
-        I_Error("Can't create messageport!");
-
-    if ((timerio = (struct timerequest *)CreateExtIO(timermp, sizeof(struct timerequest))) == NULL)
-        I_Error("Can't create External IO!");
-
-    if (timerclosed = OpenDevice(TIMERNAME, UNIT_ECLOCK, (struct IORequest *)timerio, 0))
+    if (OpenDevice(TIMERNAME, UNIT_ECLOCK, &timereq, 0))
         I_Error("Can't open timer.device!");
 
-    TimerBase = timerio->tr_node.io_Device;
+    TimerBase = timereq.io_Device;
+    
     eclocks_per_second = ReadEClock(&start_time);
 
     video_doing_fps = M_CheckParm("-fps");
@@ -1179,22 +1172,9 @@ void I_ShutdownGraphics(void)
         CloseFont(video_topaz8font);
         video_topaz8font = NULL;
     }
-    if (!timerclosed) {
-        if (!CheckIO((struct IORequest *)timerio)) {
-            AbortIO((struct IORequest *)timerio);
-            WaitIO((struct IORequest *)timerio);
-        }
-        CloseDevice((struct IORequest *)timerio);
-        timerclosed = TRUE;
+    if (TimerBase) {
+        CloseDevice(&timereq);
         TimerBase = NULL;
-    }
-    if (timerio != NULL) {
-        DeleteExtIO((struct IORequest *)timerio);
-        timerio = NULL;
-    }
-    if (timermp != NULL) {
-        DeletePort(timermp);
-        timermp = NULL;
     }
 }
 
