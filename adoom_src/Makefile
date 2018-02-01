@@ -127,8 +127,7 @@ all:	 ADoom ADoom_SndSrvr
 clean:
 	rm *.o
 
-ADoom:	$(OBJS) amiga_main.o DoomSnd.h Makefile
-	$(info $(OBJS))
+ADoom: DoomSnd.h $(OBJS) amiga_main.o Makefile
 	$(CC) $(CFLAGS) $(OBJS) amiga_main.o \
 	$(LDFLAGS) -o $(OUT)ADoom
 
@@ -198,8 +197,8 @@ amiga_sega.o: amiga_sega.s Makefile
 %.s:	%.c Makefile
 	$(CC) $(CFLAGS) -Wa,-adhln -c $<  > $@
 
-DoomSnd.h: doomsound.fd doomsound.h
-	fd2pragma -i doomsound.fd -c doomsound.h -s 42
+DoomSnd.h: doomsound.fd doomsound.h Makefile
+	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
 
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
