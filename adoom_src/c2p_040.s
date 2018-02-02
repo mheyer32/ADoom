@@ -1,5 +1,5 @@
 		mc68020
-		section	text,code
+		section	.text,code
 
 ; Chunky2Planar algorithm, originally by James McCoull
 ; Modified by Peter McGavin for variable size and depth

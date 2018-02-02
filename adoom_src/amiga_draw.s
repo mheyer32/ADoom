@@ -92,7 +92,7 @@ FRACUNIT	equ	(1<<FRACBITS)
 		xref	_colormaps
 
 ;-----------------------------------------------------------------------
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 
@@ -1668,7 +1668,7 @@ _V_DrawPatchDirect:
 		move.w	width(a2),d6
 		rol.w	#8,d6	;SWAPSHORT
 		;D6=w
-		subq.l	#1,d6	;for ; col<w
+		subq.w	#1,d6	;for ; col<w
 		lea	columnofs(a2),a3	;prepare for columnofs[col]
 
 .vd_Loop:
@@ -1716,7 +1716,7 @@ _V_DrawPatchDirect:
 		bne.b	.vdl_Loop
 
 .vdl_Next:
-		addq.l	#1,d5
+		addq.l	#1,d7		; desttop one pixel to the right
 
 		dbf		d6,.vd_Loop
 .vd_exit:

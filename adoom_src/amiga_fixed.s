@@ -11,7 +11,7 @@
 		xdef	_FixedDiv_060fpu
 		xdef	_SetFPMode
 
-		section	text,code
+		section	.text,code
 
 ;-----------------------------------------------------------------------
 ; set 68060 FPU rounding mode to "truncate towards minus infinity"
@@ -154,7 +154,7 @@ _FixedDiv_060fpu
 		rts
 
 ;-----------------------------------------------------------------------
-		section	__MERGED,bss
+;		section	__MERGED,bss
 
 ; pointers to CPU-specific FixedMul and FixedDiv routine
 

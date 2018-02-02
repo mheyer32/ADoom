@@ -1,5 +1,5 @@
 		mc68020
-		section	text,code
+		section	.text,code
 
 		include "funcdef.i"
 		include	"exec/execbase.i"

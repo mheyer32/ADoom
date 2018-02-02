@@ -46,7 +46,7 @@
 		xdef	@I_UnRegisterSong ; Do code equiv to FreeUpMUS.
 
 ;-----------------------------------------------------------------------
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 
@@ -1903,7 +1903,7 @@ validInstr	dc.b	%11111111	; (00-07) Piano
 		dc.b	%00000000	; (F8-FF)
 
 ;--------------------------------------------------------------------
-		section	PlayMusChip,data_c
+		section	.bss_chip,bss_c
 
 ClearBuf	dcb.b	160,0
 
@@ -1912,7 +1912,7 @@ chipbuffer2	dcb.b	320,0
 chipbuffer3	dcb.b	320,0
 
 ;------------------------------------------------------------------------
-		section	PlayMusBSS,bss
+		section	.bss_far,bss
 
 EventBlocks	ds.w	32768
 

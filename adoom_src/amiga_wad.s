@@ -2,7 +2,7 @@
 
 		xdef	_W_CacheLumpNum
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 

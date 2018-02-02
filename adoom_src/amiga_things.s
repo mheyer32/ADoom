@@ -1,25 +1,25 @@
 		mc68020
 
+		xdef	@R_AddSprites
 		xdef	_R_AddSprites
-		xdef	_R_AddSprites
 
+		xdef	@R_DrawMasked
 		xdef	_R_DrawMasked
-		xdef	_R_DrawMasked
 
+		xdef	@R_DrawSprite
 		xdef	_R_DrawSprite
-		xdef	_R_DrawSprite
 
+		xdef	@R_DrawVisSprite
 		xdef	_R_DrawVisSprite
-		xdef	_R_DrawVisSprite
 
+		xdef	@R_SortVisSprites
 		xdef	_R_SortVisSprites
-		xdef	_R_SortVisSprites
+		xdef	@R_NewVisSprite
 		xdef	_R_NewVisSprite
-		xdef	_R_NewVisSprite
-		xdef	_R_ClearSprites
+		xdef	@R_ClearSprites
 		xdef	_R_ClearSprites
 
-		section	text,code
+		section	.text,code
 
 		near	a4,-2
 
@@ -33,7 +33,7 @@
 		xref	_extralight
 		xref	_scalelight
 		xref	_spritelights
-		xref	_R_ProjectSprite
+		xref	@R_ProjectSprite
 		xref	_validcount
 
 		STRUCTURE	sector,0
@@ -55,7 +55,7 @@
 
 snext		EQU	24
 
-_R_AddSprites:
+@R_AddSprites:
 _R_AddSprites:
 		move.l	_validcount(a4),d0
 		cmp.l	st_validcount(a0),d0
@@ -290,10 +290,10 @@ _R_DrawSprite:
 		blt.b	.rds_Skip1
 		add.l	d1,d1
 ;;;		move.l	#clipbot,a0
-		lea	clipbot(a4),a0
+		lea	clipbot,a0
 		add.l	d1,a0
 ;;;		move.l	#cliptop,a1
-		lea	cliptop(a4),a1
+		lea	cliptop,a1
 		add.l	d1,a1
 
 		btst.l	#1,d1
@@ -411,7 +411,7 @@ _R_DrawSprite:
 		blt.b	.rdsl2_Next
 		add.l	d5,d5
 ;;;		move.l	#clipbot,a0
-		lea	clipbot(a4),a0
+		lea	clipbot,a0
 		add.l	d5,a0
 		move.l	ds_sprbottomclip(a2),a1
 		add.l	d5,a1
@@ -431,7 +431,7 @@ _R_DrawSprite:
 		blt.b	.rdsl2_Next
 		add.l	d5,d5
 ;;;		move.l	#cliptop,a0
-		lea	cliptop(a4),a0
+		lea	cliptop,a0
 		add.l	d5,a0
 		move.l	ds_sprtopclip(a2),a1
 		add.l	d5,a1
@@ -451,10 +451,10 @@ _R_DrawSprite:
 		blt.b	.rdsl2_Next
 		lsl.l	#1,d5
 ;;;		move.l	#cliptop,a0
-		lea	cliptop(a4),a0
+		lea	cliptop,a0
 		add.l	d5,a0
 ;;;		move.l	#clipbot,a1
-		lea	clipbot(a4),a1
+		lea	clipbot,a1
 		add.l	d5,a1
 		move.l	ds_sprbottomclip(a2),a5
 		move.l	ds_sprtopclip(a2),a6
@@ -485,10 +485,10 @@ _R_DrawSprite:
 		add.l	d7,d7
 		move.l	_viewheight(a4),d1
 ;;;		move.l	#clipbot,a0
-		lea	clipbot(a4),a0
+		lea	clipbot,a0
 		add.l	d7,a0
 ;;;		move.l	#cliptop,a1
-		lea	cliptop(a4),a1
+		lea	cliptop,a1
 		add.l	d7,a1
 .rds_Loop3:
 		cmp.w	#-2,(a0)+
@@ -503,10 +503,10 @@ _R_DrawSprite:
 
 .rds_SkipL3:
 ;;;		move.l	#clipbot,_mfloorclip(a4)
-		lea	clipbot(a4),a0
+		lea	clipbot,a0
 		move.l	a0,_mfloorclip(a4)
 ;;;		move.l	#cliptop,_mceilingclip(a4)
-		lea	cliptop(a4),a0
+		lea	cliptop,a0
 		move.l	a0,_mceilingclip(a4)
 		move.l	a3,a0
 		movem.l	(sp)+,d2-d7/a2/a3/a5/a6
@@ -847,7 +847,7 @@ _R_NewVisSprite:
 
 .rn_OverFlow:
 ;;;		move.l	#overflow,d0
-		lea	overflow(a4),a0
+		lea	overflow,a0
 		move.l	a0,d0
 		rts
 .rn_FirstTime:
@@ -868,7 +868,7 @@ _R_ClearSprites:
 
 
 ;-----------------------------------------------------------------------
-		section	__MERGED,bss
+		section	.data,data
 
 			cnop	0,4
 MAXSCREENWIDTH	equ	1600
