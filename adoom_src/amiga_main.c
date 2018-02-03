@@ -97,7 +97,7 @@ int STDARGS main(int argc, char *argv[])
             I_Error("malloc(%d) failed", strlen(wb_arg->wa_Name) + 1);
         strcpy(myargv[myargc++], wb_arg->wa_Name);
     }
-    if ((IconBase = OpenLibrary("icon.library", 0)) == NULL)
+    if ((IconBase = OpenLibrary(ICONNAME, 0)) == NULL)
         I_Error("Can't open icon.library");
     if ((obj = GetDiskObject(myargv[0])) != NULL) {
         toolarray = obj->do_ToolTypes;
@@ -116,6 +116,8 @@ int STDARGS main(int argc, char *argv[])
         }
         FreeDiskObject(obj);
     }
+    CloseLibrary(IconBase);
+    IconBase = NULL;
 
     if (argc != myargc) {
         printf("\nIcon tooltypes translated command line to:\n\n    ");
