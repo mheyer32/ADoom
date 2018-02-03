@@ -290,15 +290,25 @@ typedef enum {
 // The utility was written by Dave Taylor.
 //#include "sounds.h"
 
+#if 0
+#define DEBUGPRINT(x)   \
+    do {                \
+        printf x;       \
+        fflush(stdout); \
+    } while (0)
+
+
 extern int debugStep;
 
-#define DEBUGPRINT(x) \
-    printf(x);        \
-    fflush(stdout);
-
-#define DEBUGSTEP()                                                                \
-    printf(">>>> %d, %s : %d \n", debugStep++, __FUNCTION__, __LINE__); \
-    fflush(stdout);
+#define DEBUGSTEP()                                                         \
+    do {                                                                    \
+        printf(">>>> %d, %s : %d \n", debugStep++, __FUNCTION__, __LINE__); \
+        fflush(stdout);                                                     \
+    } while (0);
+#else
+    #define DEBUGPRINT(x)
+    #define DEBUGSTEP()
+#endif
 
 #endif  // __DOOMDEF__
 //-----------------------------------------------------------------------------
@@ -306,3 +316,4 @@ extern int debugStep;
 // $Log:$
 //
 //-----------------------------------------------------------------------------
+
