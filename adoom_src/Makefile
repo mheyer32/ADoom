@@ -1,5 +1,8 @@
-CC = m68k-amigaos-gcc
-CXX = m68k-amigaos-g++
+#CC =/home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/m68k-amigaos-gcc
+#PHXASS = /home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/vasm
+
+CC =/home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/m68k-amigaos-gcc
+PHXASS = /home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/vasm
 
 #-noixemul
 #-fbaserel
@@ -11,28 +14,55 @@ CXX = m68k-amigaos-g++
 #-v   #verbose
 #-fstrength-reduce
 
-CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2
+CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
 CLIB_LDFLAGS = -lnet
 
-#-Wno-int-conversion is needed because sometimes pointers get passed into taglists
-NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMU -mregparm=4
 NOIXEMUL_LDFLAGS = -lsocket
 
+USEIXEMUL ?= 1
+
+ifeq ($(USEIXEMUL), 1)
 RUNTIME_CFLAGS = $(NOIXEMUL_CFLAGS)
 RUNTIME_LDFLAGS = $(NOIXEMUL_LDFLAGS)
+else
+	RUNTIME_CFLAGS = $(CLIB_CFLAGS)
+	RUNTIME_LDFLAGS = $(CLIB_LDFLAGS)
+endif
 
-#RUNTIME_CFLAGS = $(CLIB_CFLAGS)
-#RUNTIME_LDFLAGS = $(CLIB_LDFLAGS)
+#-fbbb=abcefimprs
+#-fbbb=
+#-fbbb=Enable Bebbo's optimizations.
+# +    enable all optimizations
+# a   commute add move instructions
+# b    use register for base addresses
+# c    convert load const and compare into a sub
+# e    eliminate dead assignments + redundant loads
+# f	   shrink stack frame
+# i    use post increment on addresses
+# m    merge add and move statements
+# p    propagate move assignment pairs out of loops
+# r    register renaming to maybe save registers
+# s    a strcpy optimization
+# v    be verbose
+# V    be very verbose
+# x    dump insns
+# Default: -fbbb=+ which yields -fbbb=abcefimprs
 
+#-v -fbbb=Vabcefimprs
 
-CFLAGS = $(RUNTIME_CFLAGS) -v -Ofast -fbaserel -m68030 -m68881 -fomit-frame-pointer -Werror -Wimplicit -Wstrict-prototypes
+CFLAGS = $(RUNTIME_CFLAGS)
+CFLAGS += -fbaserel -m68030 -m68881
+CFLAGS += -Ofast -fstrength-reduce -fomit-frame-pointer
+CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
+#CFLAGS += -include "doomdef.h"
 
+#-DRANGECHECK
 CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-PHXASS = vasm
-PFLAGS = -Fhunk -nosym -phxass -ldots -m68030 -m68882
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
 
 INTERMEDIATE =$(CURDIR)/build/
 OUT = $(CURDIR)/bin/
@@ -122,6 +152,8 @@ OBJS = \
 
 OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
+#$(info $(OBJS))
+
 all:	 ADoom ADoom_SndSrvr
 
 clean:
@@ -195,15 +227,15 @@ amiga_sega.o: amiga_sega.s Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.s:	%.c Makefile
-	$(CC) $(CFLAGS) -Wa,-adhln -c $<  > $@
+	$(CC) $(CFLAGS) -Wa,-adhln -g -c $<  > $@
 
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
 
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
-	$(CC) $(CFLAGS) $(LDFLAGS) test_fixed.o amiga_fixed.o \
-	-o $(OUT)test_fixed
+	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
+	 $(LDFLAGS) -o $(OUT)test_fixed
 
 #############################################################
 #
