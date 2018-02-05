@@ -545,17 +545,18 @@ void I_InitGraphics(void)
     DisplayInfoHandle handle;
     struct DisplayInfo dispinfo;
     struct DimensionInfo dimsinfo;
-    static struct TextAttr topaz8 = {"topaz.font", 8, FS_NORMAL, FPF_ROMFONT};
+    struct TextAttr topaz8 = {"topaz.font", 8, FS_NORMAL, FPF_ROMFONT};
 
     video_maintask = FindTask(NULL);
 
     if ((KeymapBase = OpenLibrary("keymap.library", 0)) == NULL)
         I_Error("Can't open keymap.library");
 
-    if ((GfxBase = (struct GfxBase*)OpenLibrary("graphics.library", 0)) == NULL)
+    if ((GfxBase = (struct GfxBase*)OpenLibrary(GRAPHICSNAME, 0)) == NULL)
         I_Error("Can't open graphics.library");
 
     if ((IntuitionBase = (struct IntuitionBase*)OpenLibrary("intuition.library", 0)) == NULL)
+
         I_Error("Can't open intuition.library");
 
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
@@ -657,7 +658,7 @@ void I_InitGraphics(void)
                         ", 37) failed");
                 }
             }
-            CyberGfxBase = OpenLibrary("cybergraphics.library", 0); /* may be NULL */
+            CyberGfxBase = OpenLibrary(CYBERGFXNAME, 0); /* may be NULL */
 
             /* first check tooltypes for SCREENMODE */
             mode = -1;
