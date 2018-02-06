@@ -283,7 +283,7 @@ static struct GRF_Screen *video_grf_screen = NULL;
 
 /****************************************************************************/
 struct IORequest timereq;
-static ULONG eclocks_per_second; /* EClock frequency in Hz */
+static ULONG eclocks_per_millisecond; /* EClock frequency in 1000Hz */
 
 static struct EClockVal start_time;
 static unsigned int blit_time = 0;
@@ -432,18 +432,22 @@ static void video_do_fps(struct RastPort *rp, int yoffset)
     ULONG x;
     static struct EClockVal start_time = {0, 0};
     struct EClockVal end_time;
-    char msg[4];
+    char msg[6];
 
     ReadEClock(&end_time);
     x = end_time.ev_lo - start_time.ev_lo;
     if (x != 0) {
-        x = (eclocks_per_second + (x >> 1)) / x; /* round to nearest */
-        msg[0] = (x % 1000) / 100 + '0';
-        msg[1] = (x % 100) / 10 + '0';
-        msg[2] = (x % 10) + '0';
-        msg[3] = '\0';
-        Move(rp, SCREENWIDTH - 24, yoffset + 6);
-        Text(rp, msg, 3);
+        //x = (eclocks_per_second + (x >> 1)) / x; /* round to nearest */
+        x =  (x * 100) / eclocks_per_millisecond; /* 1ms * 100 */
+        msg[0] = (x / 10000) % 10 + '0';
+        msg[1] = (x / 1000) % 10 + '0';
+        msg[2] = (x / 100) % 10 + '0';
+        msg[3] = '.';
+        msg[4] = (x / 10) % 10 + '0';
+        msg[5] = (x % 10) + '0';
+        msg[6] = '\0';
+        Move(rp, SCREENWIDTH - 48, yoffset + 6);
+        Text(rp, msg, 6);
     }
     start_time = end_time;
 }
@@ -567,7 +571,7 @@ void I_InitGraphics(void)
 
     TimerBase = timereq.io_Device;
     
-    eclocks_per_second = ReadEClock(&start_time);
+    eclocks_per_millisecond = ReadEClock(&start_time) / 1000;
 
     video_doing_fps = M_CheckParm("-fps");
 
@@ -1960,8 +1964,8 @@ void amiga_getevents(void)
 /**********************************************************************/
 static void calc_time(ULONG time, char *msg)
 {
-    printf("Total %s = %u us  (%u us/frame)\n", msg, (ULONG)(1000000.0 * ((double)time) / ((double)eclocks_per_second)),
-           (ULONG)(1000000.0 * ((double)time) / ((double)eclocks_per_second) / ((double)total_frames)));
+    printf("Total %s = %u us  (%u us/frame)\n", msg, (ULONG)(1000.0 * ((double)time) / ((double)eclocks_per_millisecond)),
+           (ULONG)(1000.0 * ((double)time) / ((double)eclocks_per_millisecond) / ((double)total_frames)));
 }
 
 /**********************************************************************/
