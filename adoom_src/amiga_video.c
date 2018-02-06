@@ -652,10 +652,7 @@ void I_InitGraphics(void)
             if (AslBase == NULL) {
                 if ((AslBase = OpenLibrary("asl.library", 37L)) == NULL ||
                     (video_smr = AllocAslRequestTags(ASL_ScreenModeRequest, TAG_DONE)) == NULL) {
-                    I_Error(
-                        "OpenLibrary("
-                        "asl.library"
-                        ", 37) failed");
+                    I_Error("OpenLibrary(asl.library, 37) failed");
                 }
             }
             CyberGfxBase = OpenLibrary(CYBERGFXNAME, 0); /* may be NULL */
@@ -1173,9 +1170,22 @@ void I_ShutdownGraphics(void)
         CloseFont(video_topaz8font);
         video_topaz8font = NULL;
     }
+    if (IntuitionBase != NULL) {
+        CloseLibrary((struct Library*)IntuitionBase);
+    }
+    if (GfxBase != NULL) {
+        CloseLibrary((struct Library*)GfxBase);
+    }
     if (TimerBase) {
         CloseDevice(&timereq);
         TimerBase = NULL;
+    }
+    if (video_smr != NULL) {
+        FreeAslRequest(video_smr);
+        video_smr = NULL;
+    }
+    if (AslBase != NULL) {
+        CloseLibrary(AslBase);
     }
 }
 
@@ -1958,10 +1968,7 @@ static void calc_time(ULONG time, char *msg)
 void _STDvideo_cleanup(void)
 {
     I_ShutdownGraphics();
-    if (video_smr != NULL) {
-        FreeAslRequest(video_smr);
-        video_smr = NULL;
-    }
+
 
     /* printf ("EClocks per second = %d\n", eclocks_per_second); */
     if (total_frames > 0) {
