@@ -468,11 +468,15 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
 {
     ULONG sig;
     struct MsgPort *video_dispport, *video_safeport;
+    ULONG safe_signal, display_signal;
+    ULONG video_sigbit3_mask;
+
     BOOL going, video_disp, video_safe;
     int i;
 
-    video_sigbit3 = AllocSignal(-1);
+    video_sigbit3_mask = 1 << video_sigbit3;
     Signal(video_maintask, SIGBREAKF_CTRL_F);
+
     video_dispport = CreatePort(NULL, 0);
     video_safeport = CreatePort(NULL, 0);
     video_disp = TRUE;
@@ -481,12 +485,16 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
         video_sb[i]->sb_DBufInfo->dbi_DispMessage.mn_ReplyPort = video_dispport;
         video_sb[i]->sb_DBufInfo->dbi_SafeMessage.mn_ReplyPort = video_safeport;
     }
-    going = (video_sigbit3 != -1) && (video_dispport != NULL) && (video_safeport != NULL);
+    safe_signal = 1 << video_safeport->mp_SigBit;
+    display_signal = 1 << video_dispport->mp_SigBit;
+
+    going = (video_dispport != NULL) && (video_safeport != NULL);
     while (going) {
-        sig = Wait(1 << video_sigbit3 | SIGBREAKF_CTRL_C);
-        if ((sig & (1 << video_sigbit3)) != 0) {
-            if (video_doing_fps)
+        sig = Wait(video_sigbit3_mask | SIGBREAKF_CTRL_C);
+        if (sig & video_sigbit3_mask) {
+            if (video_doing_fps) {
                 video_do_fps(&video_rastport[video_which], 0);
+            }
             if (video_palette_changed > 0) {
                 LoadRGB32(&video_screen->ViewPort, video_colourtable[video_palette_index]);
                 video_palette_changed--; /* keep it set for 2 frames for dblbuffing */
@@ -496,14 +504,14 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
                 video_safe = FALSE;
             }
             if (!video_safe) { /* wait until safe */
-                Wait(1 << video_safeport->mp_SigBit);
+                Wait(safe_signal);
                 while (GetMsg(video_safeport) != NULL) /* clear message queue */
                     /* do nothing */;
                 video_safe = TRUE;
             }
             Signal(video_maintask, SIGBREAKF_CTRL_F);
             if (!video_disp) { /* wait for previous frame to be displayed */
-                Wait(1 << video_dispport->mp_SigBit);
+                Wait(display_signal);
                 while (GetMsg(video_dispport) != NULL) /* clear message queue */
                     /* do nothing */;
                 video_disp = TRUE;
@@ -514,19 +522,17 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
         }
     }
     if (!video_safe) { /* wait for safe */
-        Wait(1 << video_safeport->mp_SigBit);
+        Wait(safe_signal);
         while (GetMsg(video_safeport) != NULL) /* clear message queue */
             /* do nothing */;
         video_safe = TRUE;
     }
     if (!video_disp) { /* wait for last frame to be displayed */
-        Wait(1 << video_dispport->mp_SigBit);
+        Wait(display_signal);
         while (GetMsg(video_dispport) != NULL) /* clear message queue */
             /* do nothing */;
         video_disp = TRUE;
     }
-    if (video_sigbit3 != -1)
-        FreeSignal(video_sigbit3);
     if (video_dispport != NULL)
         DeletePort(video_dispport);
     if (video_safeport != NULL)
@@ -886,7 +892,8 @@ void I_InitGraphics(void)
 
     if (video_is_native_mode) {
         if (video_is_using_blitter) {
-            if ((video_sigbit1 = AllocSignal(-1)) == -1 || (video_sigbit2 = AllocSignal(-1)) == -1)
+            if ((video_sigbit1 = AllocSignal(-1)) == -1 || (video_sigbit2 = AllocSignal(-1)) == -1 ||
+                (video_sigbit3 = AllocSignal(-1)) == -1)
                 I_Error("Can't allocate signal!\n");
             Signal(video_maintask, (1 << video_sigbit1) | (1 << video_sigbit2));
             /* initial state is finished */
@@ -1085,6 +1092,10 @@ void I_ShutdownGraphics(void)
             Wait(1 << video_sigbit2);  // wait for last c2p8 to completely finish
             FreeSignal(video_sigbit2);
             video_sigbit2 = -1;
+        }
+        if (video_sigbit3 != -1) {
+            FreeSignal(video_sigbit3);
+            video_sigbit3 = -1;
         }
     }
     if (video_window != NULL) {
