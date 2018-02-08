@@ -290,23 +290,34 @@ static unsigned int blit_time = 0;
 static unsigned int safe_time = 0;
 static unsigned int c2p_time = 0;
 static unsigned int ccs_time = 0;
+static unsigned int video_safe_time = 0;
+static unsigned int video_disp_time = 0;
 static unsigned int wpa8_time = 0;
 static unsigned int lock_time = 0;
 static unsigned int total_frames = 0;
 
 /****************************************************************************/
-static __inline void start_timer(void)
+static __inline void start_timer2(struct EClockVal *start_timer)
 {
-    ReadEClock(&start_time);
+    ReadEClock(start_timer);
 }
-/****************************************************************************/
-static __inline unsigned int end_timer(void)
+
+static __inline unsigned int end_timer2(const struct EClockVal *start_timer)
 {
     struct EClockVal end_time;
 
     ReadEClock(&end_time);
-    return end_time.ev_lo - start_time.ev_lo;
+    return end_time.ev_lo - start_timer->ev_lo;
 }
+
+/****************************************************************************/
+#define start_timer()  start_timer2(&start_time);
+
+/****************************************************************************/
+#define end_timer() end_timer2(&start_time);
+
+/****************************************************************************/
+static void print_timers(void);
 
 /****************************************************************************/
 
@@ -472,6 +483,7 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
     ULONG video_sigbit3_mask;
 
     BOOL going, video_disp, video_safe;
+    struct EClockVal start_time;
     int i;
 
     video_sigbit3_mask = 1 << video_sigbit3;
@@ -504,17 +516,24 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
                 video_safe = FALSE;
             }
             if (!video_safe) { /* wait until safe */
+                start_timer();
                 Wait(safe_signal);
-                while (GetMsg(video_safeport) != NULL) /* clear message queue */
+                while (GetMsg(video_safeport) != NULL) /* clear message queue */ {
                     /* do nothing */;
+                }
                 video_safe = TRUE;
+                video_safe_time += end_timer();
             }
             Signal(video_maintask, SIGBREAKF_CTRL_F);
-            if (!video_disp) { /* wait for previous frame to be displayed */
+            if (!video_disp) {
+                /* wait for previous frame to be displayed */
+                start_timer();
                 Wait(display_signal);
-                while (GetMsg(video_dispport) != NULL) /* clear message queue */
+                while (GetMsg(video_dispport) != NULL) /* clear message queue */{
                     /* do nothing */;
+                }
                 video_disp = TRUE;
+                video_disp_time += end_timer();
             }
         }
         if ((sig & SIGBREAKF_CTRL_C) != 0) {
@@ -1493,6 +1512,10 @@ void I_FinishUpdate(void)
         if (video_doing_fps)
             video_do_fps(video_window->RPort, 0);
     }
+
+    if (video_doing_fps) {
+        print_timers();
+    }
 }
 
 /**********************************************************************/
@@ -1973,27 +1996,35 @@ void amiga_getevents(void)
 }
 
 /**********************************************************************/
-static void calc_time(ULONG time, char *msg)
+static void calc_time(ULONG time, const char *msg)
 {
-    printf("Total %s = %u us  (%u us/frame)\n", msg, (ULONG)(1000.0 * ((double)time) / ((double)eclocks_per_millisecond)),
-           (ULONG)(1000.0 * ((double)time) / ((double)eclocks_per_millisecond) / ((double)total_frames)));
+    ULONG usec = time * 1000 / eclocks_per_millisecond;
+    printf("Total %s = %u us  (%u us/frame)\n", msg, usec, usec / total_frames);
 }
 
 /**********************************************************************/
-void _STDvideo_cleanup(void)
+void print_timers(void)
 {
-    I_ShutdownGraphics();
-
-
     /* printf ("EClocks per second = %d\n", eclocks_per_second); */
-    if (total_frames > 0) {
+    if (total_frames >= 10) {
         printf("Total number of frames = %u\n", total_frames);
-        calc_time(blit_time, "blit wait time        ");
-        calc_time(safe_time, "safe wait time        ");
-        calc_time(c2p_time, "Chunky2Planar time    ");
-        calc_time(ccs_time, "CopyChunkyScreen time ");
-        calc_time(wpa8_time, "WritePixelArray8 time ");
-        calc_time(lock_time, "LockBitMap time       ");
+        calc_time(blit_time,     "blit wait time        ");
+        calc_time(safe_time,     "safe wait time        ");
+        calc_time(c2p_time,      "Chunky2Planar time    ");
+        calc_time(video_safe_time, "video wait time    ");
+        calc_time(video_disp_time, "video disp time    ");
+        //        calc_time(ccs_time, "CopyChunkyScreen time ");
+        //        calc_time(wpa8_time, "WritePixelArray8 time ");
+        //        calc_time(lock_time, "LockBitMap time       ");
+        total_frames = 0;
+        blit_time = 0;
+        safe_time = 0;
+        c2p_time = 0;
+        ccs_time = 0;
+        wpa8_time = 0;
+        lock_time = 0;
+        video_safe_time = 0;
+        video_disp_time = 0;
     }
 }
 
