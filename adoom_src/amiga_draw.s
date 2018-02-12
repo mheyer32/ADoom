@@ -1659,7 +1659,8 @@ _V_DrawPatchDirect:
 		lea	_screens(a4),a0
 		move.l	(a0,d6.l*4),d7	; get start of screen address
 ;Peter... change here (quite obvious)
-		muls.l	_SCREENWIDTH(a4),d5	;y not needed further
+		move.l _SCREENWIDTH(a4), d2
+		mulu.l	d2,d5	;y not needed further
 		add.l	d5,d7	;+y*SCREENWIDTH
 		add.l	d4,d7	;+x
 
@@ -1690,22 +1691,24 @@ _V_DrawPatchDirect:
 
 		moveq	#0,d0
 		move.b	(a5),d0		;column->topdelta*
+		beq.s	.zeroTopDelta
 ;;;		move.l	d0,d1	;!
 ;;;		lsl.l	#8,d0	;!
 ;;;		lsl.l	#6,d1	;!
 ;;;		add.l	d0,a1	;!
 ;;;		add.l	d1,a1	;!
 
-		muls.l	_SCREENWIDTH(a4),d0
+		mulu.w	d2,d0
 		add.l	d0,a1
 
+.zeroTopDelta:
 		move.b	1(a5),d0
 		addq.l	#3,a5		;source
 		;Would it be possible to use the code from DrawColumn functions by Aki
 		;here, too??
 .vdl_DrawLoop:
 		move.b	(a5)+,(a1)
-		add.l	_SCREENWIDTH(a4),a1
+		add.l	d2,a1
 		subq.b	#1,d0
 		bne.b	.vdl_DrawLoop
 
