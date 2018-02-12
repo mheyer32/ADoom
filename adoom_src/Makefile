@@ -1,8 +1,13 @@
 #CC =/home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/m68k-amigaos-gcc
 #PHXASS = /home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/vasm
 
-CC =/home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/m68k-amigaos-gcc
-PHXASS = /home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/vasm
+#CC =/home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/m68k-amigaos-gcc
+#PHXASS = /home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/vasm
+
+CC=m68k-amigaos-gcc
+PHXASS=vasmm68k_mot
+
+PREFIX = $(shell ./getprefix.sh "$(CC)")
 
 #-noixemul
 #-fbaserel
@@ -62,7 +67,7 @@ CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882 -I$(PREFIX)/m68k-amigaos/sys-include
 
 INTERMEDIATE =$(CURDIR)/build/
 OUT = $(CURDIR)/bin/
