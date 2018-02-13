@@ -290,6 +290,12 @@ typedef enum {
 // The utility was written by Dave Taylor.
 //#include "sounds.h"
 
+#define CACHE_LUMPNUM(lumpname)  \
+    static int lumpname = -1;    \
+    if (lumpname == -1) {        \
+        lumpname = W_GetNumForName(#lumpname); \
+    }
+
 #if 0
 #define DEBUGPRINT(x)   \
     do {                \

@@ -437,14 +437,18 @@ void M_DrawSaveLoadBorder(int x, int y)
 {
     int i;
 
-    V_DrawPatchInDirect(x - 8, y + 7, 0, W_CacheLumpName("M_LSLEFT", PU_CACHE));
+    CACHE_LUMPNUM(M_LSLEFT);
+    CACHE_LUMPNUM(M_LSRGHT);
+    CACHE_LUMPNUM(M_LSCNTR)
+
+    V_DrawPatchInDirect(x - 8, y + 7, 0, W_CacheLumpNum(M_LSLEFT, PU_CACHE));
 
     for (i = 0; i < 24; i++) {
-        V_DrawPatchInDirect(x, y + 7, 0, W_CacheLumpName("M_LSCNTR", PU_CACHE));
+        V_DrawPatchInDirect(x, y + 7, 0,  W_CacheLumpNum(M_LSCNTR, PU_CACHE));
         x += 8;
     }
 
-    V_DrawPatchInDirect(x, y + 7, 0, W_CacheLumpName("M_LSRGHT", PU_CACHE));
+    V_DrawPatchInDirect(x, y + 7, 0,  W_CacheLumpNum(M_LSRGHT, PU_CACHE));
 }
 
 //
@@ -953,16 +957,21 @@ void M_DrawThermo(int x, int y, int thermWidth, int thermDot)
     int xx;
     int i;
 
+    CACHE_LUMPNUM(M_THERML);
+    CACHE_LUMPNUM(M_THERMM);
+    CACHE_LUMPNUM(M_THERMR);
+    CACHE_LUMPNUM(M_THERMO);
+
     xx = x;
-    V_DrawPatchInDirect(xx, y, 0, W_CacheLumpName("M_THERML", PU_CACHE));
+    V_DrawPatchInDirect(xx, y, 0,  W_CacheLumpNum(M_THERML, PU_CACHE));
     xx += 8;
     for (i = 0; i < thermWidth; i++) {
-        V_DrawPatchInDirect(xx, y, 0, W_CacheLumpName("M_THERMM", PU_CACHE));
+        V_DrawPatchInDirect(xx, y, 0,  W_CacheLumpNum(M_THERMM, PU_CACHE));
         xx += 8;
     }
-    V_DrawPatchInDirect(xx, y, 0, W_CacheLumpName("M_THERMR", PU_CACHE));
+    V_DrawPatchInDirect(xx, y, 0,  W_CacheLumpNum(M_THERMR, PU_CACHE));
 
-    V_DrawPatchInDirect((x + 8) + thermDot * 8, y, 0, W_CacheLumpName("M_THERMO", PU_CACHE));
+    V_DrawPatchInDirect((x + 8) + thermDot * 8, y, 0,  W_CacheLumpNum(M_THERMO, PU_CACHE));
 }
 
 void M_DrawEmptyCell(menu_t* menu, int item)
