@@ -782,7 +782,7 @@ void D_DoomMain(void)
 
     IdentifyVersion();
 
-    setbuf(stdout, NULL);
+    //setbuf(stdout, NULL);
     modifiedgame = false;
 
     nomonsters = M_CheckParm("-nomonsters");
