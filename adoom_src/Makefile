@@ -85,6 +85,7 @@ OBJS = \
 	amiga_sight.o \
 	amiga_things.o \
 	amiga_median.o \
+	amiga_timer.o \
 	amiga_video.o \
 	amiga_draw.o \
 	amiga_sega.o \

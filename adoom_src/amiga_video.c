@@ -43,6 +43,7 @@
 #include "amiga_median.h"
 #include "amiga_mmu.h"
 #include "amiga_sega.h"
+#include "amiga_timer.h"
 #include "c2p8_040_amlaukka.h"
 #include "c2p_020.h"
 #include "c2p_030.h"
@@ -65,7 +66,6 @@ struct Library *CyberGfxBase = NULL;
 struct Library *LowLevelBase = NULL;
 struct Library *KeymapBase = NULL;
 struct GfxBase *GfxBase = NULL;
-struct Device *TimerBase = NULL;
 struct IntuitionBase *IntuitionBase = NULL;
 
 volatile struct Custom *const custom = (struct Custom *)0xdff000;
@@ -282,10 +282,6 @@ static struct GRF_Screen *video_grf_screen = NULL;
 #endif
 
 /****************************************************************************/
-struct IORequest timereq;
-static ULONG eclocks_per_millisecond; /* EClock frequency in 1000Hz */
-
-static struct EClockVal start_time;
 static unsigned int blit_time = 0;
 static unsigned int safe_time = 0;
 static unsigned int c2p_time = 0;
@@ -295,26 +291,6 @@ static unsigned int video_disp_time = 0;
 static unsigned int wpa8_time = 0;
 static unsigned int lock_time = 0;
 static unsigned int total_frames = 0;
-
-/****************************************************************************/
-static __inline void start_timer2(struct EClockVal *start_timer)
-{
-    ReadEClock(start_timer);
-}
-
-static __inline unsigned int end_timer2(const struct EClockVal *start_timer)
-{
-    struct EClockVal end_time;
-
-    ReadEClock(&end_time);
-    return end_time.ev_lo - start_timer->ev_lo;
-}
-
-/****************************************************************************/
-#define start_timer()  start_timer2(&start_time);
-
-/****************************************************************************/
-#define end_timer() end_timer2(&start_time);
 
 /****************************************************************************/
 static void print_timers(void);
@@ -445,11 +421,11 @@ static void video_do_fps(struct RastPort *rp, int yoffset)
     struct EClockVal end_time;
     char msg[6];
 
-    ReadEClock(&end_time);
+    ULONG eclocks_per_ms = ReadEClock(&end_time) / 1000;
     x = end_time.ev_lo - start_time.ev_lo;
     if (x != 0) {
         //x = (eclocks_per_second + (x >> 1)) / x; /* round to nearest */
-        x =  (x * 100) / eclocks_per_millisecond; /* 1ms * 100 */
+        x =  (x * 100) / eclocks_per_ms; /* 1ms * 100 */
         msg[0] = (x / 10000) % 10 + '0';
         msg[1] = (x / 1000) % 10 + '0';
         msg[2] = (x / 100) % 10 + '0';
@@ -585,18 +561,10 @@ void I_InitGraphics(void)
         I_Error("Can't open graphics.library");
 
     if ((IntuitionBase = (struct IntuitionBase*)OpenLibrary("intuition.library", 0)) == NULL)
-
         I_Error("Can't open intuition.library");
 
     if ((video_topaz8font = OpenFont(&topaz8)) == NULL)
         I_Error("Can't open topaz8 font");
-
-    if (OpenDevice(TIMERNAME, UNIT_ECLOCK, &timereq, 0))
-        I_Error("Can't open timer.device!");
-
-    TimerBase = timereq.io_Device;
-    
-    eclocks_per_millisecond = ReadEClock(&start_time) / 1000;
 
     video_doing_fps = M_CheckParm("-fps");
 
@@ -1210,10 +1178,6 @@ void I_ShutdownGraphics(void)
     if (GfxBase != NULL) {
         CloseLibrary((struct Library*)GfxBase);
     }
-    if (TimerBase) {
-        CloseDevice(&timereq);
-        TimerBase = NULL;
-    }
     if (video_smr != NULL) {
         FreeAslRequest(video_smr);
         video_smr = NULL;
@@ -1315,6 +1279,7 @@ void I_MarkRect(REG(d0, int left), REG(d1, int top), REG(d2, int width), REG(d3,
 /**********************************************************************/
 void I_StartUpdate(void)
 {
+    struct EClockVal start_time;
     UBYTE *base_address;
 
     if (video_is_directcgx) {
@@ -1346,6 +1311,7 @@ void I_FinishUpdate(void)
 /* This needs optimising to copy just the parts that changed,
    especially if the user has shrunk the playscreen. */
 {
+    struct EClockVal start_time;
     int top, left, width, height;
 
     total_frames++;
@@ -1996,27 +1962,24 @@ void amiga_getevents(void)
 }
 
 /**********************************************************************/
-static void calc_time(ULONG time, const char *msg)
-{
-    ULONG usec = time * 1000 / eclocks_per_millisecond;
-    printf("Total %s = %u us  (%u us/frame)\n", msg, usec, usec / total_frames);
-}
 
 /**********************************************************************/
-void print_timers(void)
+void NOINLINE print_timers(void)
 {
     /* printf ("EClocks per second = %d\n", eclocks_per_second); */
     if (total_frames >= 10) {
         printf("Total number of frames = %u\n", total_frames);
-        calc_time(blit_time,     "blit wait time        ");
-        calc_time(safe_time,     "safe wait time        ");
-        calc_time(c2p_time,      "Chunky2Planar time    ");
-        calc_time(video_safe_time, "video wait time    ");
-        calc_time(video_disp_time, "video disp time    ");
+        PrintTime(blit_time,     "blit wait time        ", total_frames);
+        PrintTime(safe_time,     "safe wait time        ", total_frames);
+        PrintTime(c2p_time,      "Chunky2Planar time    ", total_frames);
+        PrintTime(video_safe_time, "video wait time    ", total_frames);
+        PrintTime(video_disp_time, "video disp time    ", total_frames);
         //        calc_time(ccs_time, "CopyChunkyScreen time ");
         //        calc_time(wpa8_time, "WritePixelArray8 time ");
         //        calc_time(lock_time, "LockBitMap time       ");
+
         total_frames = 0;
+
         blit_time = 0;
         safe_time = 0;
         c2p_time = 0;
