@@ -22,6 +22,7 @@
 #define CHIP __chip
 #define INTERRUPT  __interrupt //__interrupt
 #define INLINE __inline__
+#define NOINLINE __attribute__ ((noinline))
 #else /* of __GNUC__ */
 
 #ifdef __SASC
