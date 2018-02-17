@@ -16,7 +16,7 @@ PHXASS = $(TOOLCHAIN)/bin/vasmm68k_mot
 CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
 CLIB_LDFLAGS = -lnet
 
-NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMU -mregparm=4
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
 NOIXEMUL_LDFLAGS = -lsocket
 
 USEIXEMUL ?= 1
@@ -57,7 +57,7 @@ CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
 #CFLAGS += -include "doomdef.h"
 
 #-DRANGECHECK
-CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
+CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
