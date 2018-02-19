@@ -26,14 +26,9 @@ static const char rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 #ifdef NORMALUNIX
 #ifndef __SASC
 #include <ctype.h>
-#include <fcntl.h>
-#include <malloc.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#define O_BINARY 0
 #else
 #include <ctype.h>
 #include <stat.h>
@@ -67,7 +62,7 @@ void** lumpcache;
 #define strcmpi strcasecmp
 
 #if defined(USECLIB2)
-void strupr(char* s)
+static void strupr(char* s)
 {
     while (*s) {
         *s = toupper(*s);
@@ -130,8 +125,8 @@ void ExtractFileBase(char* path, char* dest)
 //  specially to allow map reloads.
 // But: the reload feature is a fragile hack...
 
-int reloadlump;
-char* reloadname;
+static int reloadlump = -1;
+static char* reloadname = NULL;
 
 void W_AddFile(char* filename)
 {
@@ -155,7 +150,7 @@ void W_AddFile(char* filename)
         reloadlump = numlumps;
     }
 
-    if ((handle = fopen(filename, "r")) == NULL) {
+    if ((handle = fopen(filename, "rb")) == NULL) {
         printf(" couldn't open %s\n", filename);
         return;
     }
@@ -237,7 +232,7 @@ void W_Reload(void)
     if (!reloadname)
         return;
 
-    if ((handle = fopen(reloadname, "r")) == NULL)
+    if ((handle = fopen(reloadname, "rb")) == NULL)
         I_Error("W_Reload: couldn't open %s", reloadname);
 
     fread(&header, 1, sizeof(header), handle);
@@ -414,7 +409,7 @@ void W_ReadLump(REGD0(int lump), REGA0(void* dest))
 
     if (l->handle == NULL) {
         // reloadable file, so use open / read / close
-        if ((handle = fopen(reloadname, "r")) == NULL)
+        if ((handle = fopen(reloadname, "rb")) == NULL)
             I_Error("W_ReadLump: couldn't open %s", reloadname);
     } else
         handle = l->handle;

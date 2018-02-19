@@ -126,7 +126,7 @@ int M_ReadFile(char const* name, byte** buffer)
     struct stat* fileinfo;
     byte* buf;
 
-    if ((handle = fopen(name, "r")) == NULL || (fileinfo = malloc(sizeof(struct stat))) == NULL ||
+    if ((handle = fopen(name, "rb")) == NULL || (fileinfo = malloc(sizeof(struct stat))) == NULL ||
         fstat(fileno(handle), fileinfo) == -1)
         I_Error("Couldn't read file %s", name);
     length = fileinfo->st_size;
