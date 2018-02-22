@@ -106,12 +106,15 @@ static struct ScreenBuffer *video_sb[2] = {NULL, NULL};
 static struct DBufInfo *video_db = NULL;
 static struct MsgPort *video_mp = NULL;
 static int video_which = 0;
+
 static BYTE video_sigbit1 = -1;
 static BYTE video_sigbit2 = -1;
 static volatile BYTE video_sigbit3 = -1;
 static UBYTE *video_chipbuff = NULL;
+static c2pbltnode_t video_bltnodes[2];
 static struct Task *video_maintask;
 static struct Task *video_fliptask = NULL;
+
 static int video_depth = 0;
 static int video_oscan_height;
 static FAR ULONG video_colourtable[NUMPALETTES][1 + 3 * 256 + 1];
@@ -891,10 +894,12 @@ void I_InitGraphics(void)
                 I_Error("Subtask couldn't allocate sigbit");
             if ((video_chipbuff = AllocMem(2 * SCREENWIDTH * SCREENHEIGHT, MEMF_CHIP | MEMF_CLEAR)) == NULL)
                 I_Error("Out of CHIP memory allocating %d bytes", 2 * SCREENWIDTH * SCREENHEIGHT);
-            if (!video_is_ehb_mode)
+            if (!video_is_ehb_mode) {
+                memset(video_bltnodes, 0, sizeof(video_bltnodes));
                 c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, SCREENHEIGHT, 0, SCREENWIDTH * SCREENHEIGHT / 8,
                                             1 << video_sigbit1, 1 << video_sigbit3, video_maintask, video_fliptask,
-                                            video_chipbuff);
+                                            video_chipbuff, &video_bltnodes[0]);
+            }
         }
     }
 
@@ -1427,7 +1432,7 @@ void I_FinishUpdate(void)
                               1 << video_sigbit2, 1 << video_sigbit3, SCREENWIDTH * height, (SCREENWIDTH >> 3) * top,
                               video_fliptask, video_chipbuff);
                 else
-                    c2p1x1_cpu3blit1_queue(screens[0], video_raster[video_which]);
+                    c2p1x1_cpu3blit1_queue(screens[0], video_raster[video_which], &video_bltnodes[0]);
             }
             c2p_time += end_timer();
             video_blit_is_in_progress = TRUE;

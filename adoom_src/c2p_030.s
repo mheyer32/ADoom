@@ -57,16 +57,25 @@ _LVOQBlit	equ	-276
 ; d5.l  bplsize [bytes] -- offset between one row in one bpl and the next bpl
 ; d6.l  signals1 mask
 ; d7.l  signals3 mask
-; a2.l  this task to Signal(signals1) on cleanup
-; a3.l  other task to Signal(signals3) on cleanup
-; a4.l  chip buffer of at least size chunkyx * chunkyy
+; a1.l  this task to Signal(signals1) on cleanup
+; a2.l  other task to Signal(signals3) on cleanup
+; a3.l  chip buffer of at least size chunkyx * chunkyy
+; a0.l  output c2pbltnode pointer
 
 _c2p1x1_cpu3blit1_queue_init
-		movem.l	d2-d3,-(sp)
-		lea	(c2p_bltnode,pc),a0
+		movem.l	d2-d3/d7,-(sp)
 		move.l	a3,(c2p_blitbuf,a0)
 		move.l	d6,(signals1,a0)
 		move.l	d7,(signals3,a0)
+		or.l	d6,d7
+		beq		.noSignals
+		move.b  #CLEANME, (bltnodeX+bn_stat, a0)
+		move.l  #c2p_blitcleanup, (bltnodeX+bn_cleanup, a0)
+		bra.s	.cont
+.noSignals
+		move.b  #0, (bltnodeX+bn_stat, a0)
+		move.l  #0, (bltnodeX+bn_cleanup, a0)
+.cont
 		move.l	a1,(task,a0)
 		move.l	a2,(othertask,a0)
 		andi.l	#$ffff,d0
@@ -86,9 +95,7 @@ _c2p1x1_cpu3blit1_queue_init
 		move.l	d1,(c2p_pixels,a0)
 		lsr.l	#4,d1
 		move.l	d1,(c2p_pixels16,a0)
-		move.b  #CLEANME, (bltnodeX+bn_stat, a0)
-		move.l  #c2p_blitcleanup, (bltnodeX+bn_cleanup, a0)
-		movem.l	(sp)+,d2-d3
+		movem.l	(sp)+,d2-d3/d7
 		rts
 
 ;-----------------------------------------------------------------------
@@ -97,9 +104,8 @@ _c2p1x1_cpu3blit1_queue_init
 ; d0	blit queue 0 or 1
 
 _c2p1x1_cpu3blit1_queue
-		movem.l	d2-d7/a2-a6,-(sp)
-
-		lea	(c2p_bltnode,pc),a2
+		movem.l	d2-d7/a3-a6,-(sp)
+		move.l	a2,-(sp)
 		move.l	a1,(c2p_screen,a2)
 
 		move.l	#$0f0f0f0f,a4
@@ -272,13 +278,13 @@ _c2p1x1_cpu3blit1_queue
 		move.l	d2,(a1)+
 		move.l	d3,(a1)+
 
-		lea		(c2p_bltnode,pc),a1
-
+		move.l	(sp)+, a2
+		move.l	a2, a1
 		move.l	#c2p1x1_cpu3blit1_queue_41,(bltnodeX + bn_function,a1)
 		movea.l	(_GfxBase),a6
 		jsr	(_LVOQBlit,a6)
 .none
-		movem.l (sp)+,d2-d7/a2-a6
+		movem.l (sp)+,d2-d7/a3-a6
 		rts
 
 ;-----------------------------------------------------------------------
@@ -435,7 +441,7 @@ c2p1x1_cpu3blit1_queue_48			; Pass 4, subpass 8, descending
 ;-----------------------------------------------------------------------
 c2p_blitcleanup
 		movem.l	a2/a6,-(sp)
-		lea	(c2p_bltnode,pc),a2
+		move.l	a1,a2		 ; bltnode struct comes in a1
 		move.l	(task,a2),a1 ; signal QBlit() has finished
 		move.l	(signals1,a2),d0
 		move.l	(4).w,a6
@@ -445,12 +451,6 @@ c2p_blitcleanup
 		jsr	(_LVOSignal,a6)		; signal pass 4 has finished
 		movem.l	(sp)+,a2/a6
 		rts
-
-;-----------------------------------------------------------------------
-		cnop 0,4
-
-c2p_bltnode
-		dcb.b c2pbltnode_SIZEOF
 
 ;-----------------------------------------------------------------------
 ;		section bss_c,bss_c,chip
