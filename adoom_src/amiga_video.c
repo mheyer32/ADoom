@@ -895,10 +895,19 @@ void I_InitGraphics(void)
             if ((video_chipbuff = AllocMem(2 * SCREENWIDTH * SCREENHEIGHT, MEMF_CHIP | MEMF_CLEAR)) == NULL)
                 I_Error("Out of CHIP memory allocating %d bytes", 2 * SCREENWIDTH * SCREENHEIGHT);
             if (!video_is_ehb_mode) {
-                memset(video_bltnodes, 0, sizeof(video_bltnodes));
-                c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, SCREENHEIGHT, 0, SCREENWIDTH * SCREENHEIGHT / 8,
-                                            1 << video_sigbit1, 1 << video_sigbit3, video_maintask, video_fliptask,
-                                            video_chipbuff, &video_bltnodes[0]);
+                int halfHeight = SCREENHEIGHT / 2;
+                memset(video_bltnodes, 0, sizeof(video_bltnodes));  // ideally, this should not be needed here
+                // The c2p task is devided between Blitter and CPU.
+                // Additionaly, in order to overlap Blitter and CPU work, we let the Blitter start
+                // working on the first half of the screen, while the CPU prepares data for the second
+                // half. Once the Blitter is finished, it'll signal the fliptask who will automatically
+                // put the new buffer on screen.
+                c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, halfHeight, 0, SCREENWIDTH * SCREENHEIGHT / 8, 0, 0,
+                                            video_maintask, video_fliptask, video_chipbuff, &video_bltnodes[0]);
+                c2p1x1_cpu3blit1_queue_init(SCREENWIDTH, halfHeight, /*SCREENWIDTH * halfHeight*/ 0,
+                                            SCREENWIDTH * SCREENHEIGHT / 8, 1 << video_sigbit1,
+                                            1 << video_sigbit3, video_maintask, video_fliptask,
+                                            video_chipbuff + SCREENWIDTH * halfHeight, &video_bltnodes[1]);
             }
         }
     }
@@ -1427,12 +1436,17 @@ void I_FinishUpdate(void)
                           1 << video_sigbit2, 1 << video_sigbit3, SCREENWIDTH * height, (SCREENWIDTH >> 3) * top,
                           video_xlate[video_palette_index], video_fliptask, video_chipbuff);
             } else {
-                if (cpu_type < 68030)
+                if (cpu_type < 68030) {
                     c2p_8_020(&screens[0][SCREENWIDTH * top], video_bitmap[video_which].Planes, 1 << video_sigbit1,
                               1 << video_sigbit2, 1 << video_sigbit3, SCREENWIDTH * height, (SCREENWIDTH >> 3) * top,
                               video_fliptask, video_chipbuff);
-                else
+                } else {
+                    int halfHeight = SCREENHEIGHT / 2;
                     c2p1x1_cpu3blit1_queue(screens[0], video_raster[video_which], &video_bltnodes[0]);
+                    c2p1x1_cpu3blit1_queue(screens[0] + SCREENWIDTH * halfHeight,
+                                           video_raster[video_which] + SCREENWIDTH * halfHeight / 8,
+                                           &video_bltnodes[1]);
+                }
             }
             c2p_time += end_timer();
             video_blit_is_in_progress = TRUE;
