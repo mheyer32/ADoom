@@ -1,6 +1,5 @@
 		mc68020
 
-		xdef	@P_DivlineSide
 		xdef	_P_DivlineSide
 
 		section	.text,code
@@ -23,7 +22,6 @@ dx		equ	8
 dy		equ	12
 divline_size	equ	16
 
-@P_DivlineSide:
 _P_DivlineSide:
 		;I bet this could be a little faster if someone profiled the input
 		;and found which case all in all happens most often...

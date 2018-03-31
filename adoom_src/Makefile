@@ -89,7 +89,6 @@ OBJS = \
 	amiga_video.o \
 	amiga_draw.o \
 	amiga_sega.o \
-	amiga_music.o \
 	c2p_8_020.o \
 	c2p_6_020.o \
 	c2p_8_030.o \

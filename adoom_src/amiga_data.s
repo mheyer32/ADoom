@@ -1,7 +1,6 @@
 		mc68020
 
 		xdef	_R_GetColumn
-		xdef	_R_GetColumn
 
 		section	.text,code
 
@@ -25,7 +24,7 @@
 ;byte**			texturecomposite;
 
 		cnop	0,4
-_R_GetColumn:
+
 _R_GetColumn:
 		movem.l	d2/d4,-(sp)
 
