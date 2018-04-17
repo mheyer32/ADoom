@@ -51,7 +51,7 @@ endif
 #-v -fbbb=Vabcefimprs
 
 CFLAGS = $(RUNTIME_CFLAGS)
-CFLAGS += -fbaserel -m68030 -m68881
+CFLAGS += -fbaserel -m68030 -m68881 -g -msmall-code
 CFLAGS += -Ofast -fstrength-reduce -fomit-frame-pointer
 CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
 #CFLAGS += -include "doomdef.h"
