@@ -1,7 +1,7 @@
-TOOLCHAIN ?= /home/matze/amigatoolchain/amiga-gcc-out
+CC=m68k-amigaos-gcc
+PHXASS=vasmm68k_mot
 
-CC = $(TOOLCHAIN)/bin/m68k-amigaos-gcc
-PHXASS = $(TOOLCHAIN)/bin/vasmm68k_mot
+PREFIX = $(shell ./getprefix.sh "$(CC)")
 
 #-noixemul
 #-fbaserel
@@ -62,8 +62,8 @@ CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
 PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
-PFLAGS += -I$(TOOLCHAIN)/m68k-amigaos/sys-include
-PFLAGS += -I$(TOOLCHAIN)/m68k-amigaos/ndk/include
+PFLAGS += -I$(PREFIX)/m68k-amigaos/sys-include
+PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
 INTERMEDIATE =$(CURDIR)/build/
 OUT = $(CURDIR)/bin/
