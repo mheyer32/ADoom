@@ -153,8 +153,8 @@ void D_ProcessEvents(void)
     event_t* ev;
 
     // IF STORE DEMO, DO NOT ACCEPT INPUT
-    if ((gamemode == commercial) && (W_CheckNumForName("map01") < 0))
-        return;
+//    if ((gamemode == commercial) && (W_CheckNumForName("map01") < 0))
+//        return;
 
     for (; eventtail != eventhead; eventtail = (++eventtail) & (MAXEVENTS - 1)) {
         ev = &events[eventtail];
@@ -268,8 +268,10 @@ void D_Display(void)
         HU_Drawer();
 
     // clean up border stuff
-    if (gamestate != oldgamestate && gamestate != GS_LEVEL)
-        I_SetPalette(W_CacheLumpName("PLAYPAL", PU_CACHE), 0);
+    if (gamestate != oldgamestate && gamestate != GS_LEVEL) {
+        CACHE_LUMPNUM(PLAYPAL);
+        I_SetPalette(W_CacheLumpNum(PLAYPAL, PU_CACHE), 0);
+    }
 
     // see if the border needs to be initially drawn
     if (gamestate == GS_LEVEL && oldgamestate != GS_LEVEL) {
@@ -393,7 +395,7 @@ void D_DoomLoop(void)
 //
 int demosequence;
 int pagetic;
-char* pagename;
+int pagelumpnum;
 
 //
 // D_PageTicker
@@ -410,7 +412,7 @@ void D_PageTicker(void)
 //
 void D_PageDrawer(void)
 {
-    V_DrawPatchInDirect(0, 0, 0, W_CacheLumpName(pagename, PU_CACHE));
+    V_DrawPatchInDirect(0, 0, 0, W_CacheLumpNum(pagelumpnum, PU_CACHE));
 }
 //
 // D_AdvanceDemo
@@ -444,7 +446,7 @@ void D_DoAdvanceDemo(void)
         else
             pagetic = 170;
         gamestate = GS_DEMOSCREEN;
-        pagename = "TITLEPIC";
+        pagelumpnum = W_GetNumForName("TITLEPIC");
         if (gamemode == commercial)
             S_StartMusic(mus_dm2ttl);
         else
@@ -456,7 +458,7 @@ void D_DoAdvanceDemo(void)
     case 2:
         pagetic = 200;
         gamestate = GS_DEMOSCREEN;
-        pagename = "CREDIT";
+        pagelumpnum = W_GetNumForName("CREDIT");
         break;
     case 3:
         G_DeferedPlayDemo("demo2");
@@ -465,15 +467,15 @@ void D_DoAdvanceDemo(void)
         gamestate = GS_DEMOSCREEN;
         if (gamemode == commercial) {
             pagetic = 35 * 11;
-            pagename = "TITLEPIC";
+            pagelumpnum = W_GetNumForName("TITLEPIC");
             S_StartMusic(mus_dm2ttl);
         } else {
             pagetic = 200;
 
             if (gamemode == retail)
-                pagename = "CREDIT";
+                pagelumpnum = W_GetNumForName("CREDIT");
             else
-                pagename = "HELP2";
+                pagelumpnum = W_GetNumForName("HELP2");
         }
         break;
     case 5:
@@ -780,7 +782,7 @@ void D_DoomMain(void)
 
     IdentifyVersion();
 
-    setbuf(stdout, NULL);
+    //setbuf(stdout, NULL);
     modifiedgame = false;
 
     nomonsters = M_CheckParm("-nomonsters");

@@ -36,7 +36,7 @@
 //#define SWAPSHORT(x) ((short)SwapSHORT((unsigned short)(x)))
 //#define SWAPLONG(x) ((long)SwapLONG((unsigned long)(x)))
 
-inline short SwapSHORT(short val)
+static inline short SwapSHORT(short val)
 {
 	__asm __volatile
 	(
@@ -49,7 +49,7 @@ inline short SwapSHORT(short val)
 	return val;
 }
 
-inline long SwapLONG(long val)
+static inline long SwapLONG(long val)
 {
 	__asm __volatile
 	(

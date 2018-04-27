@@ -19,6 +19,8 @@
 #include "g_game.h"
 #include "m_argv.h"
 
+#include "amiga_timer.h"
+
 void amiga_getevents(void);
 
 #define MIN_ZONESIZE (2 * 1024 * 1024)
@@ -36,6 +38,10 @@ void I_Init(void)
         taskpriority = atoi(myargv[p + 1]);
     }
     SetTaskPri(FindTask(NULL), taskpriority);
+
+    if (!InitTimer()) {
+        I_Error("Can't open timer device");
+    }
 
     I_InitGraphics();
     I_InitSound();
@@ -161,6 +167,8 @@ void I_Quit(void)
     I_ShutdownMusic();
     M_SaveDefaults();
     I_ShutdownGraphics();
+    ShutdownTimer();
+
     exit(0);
 }
 

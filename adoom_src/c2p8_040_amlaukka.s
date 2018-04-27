@@ -17,11 +17,8 @@
 	include "graphics/gfx.i"
 
 	XDEF    _c2p8
-	XDEF    @c2p8
 	XDEF    _c2p8_reloc
-	XDEF    @c2p8_reloc
 	XDEF    _c2p8_deinit
-	XDEF    @c2p8_deinit
 
 patch	macro
 ;;;	move.l	d1,(\1-_c2p8+4,a0)	; This fails because of bug in PhxAss
@@ -38,7 +35,6 @@ patch	macro
 *
 
 _c2p8_reloc
-@c2p8_reloc
 	movem.l a2/a3,-(sp)
 	move.l  a0,a2
 	move.l  a1,a3
@@ -102,7 +98,6 @@ _c2p8_reloc
 *
 
 _c2p8_deinit
-@c2p8_deinit
 	move.l  a0,a1
 	jsr     (_LVOFreeVec,a6)
 	rts
@@ -114,7 +109,6 @@ _c2p8_deinit
 *
 
 _c2p8
-@c2p8
 	movem.l d2-d7/a2-a6,-(sp)
 	move.l  a0,a6
 	move.l  a2,a3

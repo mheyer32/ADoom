@@ -1,22 +1,11 @@
 		mc68020
 
-		xdef	@R_AddSprites
 		xdef	_R_AddSprites
-
-		xdef	@R_DrawMasked
 		xdef	_R_DrawMasked
-
-		xdef	@R_DrawSprite
 		xdef	_R_DrawSprite
-
-		xdef	@R_DrawVisSprite
 		xdef	_R_DrawVisSprite
-
-		xdef	@R_SortVisSprites
 		xdef	_R_SortVisSprites
-		xdef	@R_NewVisSprite
 		xdef	_R_NewVisSprite
-		xdef	@R_ClearSprites
 		xdef	_R_ClearSprites
 
 		section	.text,code
@@ -33,7 +22,7 @@
 		xref	_extralight
 		xref	_scalelight
 		xref	_spritelights
-		xref	@R_ProjectSprite
+		;xref	@R_ProjectSprite
 		xref	_validcount
 
 		STRUCTURE	sector,0
@@ -55,7 +44,6 @@
 
 snext		EQU	24
 
-@R_AddSprites:
 _R_AddSprites:
 		move.l	_validcount(a4),d0
 		cmp.l	st_validcount(a0),d0
@@ -182,7 +170,7 @@ _R_AddSprites:
 		LABEL	ds_size
 
 		cnop	0,4
-_R_DrawMasked:
+
 _R_DrawMasked:
 		movem.l	a2/a3,-(sp)
 		jsr	(_R_SortVisSprites)
@@ -277,7 +265,6 @@ _R_DrawMasked:
 		xref	_viewheight
 		xref	_memcpy
 
-_R_DrawSprite:
 _R_DrawSprite:
 
 		movem.l	d2-d7/a2/a3/a5/a6,-(sp)
@@ -652,7 +639,7 @@ _R_DrawSprite:
 ; copies of the sprite->x1 sprite->x2
 
 		cnop	0,4
-_R_DrawVisSprite:
+
 _R_DrawVisSprite:
 
 		movem.l	d2/d7/a2/a3,-(sp)
@@ -783,7 +770,7 @@ MAXINT		equ	$7FFFFFFF
 MAXSPRITE	equ	128
 
 		cnop	0,4
-_R_SortVisSprites:
+
 _R_SortVisSprites:
 		movem.l	a2/a3/a5,-(sp)
 
@@ -827,7 +814,7 @@ _R_SortVisSprites:
 		rts
 
 		cnop	0,4
-_R_NewVisSprite:
+
 _R_NewVisSprite:
 		move.l	_vissprite_p(a4),d0
 		beq.b	.rn_FirstTime
@@ -856,7 +843,7 @@ _R_NewVisSprite:
 		rts
 
 		cnop	0,4
-_R_ClearSprites:
+
 _R_ClearSprites:
 		move.l	#_vissprites,a0
 		move.l	#0,_vissprite_p(a4)

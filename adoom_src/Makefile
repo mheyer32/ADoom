@@ -1,9 +1,3 @@
-#CC =/home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/m68k-amigaos-gcc
-#PHXASS = /home/matze/amigatoolchain/gcc-2.97/m68k-amigaos/bin/vasm
-
-#CC =/home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/m68k-amigaos-gcc
-#PHXASS = /home/matze/amigatoolchain/gcc-6.2/m68k-amigaos/bin/vasm
-
 CC=m68k-amigaos-gcc
 PHXASS=vasmm68k_mot
 
@@ -22,7 +16,7 @@ PREFIX = $(shell ./getprefix.sh "$(CC)")
 CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
 CLIB_LDFLAGS = -lnet
 
-NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMU -mregparm=4
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
 NOIXEMUL_LDFLAGS = -lsocket
 
 USEIXEMUL ?= 1
@@ -63,11 +57,13 @@ CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
 #CFLAGS += -include "doomdef.h"
 
 #-DRANGECHECK
-CFLAGS += -DVERBOSE -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
+CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882 -I$(PREFIX)/m68k-amigaos/sys-include
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
+PFLAGS += -I$(PREFIX)/m68k-amigaos/sys-include
+PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
 INTERMEDIATE =$(CURDIR)/build/
 OUT = $(CURDIR)/bin/
@@ -89,10 +85,10 @@ OBJS = \
 	amiga_sight.o \
 	amiga_things.o \
 	amiga_median.o \
+	amiga_timer.o \
 	amiga_video.o \
 	amiga_draw.o \
 	amiga_sega.o \
-	amiga_music.o \
 	c2p_8_020.o \
 	c2p_6_020.o \
 	c2p_8_030.o \

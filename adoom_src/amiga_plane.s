@@ -1,12 +1,7 @@
 		mc68020
 
-;		xdef	@R_MakeSpans
 		xdef	_R_MakeSpans
-
-;		xdef	@R_DrawPlanes
 		xdef	_R_DrawPlanes
-
-;		xdef	@R_MapPlane
 		xdef	_R_MapPlane
 
 		section	.text,code
@@ -17,7 +12,7 @@
 ; R_MakeSpans (in r_plane.c) by Arto Huusko <arto.huusko@pp.qnet.fi>
 
 		xref	_spanstart
-;;;		xref	@R_MapPlane
+
 ;void
 ;__asm R_MakeSpans
 ;( register __d2 int x,
@@ -27,7 +22,7 @@
 ;  register __d6 int b2 );
 
 		cnop	0,4
-@R_MakeSpans:
+
 _R_MakeSpans:
 ;First comments are for the non-__asm version of func prototype
 
@@ -69,7 +64,7 @@ _R_MakeSpans:
 .rms_Loop1_2:	;Another loop...
 		move.l	(a3)+,d1
 		move.l	d3,d0
-		jsr	(@R_MapPlane)
+		jsr	(_R_MapPlane)
 		addq.l	#1,d3
 		dbf	d7,.rms_Loop1_2
 		bra.b	.rmsl2_Done	;..so we can quickly skip
@@ -81,7 +76,7 @@ _R_MakeSpans:
 .rms_Loop1:
 		move.l	(a3)+,d1
 		move.l	d3,d0
-		jsr	(@R_MapPlane)
+		jsr	(_R_MapPlane)
 		addq.l	#1,d3
 		dbf	d7,.rms_Loop1
 
@@ -103,7 +98,7 @@ _R_MakeSpans:
 .rms_Loop2_2:
 		move.l	-(a3),d1
 		move.l	d4,d0
-		jsr	(@R_MapPlane)
+		jsr	(_R_MapPlane)
 		subq.l	#1,d4
 		dbf	d7,.rms_Loop2_2
 
@@ -117,7 +112,7 @@ _R_MakeSpans:
 .rms_Loop2:
 		move.l	-(a3),d1
 		move.l	d4,d0
-		jsr	(@R_MapPlane)
+		jsr	(_R_MapPlane)
 		subq.l	#1,d4
 		dbf	d7,.rms_Loop2
 
@@ -312,7 +307,7 @@ visplane_size	equ	28
 
 
 		cnop	0,4
-@R_DrawPlanes:
+
 _R_DrawPlanes:
 		movem.l	d2-d7/a2/a3/a5/a6,-(sp)
 
@@ -575,7 +570,7 @@ ANGLETOFINESHIFT	equ	19
 ;  int		x2 )
 
 		cnop	0,4
-@R_MapPlane:
+
 _R_MapPlane:
 		movem.l	d3/d4/d7,-(sp)
 

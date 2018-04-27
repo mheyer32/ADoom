@@ -24,39 +24,25 @@ FRACUNIT	equ	(1<<FRACBITS)
 *
 
 		xdef	_init_r_draw
-		xdef	@init_r_draw
+
 
 ;;		xdef    _R_DrawColumn_030			; high detail
-;;		xdef    @R_DrawColumn_030
 		xdef    _R_DrawColumn_040			; high detail
-		xdef    @R_DrawColumn_040
 		xdef    _R_DrawSpan_040
-		xdef    @R_DrawSpan_040
 		xdef    _R_DrawColumn_060
-		xdef    @R_DrawColumn_060
 		xdef    _R_DrawSpan_060
-		xdef    @R_DrawSpan_060
 		xdef	_R_DrawFuzzColumn
-		xdef	@R_DrawFuzzColumn
 ;;		xdef	_R_DrawTranslatedColumn
-;;		xdef	@R_DrawTranslatedColumn
 
 		xdef	_R_DrawSpanLow				; low detail
-		xdef	@R_DrawSpanLow
 		xdef	_R_DrawColumnLow
-		xdef	@R_DrawColumnLow
 		xdef	_R_DrawFuzzColumnLow
-		xdef	@R_DrawFuzzColumnLow
 ;;		xdef	_R_DrawTranslatedColumnLow
-;;		xdef	@R_DrawTranslatedColumnLow
 
 		xdef	_R_DrawMaskedColumn
-		xdef	@R_DrawMaskedColumn
 
 		xdef	_V_DrawPatch
-		xdef	@V_DrawPatch
 		xdef	_V_DrawPatchDirect
-		xdef	@V_DrawPatchDirect
 
 *
 *       needed symbols/labels
@@ -102,83 +88,82 @@ FRACUNIT	equ	(1<<FRACBITS)
 ; patch _SCREENWIDTH into draw routines (self-modifying code) and flush caches
 
 _init_r_draw
-@init_r_draw
 		movem.l	a6,-(sp)
 
-		lea	@init_r_draw(pc),a0
+		lea	_init_r_draw(pc),a0
 
 		move.l	_SCREENWIDTH(a4),d0	; d0 = _SCREENWIDTH
 
-		move.w	d0,sw12_1-@init_r_draw+2(a0)
-		move.w	d0,sw12_3-@init_r_draw+2(a0)
-		move.w	d0,sw12_4-@init_r_draw+2(a0)
-		move.w	d0,sw12_4a-@init_r_draw+2(a0)
-		move.w	d0,sw12_5-@init_r_draw+2(a0)
-		move.w	d0,sw12_5a-@init_r_draw+2(a0)
-		move.w	d0,sw12_6-@init_r_draw+2(a0)
-		move.w	d0,sw12_7-@init_r_draw+2(a0)
-		move.w	d0,sw12_8-@init_r_draw+2(a0)
+		move.w	d0,sw12_1-_init_r_draw+2(a0)
+		move.w	d0,sw12_3-_init_r_draw+2(a0)
+		move.w	d0,sw12_4-_init_r_draw+2(a0)
+		move.w	d0,sw12_4a-_init_r_draw+2(a0)
+		move.w	d0,sw12_5-_init_r_draw+2(a0)
+		move.w	d0,sw12_5a-_init_r_draw+2(a0)
+		move.w	d0,sw12_6-_init_r_draw+2(a0)
+		move.w	d0,sw12_7-_init_r_draw+2(a0)
+		move.w	d0,sw12_8-_init_r_draw+2(a0)
 
 		add.l	d0,d0			; d0 = 2 * _SCREENWIDTH
 
-		move.w	d0,sw22_1-@init_r_draw+2(a0)
-		move.w	d0,sw22_3-@init_r_draw+2(a0)
-		move.w	d0,sw22_4-@init_r_draw+2(a0)
-		move.w	d0,sw22_4a-@init_r_draw+2(a0)
-		move.w	d0,sw22_5-@init_r_draw+2(a0)
-		move.w	d0,sw22_5a-@init_r_draw+2(a0)
-		move.w	d0,sw22_6-@init_r_draw+2(a0)
-		move.w	d0,sw22_7-@init_r_draw+2(a0)
-		move.w	d0,sw22_8-@init_r_draw+2(a0)
+		move.w	d0,sw22_1-_init_r_draw+2(a0)
+		move.w	d0,sw22_3-_init_r_draw+2(a0)
+		move.w	d0,sw22_4-_init_r_draw+2(a0)
+		move.w	d0,sw22_4a-_init_r_draw+2(a0)
+		move.w	d0,sw22_5-_init_r_draw+2(a0)
+		move.w	d0,sw22_5a-_init_r_draw+2(a0)
+		move.w	d0,sw22_6-_init_r_draw+2(a0)
+		move.w	d0,sw22_7-_init_r_draw+2(a0)
+		move.w	d0,sw22_8-_init_r_draw+2(a0)
 
 		add.l	_SCREENWIDTH(a4),d0	; d0 = 3 * _SCREENWIDTH
 
-		move.w	d0,sw32_1-@init_r_draw+2(a0)
-		move.w	d0,sw32_3-@init_r_draw+2(a0)
-		move.w	d0,sw32_4-@init_r_draw+2(a0)
-		move.w	d0,sw32_4a-@init_r_draw+2(a0)
-		move.w	d0,sw32_5-@init_r_draw+2(a0)
-		move.w	d0,sw32_5a-@init_r_draw+2(a0)
-		move.w	d0,sw32_6-@init_r_draw+2(a0)
-		move.w	d0,sw32_7-@init_r_draw+2(a0)
-		move.w	d0,sw32_8-@init_r_draw+2(a0)
+		move.w	d0,sw32_1-_init_r_draw+2(a0)
+		move.w	d0,sw32_3-_init_r_draw+2(a0)
+		move.w	d0,sw32_4-_init_r_draw+2(a0)
+		move.w	d0,sw32_4a-_init_r_draw+2(a0)
+		move.w	d0,sw32_5-_init_r_draw+2(a0)
+		move.w	d0,sw32_5a-_init_r_draw+2(a0)
+		move.w	d0,sw32_6-_init_r_draw+2(a0)
+		move.w	d0,sw32_7-_init_r_draw+2(a0)
+		move.w	d0,sw32_8-_init_r_draw+2(a0)
 
 		add.l	_SCREENWIDTH(a4),d0	; d0 = 4 * _SCREENWIDTH
 
-		move.w	d0,sw42_1-@init_r_draw+2(a0)
-		move.w	d0,sw42_3-@init_r_draw+2(a0)
-		move.w	d0,sw42_4-@init_r_draw+2(a0)
-		move.w	d0,sw42_5-@init_r_draw+2(a0)
-		move.w	d0,sw42_6-@init_r_draw+2(a0)
-		move.w	d0,sw42_8-@init_r_draw+2(a0)
+		move.w	d0,sw42_1-_init_r_draw+2(a0)
+		move.w	d0,sw42_3-_init_r_draw+2(a0)
+		move.w	d0,sw42_4-_init_r_draw+2(a0)
+		move.w	d0,sw42_5-_init_r_draw+2(a0)
+		move.w	d0,sw42_6-_init_r_draw+2(a0)
+		move.w	d0,sw42_8-_init_r_draw+2(a0)
 
 		move.l	_SCREENWIDTH(a4),d0
 		neg.l	d0			; d0 = -_SCREENWIDTH
 
-		move.w	d0,swm10_1-@init_r_draw(a0)
-		move.w	d0,swm10_3-@init_r_draw(a0)
-		move.w	d0,swm10_4-@init_r_draw(a0)
-		move.w	d0,swm10_5-@init_r_draw(a0)
-		move.w	d0,swm10_6-@init_r_draw(a0)
-		move.w	d0,swm10_8-@init_r_draw(a0)
+		move.w	d0,swm10_1-_init_r_draw(a0)
+		move.w	d0,swm10_3-_init_r_draw(a0)
+		move.w	d0,swm10_4-_init_r_draw(a0)
+		move.w	d0,swm10_5-_init_r_draw(a0)
+		move.w	d0,swm10_6-_init_r_draw(a0)
+		move.w	d0,swm10_8-_init_r_draw(a0)
 
 		add.l	d0,d0			; d0 = -2*_SCREENWIDTH
 
-		move.w	d0,swm20_1-@init_r_draw(a0)
-		move.w	d0,swm20_3-@init_r_draw(a0)
-		move.w	d0,swm20_4-@init_r_draw(a0)
-		move.w	d0,swm20_5-@init_r_draw(a0)
-		move.w	d0,swm20_6-@init_r_draw(a0)
-		move.w	d0,swm20_8-@init_r_draw(a0)
+		move.w	d0,swm20_1-_init_r_draw(a0)
+		move.w	d0,swm20_3-_init_r_draw(a0)
+		move.w	d0,swm20_4-_init_r_draw(a0)
+		move.w	d0,swm20_5-_init_r_draw(a0)
+		move.w	d0,swm20_6-_init_r_draw(a0)
+		move.w	d0,swm20_8-_init_r_draw(a0)
 
 		sub.l	_SCREENWIDTH(a4),d0	; d0 = -3*_SCREENWIDTH
 
-		move.w	d0,swm30_1-@init_r_draw(a0)
-		move.w	d0,swm30_3-@init_r_draw(a0)
-		move.w	d0,swm30_4-@init_r_draw(a0)
-		move.w	d0,swm30_5-@init_r_draw(a0)
-		move.w	d0,swm30_6-@init_r_draw(a0)
-		move.w	d0,swm30_8-@init_r_draw(a0)
+		move.w	d0,swm30_1-_init_r_draw(a0)
+		move.w	d0,swm30_3-_init_r_draw(a0)
+		move.w	d0,swm30_4-_init_r_draw(a0)
+		move.w	d0,swm30_5-_init_r_draw(a0)
+		move.w	d0,swm30_6-_init_r_draw(a0)
+		move.w	d0,swm30_8-_init_r_draw(a0)
 
 		movea.l	_SysBase(a4),a6
 		jsr	_LVOCacheClearU(a6)
@@ -190,7 +175,6 @@ _init_r_draw
 		cnop	0,4
 
 _R_DrawColumnLow
-@R_DrawColumnLow
 		movem.l d3-d4/d6-d7/a2/a3,-(sp)
 
 		move.l  _dc_yh(a4),d7	; count = _dc_yh - _dc_yl
@@ -296,7 +280,6 @@ l.end1
 		cnop	0,4
 
 _R_DrawSpanLow
-@R_DrawSpanLow
 		movem.l d2-d7/a2-a4,-(sp)
 		move.l  _ds_y(a4),d0
 		move.l  _ds_x1(a4),d1	; dest = ylookup[_ds_y] + columnofs[_ds_x1]
@@ -423,7 +406,6 @@ l.end22		movem.l (sp)+,d2-d7/a2-a4
 		cnop	0,4
 
 _R_DrawTranslatedColumnLow
-@R_DrawTranslatedColumnLow
 		movem.l d2-d4/d6-d7/a2/a3,-(sp)
 
 		move.l  _dc_yh(a4),d7	; count = _dc_yh - _dc_yl
@@ -541,7 +523,6 @@ l.end3
 		cnop	0,4
 
 _R_DrawFuzzColumnLow
-@R_DrawFuzzColumnLow
 		movem.l d4/d6-d7/a2/a3,-(sp)
 
 		move.l	_viewheight(a4),d1
@@ -655,7 +636,6 @@ l.end4
 		cnop	0,4
 
 _R_DrawFuzzColumn
-@R_DrawFuzzColumn
 		movem.l d4/d6-d7/a2/a3,-(sp)
 
 		move.l	_viewheight(a4),d1
@@ -756,7 +736,6 @@ l.end5
 		cnop	0,4
 
 _R_DrawTranslatedColumn					; no 060 version :(
-@R_DrawTranslatedColumn
 		movem.l d2-d4/d6-d7/a2/a3,-(sp)
 
 		move.l  _dc_yh(a4),d7	; count = _dc_yh - _dc_yl
@@ -867,7 +846,6 @@ l.end6
 ; routine from j.selck@flensburg.netsurf.de   (Aki's 040 routine is faster)
 
 ;_R_DrawColumn_030
-;@R_DrawColumn_030
 ;		movem.l	d3-d7/a2-a5,-(sp)
 ;		move.l	_dc_yl(a4),d0
 ;		move.l	_dc_yh(a4),d7
@@ -906,7 +884,6 @@ l.end6
 		cnop	0,4
 
 _R_DrawColumn_060
-@R_DrawColumn_060
 		movem.l d2-d3/d5-d7/a2/a3,-(sp)
 
 		move.l  (_dc_yh,a4),d7     ; count = _dc_yh - _dc_yl
@@ -1038,7 +1015,6 @@ l.end7
 ; 040 version
 
 _R_DrawColumn_040
-@R_DrawColumn_040
 		movem.l d3-d4/d6-d7/a2/a3,-(sp)
 
 		move.l  _dc_yh(a4),d7     ; count = _dc_yh - _dc_yl
@@ -1136,7 +1112,6 @@ l.end8
 		cnop    0,4
 
 _R_DrawSpan_060
-@R_DrawSpan_060
 		movem.l d2-d7/a2/a3,-(sp)
 		move.l  (_ds_y),d0
 		move.l  (_ds_x1),d1     ; dest = ylookup[_ds_y] + columnofs[_ds_x1]
@@ -1293,7 +1268,6 @@ l.end29   	movem.l (sp)+,d2-d7/a2/a3
 ; 030/040 version
 
 _R_DrawSpan_040
-@R_DrawSpan_040
 		movem.l d2-d7/a2-a4,-(sp)
 		move.l  _ds_y(a4),d0
 		move.l  _ds_x1(a4),d1	; dest = ylookup[_ds_y] + columnofs[_ds_x1]
@@ -1458,7 +1432,6 @@ l.end20		movem.l (sp)+,d2-d7/a2-a4
 		cnop	0,4
 
 _R_DrawMaskedColumn:
-@R_DrawMaskedColumn:
 
 		cmp.b	#$FF,(a0)
 		beq.w	.rd_Exit
@@ -1623,9 +1596,7 @@ column_t
 
 		cnop	0,4
 _V_DrawPatch:
-@V_DrawPatch:
 _V_DrawPatchDirect:
-@V_DrawPatchDirect:
 		movem.l	d2-d7/a2/a3/a5,-(sp)
 
 		move.l	d0,d4	;x
@@ -1659,7 +1630,8 @@ _V_DrawPatchDirect:
 		lea	_screens(a4),a0
 		move.l	(a0,d6.l*4),d7	; get start of screen address
 ;Peter... change here (quite obvious)
-		muls.l	_SCREENWIDTH(a4),d5	;y not needed further
+		move.l _SCREENWIDTH(a4), d2
+		mulu.l	d2,d5	;y not needed further
 		add.l	d5,d7	;+y*SCREENWIDTH
 		add.l	d4,d7	;+x
 
@@ -1690,22 +1662,24 @@ _V_DrawPatchDirect:
 
 		moveq	#0,d0
 		move.b	(a5),d0		;column->topdelta*
+		beq.s	.zeroTopDelta
 ;;;		move.l	d0,d1	;!
 ;;;		lsl.l	#8,d0	;!
 ;;;		lsl.l	#6,d1	;!
 ;;;		add.l	d0,a1	;!
 ;;;		add.l	d1,a1	;!
 
-		muls.l	_SCREENWIDTH(a4),d0
+		mulu.w	d2,d0
 		add.l	d0,a1
 
+.zeroTopDelta:
 		move.b	1(a5),d0
 		addq.l	#3,a5		;source
 		;Would it be possible to use the code from DrawColumn functions by Aki
 		;here, too??
 .vdl_DrawLoop:
 		move.b	(a5)+,(a1)
-		add.l	_SCREENWIDTH(a4),a1
+		add.l	d2,a1
 		subq.b	#1,d0
 		bne.b	.vdl_DrawLoop
 

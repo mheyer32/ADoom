@@ -34,16 +34,16 @@
 ; void I_UnRegisterSong (int handle);	// See above (register), then think backwards
 
 ;------------------------------------------------------------------------
-		xdef	@I_InitMusic	  ; Allocate audio channels and clear them.
-		xdef	@I_ShutdownMusic  ; Clear channels and free them.
-		xdef	@I_SetMusicVolume ; Do code equiv to J_VolBox.
-		xdef	@I_PauseSong	  ; Do code equiv to DoPause.
-		xdef	@I_ResumeSong	  ; Goes to J_PlayBox equiv code.
-		xdef	@I_RegisterSong	  ; Do code equiv to LoadMUS; no need to actually load it
+		xdef	_I_InitMusic	  ; Allocate audio channels and clear them.
+		xdef	_I_ShutdownMusic  ; Clear channels and free them.
+		xdef	_I_SetMusicVolume ; Do code equiv to J_VolBox.
+		xdef	_I_PauseSong	  ; Do code equiv to DoPause.
+		xdef	_I_ResumeSong	  ; Goes to J_PlayBox equiv code.
+		xdef	_I_RegisterSong	  ; Do code equiv to LoadMUS; no need to actually load it
 					  ; as we are passed a pointer to it here.
-		xdef	@I_PlaySong	  ; Do code equiv to J_PlayBox.
-		xdef	@I_StopSong	  ; Do code equiv to J_StopBox.
-		xdef	@I_UnRegisterSong ; Do code equiv to FreeUpMUS.
+		xdef	_I_PlaySong	  ; Do code equiv to J_PlayBox.
+		xdef	_I_StopSong	  ; Do code equiv to J_StopBox.
+		xdef	_I_UnRegisterSong ; Do code equiv to FreeUpMUS.
 
 ;-----------------------------------------------------------------------
 		section	.text,code
@@ -96,7 +96,7 @@ CALLDOS		macro	;FunctionName
 ; void I_InitMusic (void);
 ; Allocate audio channels and clear them.
 
-@I_InitMusic	movem.l	d0-d7/a0-a6,-(sp)
+_I_InitMusic	movem.l	d0-d7/a0-a6,-(sp)
 
 		movea.l	#musicarg,a0
 		jsr	_M_CheckParm
@@ -139,12 +139,12 @@ CALLDOS		macro	;FunctionName
 ; void I_ShutdownMusic (void);
 ; Clear channels and free them.
 
-@I_ShutdownMusic
+_I_ShutdownMusic
 		movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.exit
-		bsr	@I_StopSong
-		bsr	@I_UnRegisterSong	; kill old mus
+		bsr	_I_StopSong
+		bsr	_I_UnRegisterSong	; kill old mus
 		bsr	FreeChannels
 		lea	AudioIO,a1
 		CALLEXE CloseDevice
@@ -157,7 +157,7 @@ CALLDOS		macro	;FunctionName
 ; void I_SetMusicVolume (int volume);	// Volume.
 ; Do code equiv to J_VolBox.
 
-@I_SetMusicVolume
+_I_SetMusicVolume
 		movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.exit
@@ -173,7 +173,7 @@ CALLDOS		macro	;FunctionName
 ; void I_PauseSong (int handle);	// PAUSE game handling.
 ; Do code equiv to DoPause.
 
-@I_PauseSong	movem.l	d0-d7/a0-a6,-(sp)
+_I_PauseSong	movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.done
 
@@ -199,7 +199,7 @@ CALLDOS		macro	;FunctionName
 ; void I_ResumeSong (int handle);
 ; Goes to J_PlayBox equiv code.
 
-@I_ResumeSong	movem.l	d0-d7/a0-a6,-(sp)
+_I_ResumeSong	movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.exit
 
@@ -271,15 +271,15 @@ CALLDOS		macro	;FunctionName
 ; Do code equiv to LoadMUS; no need to actually load it
 ; as we are passed a pointer to it here.
 
-@I_RegisterSong
+_I_RegisterSong
 		movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.done2
 
 		move.l	a0,-(sp)		; save data ptr
 
-		bsr	@I_StopSong		; stop current mus
-		bsr	@I_UnRegisterSong	; kill old mus
+		bsr	_I_StopSong		; stop current mus
+		bsr	_I_UnRegisterSong	; kill old mus
 
 		movea.l	(sp)+,a0
 		move.l	a0,MUSMemPtr
@@ -387,7 +387,7 @@ CALLDOS		macro	;FunctionName
 
 .done		btst	#1,Flags		; success?
 		bne.b	.exit
-		bsr	@I_UnRegisterSong	; kill MUS and instruments
+		bsr	_I_UnRegisterSong	; kill MUS and instruments
 
 .exit		move.l	InstrHandle,d1
 		beq.b	.done2
@@ -428,7 +428,7 @@ CALLDOS		macro	;FunctionName
 ; void I_PlaySong (int handle, int looping);
 ; Do code equiv to J_PlayBox.
 
-@I_PlaySong	movem.l	d0-d7/a0-a6,-(sp)
+_I_PlaySong	movem.l	d0-d7/a0-a6,-(sp)
 		tst.b	AudioOK
 		beq	.exit
 
@@ -436,7 +436,7 @@ CALLDOS		macro	;FunctionName
 		add.l	(_gametic),d0
 		move.l	d0,(musicdies)
 
-		bsr	@I_ResumeSong
+		bsr	_I_ResumeSong
 
 .exit		movem.l	(sp)+,d0-d7/a0-a6
 		rts
@@ -445,7 +445,7 @@ CALLDOS		macro	;FunctionName
 ; void I_StopSong (int handle);		// Stops a song over 3 seconds.
 ; Do code equiv to J_StopBox.
 
-@I_StopSong	movem.l	d0-d7/a0-a6,-(sp)
+_I_StopSong	movem.l	d0-d7/a0-a6,-(sp)
 
 		move.l	#0,(looping)
 		move.l	#0,(musicdies)
@@ -453,7 +453,7 @@ CALLDOS		macro	;FunctionName
 		tst.b	AudioOK
 		beq	.exit
 
-		bsr	@I_PauseSong
+		bsr	_I_PauseSong
 		bsr	KillAllAud
 
 .exit		movem.l	(sp)+,d0-d7/a0-a6
@@ -463,7 +463,7 @@ CALLDOS		macro	;FunctionName
 ; void I_UnRegisterSong (int handle);	// See above (register), then think backwards
 ; Do code equiv to FreeUpMUS.
 
-@I_UnRegisterSong
+_I_UnRegisterSong
 		movem.l	d0-d7/a0-a6,-(sp)
 
 		tst.b	AudioOK

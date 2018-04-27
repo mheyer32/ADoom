@@ -1,15 +1,8 @@
 		mc68020
 
 		xdef	_R_RenderSegLoop
-		xdef	_R_RenderSegLoop
-
 		xdef	_R_PointToDist
-		xdef	_R_PointToDist
-
 		xdef	_R_RenderMaskedSegRange
-		xdef	_R_RenderMaskedSegRange
-
-		xdef	_R_ScaleFromGlobalAngle
 		xdef	_R_ScaleFromGlobalAngle
 
 		include	"exec/types.i"
@@ -67,7 +60,6 @@
 
 		cnop	0,4
 
-@R_RenderSegLoop
 _R_RenderSegLoop
 		move.l	_rw_x(a4),d0
 		cmp.l	_rw_stopx(a4),d0
@@ -291,7 +283,6 @@ ANG90		equ	$40000000
 ANGLETOFINESHIFT	equ	19
 
 _R_PointToDist:
-_R_PointToDist:
 		move.l	d2,-(sp)
 		move.l	_FixedDiv(a4),a1
 
@@ -450,7 +441,6 @@ ML_DONTPEGBOTTOM equ	16	;bit number is 4
 		 WORD	sd_midtexture
 		 APTR	sd_sector
 
-@R_RenderMaskedSegRange:
 _R_RenderMaskedSegRange:
 		movem.l	d2-d7/a2/a3/a5,-(sp)
 
@@ -704,7 +694,6 @@ _R_RenderMaskedSegRange:
 ;ANGLETOFINESHIFT	EQU	19
 ;ANG90		EQU	$40000000
 
-_R_ScaleFromGlobalAngle:
 _R_ScaleFromGlobalAngle:
 		move.l	d2,-(sp)
 		add.l	#ANG90,d0

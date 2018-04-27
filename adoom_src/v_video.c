@@ -292,6 +292,11 @@ void  // stretches bitmap to fill screen
     int deltax, deltay, deltaxi, deltayi, stretchx, stretchy;
     int srccol, collen;
 
+    if (SCREENWIDTH == 320 && SCREENHEIGHT == 200) {
+        V_DrawPatchDirect(x,y,scrn, patch);
+        return;
+    }
+
     y -= SWAPSHORT(patch->topoffset);
     x -= SWAPSHORT(patch->leftoffset);
 
