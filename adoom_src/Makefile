@@ -14,10 +14,10 @@ PREFIX = $(shell ./getprefix.sh "$(CC)")
 #-fstrength-reduce
 
 CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
-CLIB_LDFLAGS = -lnet
+CLIB_LDFLAGS =
 
 NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
-NOIXEMUL_LDFLAGS = -lsocket
+NOIXEMUL_LDFLAGS =
 
 USEIXEMUL ?= 1
 
@@ -57,7 +57,7 @@ CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
 #CFLAGS += -include "doomdef.h"
 
 #-DRANGECHECK
-CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
+CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
 
 LDFLAGS = $(RUNTIME_LDFLAGS)
 

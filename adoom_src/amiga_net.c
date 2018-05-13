@@ -3,18 +3,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h>
 
-#include <arpa/inet.h>
 #include <devices/serial.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/ioctl.h>
-#include <sys/socket.h>
 
-#include <clib/alib_protos.h>
+#include <proto/alib.h>
+#include <proto/bsdsocket.h>
 #include <proto/dos.h>
 #include <proto/exec.h>
+
+// I need to cheat, so we're going to get the bsdsocket's ioctl.h
+// which does not remove ioctl() from the header duie to __NO_NET_API
+#include <../ndk-include/sys/ioctl.h>
 
 #ifdef AMIPX
 // These include file are distributed with amipx.library
@@ -25,13 +24,11 @@
 
 #include "d_event.h"
 #include "d_net.h"
+#include "doomstat.h"
+#include "i_net.h"
 #include "i_system.h"
 #include "m_argv.h"
 #include "m_swap.h"
-
-#include "doomstat.h"
-
-#include "i_net.h"
 
 //
 // NETWORKING
@@ -125,13 +122,13 @@ static void IP_PacketSend(void)
 //
 static void IP_PacketGet(void)
 {
-    int i, c;
+    int i;
     struct sockaddr_in fromaddress;
     socklen_t fromlen;
     doomdata_t sw;
 
     fromlen = sizeof(fromaddress);
-    c = recvfrom(IP_insocket, &sw, sizeof(sw), 0, (struct sockaddr *)&fromaddress, &fromlen);
+    LONG c = recvfrom(IP_insocket, &sw, sizeof(sw), 0, (struct sockaddr *)&fromaddress, &fromlen);
     if (c == -1) {
         if (errno != EWOULDBLOCK)
             I_Error("GetPacket: %s", strerror(errno));
@@ -252,11 +249,11 @@ static void IP_InitNetwork(int i)
 static void IP_Shutdown(void)
 {
     if (IP_insocket != -1) {
-        close(IP_insocket);
+        CloseSocket(IP_insocket);
         IP_insocket = -1;
     }
     if (IP_sendsocket != -1) {
-        close(IP_sendsocket);
+        CloseSocket(IP_sendsocket);
         IP_sendsocket = -1;
     }
     if (SocketBase != NULL) {
