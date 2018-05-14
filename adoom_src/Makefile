@@ -62,7 +62,7 @@ CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
 PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
-PFLAGS += -I$(PREFIX)/m68k-amigaos/sys-include
+PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk-include
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
 INTERMEDIATE =$(CURDIR)/build/
