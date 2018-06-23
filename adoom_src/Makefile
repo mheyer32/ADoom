@@ -158,9 +158,12 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 all:	 ADoom ADoom_SndSrvr
 
 clean:
-	rm *.o
+	rm -f *.o
+	rm -rf bin
+	rm -f ADoom_SndSrvr
 
 ADoom: DoomSnd.h $(OBJS) amiga_main.o Makefile
+	mkdir -p bin
 	$(CC) $(CFLAGS) $(OBJS) amiga_main.o \
 	$(LDFLAGS) -o $(OUT)ADoom
 
