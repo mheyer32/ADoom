@@ -1,4 +1,4 @@
-		mc68020
+		mc68040
 ;		multipass
 		section	.text,code
 

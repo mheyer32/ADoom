@@ -1,4 +1,4 @@
-		mc68020
+		mc68040
 		section	.text,code
 
 ; Chunky2Planar algorithm, originally by James McCoull
