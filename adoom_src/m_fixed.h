@@ -49,6 +49,19 @@ extern fixed_t  FixedMul_060fpu(REGD0(fixed_t a), REGD1(fixed_t b));
 extern fixed_t  FixedMul_060(REGD0(fixed_t a), REGD1(fixed_t b));
 extern fixed_t  FixedDiv_040(REGD0(fixed_t a), REGD1(fixed_t b));
 extern fixed_t  FixedDiv_060fpu(REGD0(fixed_t a), REGD1(fixed_t b));
+
+static __inline__ int ULongDiv(int eins,int zwei)
+{
+	__asm __volatile
+	(
+		"divul.l %2,%0:%0\n\t"
+
+		: "=d" (eins)
+		: "0" (eins), "d" (zwei)
+	);
+
+	return eins;
+}
 #else
 fixed_t FixedMul(fixed_t a, fixed_t b);
 fixed_t FixedDiv(fixed_t a, fixed_t b);
