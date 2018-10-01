@@ -535,7 +535,6 @@ static void SAVEDS video_flipscreentask(void)
     if (video_safeport != NULL)
         DeletePort(video_safeport);
     Signal(video_maintask, SIGBREAKF_CTRL_F);
-    Wait(0);
 }
 
 /**********************************************************************/
@@ -1079,7 +1078,6 @@ void I_ShutdownGraphics(void)
     if (video_fliptask != NULL) {
         Signal(video_fliptask, SIGBREAKF_CTRL_C);
         Wait(SIGBREAKF_CTRL_F);
-        DeleteTask(video_fliptask);
         video_fliptask = NULL;
     }
     if (video_is_using_blitter) {
