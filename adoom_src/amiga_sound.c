@@ -216,7 +216,7 @@ void I_InitSound(void)
 
     clock_constant = 3579545; /* NTSC */
     if (GfxBase) {
-        if ((GfxBase->DisplayFlags & REALLY_PAL) == 0) {
+        if (GfxBase->DisplayFlags & REALLY_PAL) {
             clock_constant = 3546895; /* PAL */
         }
     } else {
