@@ -236,7 +236,10 @@ amiga_sega.o: amiga_sega.s Makefile
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
 
-doomsound_midi.library: doomsound_midi.c Makefile
+DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
+	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
+
+doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
 	$(CC) $(CFLAGS) -v  -I./ -ramiga-libr -resident -c $< -o bin/$@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile

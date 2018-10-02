@@ -10,6 +10,7 @@
 #include <stabs.h>
 
 #include "camd.h"
+#include "DoomSndFwd.h"
 
 #define ADDTABL_6(name, arg1, arg2, arg3, arg4, arg5, arg6) \
     _ADDTABL_START(name);                                   \
