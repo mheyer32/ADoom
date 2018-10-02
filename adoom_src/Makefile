@@ -155,15 +155,18 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
 #$(info $(OBJS))
 
-all:	 ADoom ADoom_SndSrvr
+all:	 ADoom ADoom_SndSrvr doomsound_midi.library
 
 clean:
-	rm *.o
+	rm -f *.o
+	rm -f bin/ADoom
+	rm -f bin/doomsound_midi.library
 
 ADoom: DoomSnd.h $(OBJS) amiga_main.o Makefile
 	$(CC) $(CFLAGS) $(OBJS) amiga_main.o \
 	$(LDFLAGS) -o $(OUT)ADoom
 
+# FIXME: this is very likely wrong.
 ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
 	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
 
@@ -233,6 +236,8 @@ amiga_sega.o: amiga_sega.s Makefile
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
 
+doomsound_midi.library: doomsound_midi.c Makefile
+	$(CC) $(CFLAGS) -v  -I./ -ramiga-libr -resident -c $< -o bin/$@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
