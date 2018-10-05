@@ -9,8 +9,8 @@
 #include <proto/realtime.h>
 #include <stabs.h>
 
-#include "camd.h"
 #include "DoomSndFwd.h"
+#include "camd.h"
 
 #define ADDTABL_6(name, arg1, arg2, arg3, arg4, arg5, arg6) \
     _ADDTABL_START(name);                                   \
@@ -44,7 +44,7 @@ const UWORD LibRevision = 1;
 struct Library *myLibPtr = NULL;
 struct ExecBase *SysBase = NULL;
 struct Library *CamdBase = NULL;
-struct Library *DoomSndBase = NULL;
+struct Library *DoomSndFwdBase = NULL;
 struct RealTimeBase *RealTimeBase = NULL;
 
 /******************************************************************************/
@@ -55,7 +55,7 @@ struct RealTimeBase *RealTimeBase = NULL;
 /*                                                                            */
 /******************************************************************************/
 
-int __saveds __UserLibInit(struct Library *myLib)
+int __UserLibInit(struct Library *myLib)
 {
     /* setup your library base - to access library functions over *this* basePtr! */
 
@@ -69,14 +69,16 @@ int __saveds __UserLibInit(struct Library *myLib)
     if ((CamdBase = OpenLibrary("camd.library", 37L)) == NULL) {
         goto failure;
     }
-    if ((DoomSndBase = OpenLibrary("doomsound.library", 0)) == NULL) {
+    if ((DoomSndFwdBase = OpenLibrary("doomsound.library", 0)) == NULL) {
         goto failure;
     }
 
+    return 1; // success!
+
 failure:
-    if (DoomSndBase) {
-        CloseLibrary(DoomSndBase);
-        DoomSndBase = NULL;
+    if (DoomSndFwdBase) {
+        CloseLibrary(DoomSndFwdBase);
+        DoomSndFwdBase = NULL;
     }
     if (CamdBase) {
         CloseLibrary(CamdBase);
@@ -86,7 +88,7 @@ failure:
         CloseLibrary(&RealTimeBase->rtb_LibNode);
         RealTimeBase = NULL;
     }
-    return 5;
+    return 0;
 }
 
 /******************************************************************************/
@@ -97,11 +99,11 @@ failure:
 /*                                                                            */
 /******************************************************************************/
 
-void __saveds __UserLibCleanup(void)
+void __UserLibCleanup(void)
 {
-    if (DoomSndBase) {
-        CloseLibrary(DoomSndBase);
-        DoomSndBase = NULL;
+    if (DoomSndFwdBase) {
+        CloseLibrary(DoomSndFwdBase);
+        DoomSndFwdBase = NULL;
     }
     if (CamdBase) {
         CloseLibrary(CamdBase);
@@ -123,46 +125,99 @@ void __saveds __UserLibCleanup(void)
 // calls the actual C function.
 // FIXME: find a way to get around the stack push/pop business and use regparms
 
-ADDTABL_1(Sfx_SetVol, d0); /* One Argument in d0 */
-__stdargs __saveds void Sfx_SetVol(int vol) {
+// Prefix my own library functions. When calling your own library functions, you're
+// supposed to go through the unprefixed functions via library base pointer and offset,
+// as other programs might have patched a lib's func table
+
+ADDTABL_1(__Sfx_SetVol, d0); /* One Argument in d0 */
+ADDTABL_6(__Sfx_Start, a0, d0, d1, d2, d3, d4);
+ADDTABL_4(__Sfx_Update, d0, d1, d2, d3);
+ADDTABL_1(__Sfx_Stop, d0);
+ADDTABL_1(__Sfx_Done, d0);
+ADDTABL_1(__Mus_SetVol, d0);
+ADDTABL_1(__Mus_Register, a0);
+ADDTABL_1(__Mus_Unregister, d0);
+ADDTABL_2(__Mus_Play, d0, d1);
+ADDTABL_1(__Mus_Stop, d0);
+ADDTABL_1(__Mus_Pause, d0);
+ADDTABL_1(__Mus_Resume, d0);
+ADDTABL_1(__Mus_Done, d0);
+ADDTABL_END();
+
+
+__stdargs void __Sfx_SetVol(int vol)
+{
+    Fwd_Sfx_SetVol(vol);
+}
+
+
+__stdargs void __Sfx_Start(char *wave, int cnum, int step, int vol, int sep, int length)
+{
+    Fwd_Sfx_Start(wave, cnum, step, vol, sep, length);
+}
+
+
+__stdargs void __Sfx_Update(int cnum, int step, int vol, int sep)
+{
+    Fwd_Sfx_Update(cnum, step, vol, sep);
+}
+
+__stdargs void __Sfx_Stop(int cnum)
+{
+    Fwd_Sfx_Stop(cnum);
+}
+
+
+__stdargs int __Sfx_Done(int cnum)
+{
+    return Fwd_Sfx_Done(cnum);
+}
+
+
+__stdargs void __Mus_SetVol(int vol)
+{
 
 }
 
-ADDTABL_6(Sfx_Start, a0, d0, d1, d2, d3, d4);
-__stdargs __saveds void Sfx_Start(char *wave, int cnum, int step, int vol, int sep, int length) {}
 
-ADDTABL_4(Sfx_Update, d0, d1, d2, d3);
-__stdargs __saveds void Sfx_Update(int cnum, int step, int vol, int sep) {}
+__stdargs int __Mus_Register(void *musdata)
+{
+    return 1;
+}
 
-ADDTABL_1(Sfx_Stop, d0);
-__stdargs __saveds void Sfx_Stop(int cnum) {}
 
-ADDTABL_1(Sfx_Done, d0);
-__stdargs __saveds int Sfx_Done(int cnum) {}
+__stdargs void __Mus_Unregister(int handle)
+{
 
-ADDTABL_1(Mus_SetVol, d0);
-__stdargs __saveds void Mus_SetVol(int vol) {}
+}
 
-ADDTABL_1(Mus_Register, a0);
-__stdargs __saveds int Mus_Register(void *musdata) {}
 
-ADDTABL_1(Mus_Unregister, d0);
-__stdargs __saveds void Mus_Unregister(int handle) {}
+__stdargs void __Mus_Play(int handle, int looping)
+{
 
-ADDTABL_2(Mus_Play, d0, d1);
-__stdargs __saveds void Mus_Play(int handle, int looping) {}
+}
 
-ADDTABL_1(Mus_Stop, d0);
-__stdargs __saveds void Mus_Stop(int handle) {}
+__stdargs void __Mus_Stop(int handle)
+{
 
-ADDTABL_1(Mus_Pause, d0);
-__stdargs __saveds void Mus_Pause(int handle) {}
+}
 
-ADDTABL_1(Mus_Resume, d0);
-__stdargs __saveds void Mus_Resume(int handle) {}
 
-ADDTABL_1(Mus_Done, d0);
-__stdargs __saveds int Mus_Done(int handle) {}
+__stdargs void __Mus_Pause(int handle)
+{
+
+}
+
+
+__stdargs void __Mus_Resume(int handle)
+{
+
+}
+
+__stdargs int __Mus_Done(int handle)
+{
+    return 1;
+}
 
 /******************************************************************************/
 /*                                                                            */
@@ -170,7 +225,7 @@ __stdargs __saveds int Mus_Done(int handle) {}
 /*                                                                            */
 /******************************************************************************/
 
-ADDTABL_END();
+
 
 /******************************************************************************/
 /*                                                                            */
