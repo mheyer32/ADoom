@@ -175,12 +175,12 @@ void I_InitSound(void)
     // Secure and configure sound device first.
     fprintf(stderr, "I_InitSound: ");
 
-    if ((DoomSndBase = OpenLibrary("doomsound.library", 37)) != NULL) {
+    if ((DoomSndBase = OpenLibrary("doomsound_midi.library", 0)) != NULL) {
         Sfx_SetVol(64);
         Mus_SetVol(64);
         numChannels = 16;
     } else {
-        fprintf(stderr, " Cannot open doomsound.library, music not available.\n");
+        fprintf(stderr, " Cannot open doomsound_midi.library, music not available.\n");
         fprintf(stderr, "I_InitSound: ");
     }
 
