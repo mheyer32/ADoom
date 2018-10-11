@@ -12,12 +12,14 @@
 #include <proto/realtime.h>
 #include <stabs.h>
 
-#include "doomtype.h"
-
 #include "DoomSnd.h"
 #include "DoomSndFwd.h"
-#include "camd.h"
+#include "doomdef.h"
+#include "doomtype.h"
 #include "m_swap.h"
+
+#include <camd.h>
+#include <midi/mididefs.h>
 
 #include <assert.h>
 #include <string.h>
@@ -75,18 +77,6 @@ typedef enum
     mus_scoreend = 0x60
 } musevent;
 
-// MIDI event codes
-typedef enum
-{
-    midi_releasekey = 0x80,
-    midi_presskey = 0x90,
-    midi_aftertouchkey = 0xA0,
-    midi_changecontroller = 0xB0,
-    midi_changepatch = 0xC0,
-    midi_aftertouchchannel = 0xD0,
-    midi_pitchwheel = 0xE0
-} midievent;
-
 // Structure to hold MUS file header
 typedef struct
 {
@@ -112,10 +102,14 @@ static unsigned int tracksize;
 static const byte controller_map[] = {0x00, 0x20, 0x01, 0x07, 0x0A, 0x0B, 0x5B, 0x5D,
                                       0x40, 0x43, 0x78, 0x7B, 0x7E, 0x7F, 0x79};
 
-static int channel_map[NUM_CHANNELS];
+static char channel_map[NUM_CHANNELS];
 
-// This would require a multi-base library, since the mainTask would differ per applcication
-static ULONG midiTics = 0;
+// This would require a multi-base library, since the mainTask would differ per application
+
+static const ULONG midiTics = TICK_FREQ / 140;  // FIXME: this probably gets rounded and will eventually
+                                                // drift. We should keep a global song time and adjust
+                                                // the ticks dependent on wallclock time
+
 static struct Task *mainTask = NULL;
 static struct Task *playerTask = NULL;
 static struct Player *player = NULL;
@@ -146,7 +140,7 @@ typedef struct
     boolean done;
 } Song;
 
-static Song *currentSong = NULL;
+volatile static Song *currentSong = NULL;
 
 const char *FindMidiDevice(void)
 {
@@ -235,6 +229,8 @@ boolean InitMidiTask(void)
         goto failure;
     }
 
+    err = SetConductorState(player, CONDSTATE_RUNNING, 0);
+
     return TRUE;
 
 failure:
@@ -242,72 +238,26 @@ failure:
     return FALSE;
 }
 
-void RestoreA4(void)
+static void RestoreA4(void)
 {
     __asm volatile("\tlea ___a4_init, a4");
 }
 
-void MidiPlayerTask(void)
-{
-    RestoreA4();
-
-    if (!InitMidiTask()) {
-        Signal(mainTask, SIGBREAKF_CTRL_C);
-        return;
-    }
-
-    //    struct Library *myDoomSndBase = OpenLibrary("doomsound.library", 0);
-
-    Signal(mainTask, SIGBREAKF_CTRL_E);
-
-    const ULONG signalBitMask = (1UL << playerSignalBit);
-    const ULONG signalMask = signalBitMask | SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_E;
-
-    while (true) {
-        ULONG signals = Wait(signalMask);
-        if (signals & SIGBREAKF_CTRL_C) {
-            break;
-        }
-        if (signals & SIGBREAKF_CTRL_E) {
-            // acknowledge we're stopping
-            //            SetSignal(0, signalBitMask);
-            //            signals &= ~signalBitMask;
-            Signal(mainTask, SIGBREAKF_CTRL_E);
-
-            // wait for maintask to do its thing
-            Wait(SIGBREAKF_CTRL_E);
-        }
-        if (signals & signalBitMask) {
-            // PlayNextNote()
-
-            // Rearm timer
-            // FIXME: we could get fancy here and adjust the tic to the next event
-            // based on the wallclock time that has passed
-            //            LONG res =
-            //                SetPlayerAttrs(player, PLAYER_AlarmTime, player->pl_AlarmTime + midiTics, PLAYER_Ready,
-            //                TRUE, TAG_END);
-        }
-    };
-
-    ShutDownMidiTask();
-    //    CloseLibrary(myDoomSndBase);
-
-    Signal(mainTask, SIGBREAKF_CTRL_E);
-}
-
-void HaltTask(void)
+static void HaltTask(void)
 {
     if (playerTask) {
         Signal(playerTask, SIGBREAKF_CTRL_E);
         Wait(SIGBREAKF_CTRL_E);
     }
 }
-void ResumeTask(void)
+static void ResumeTask(void)
 {
     if (playerTask) {
         Signal(playerTask, SIGBREAKF_CTRL_E);
     }
 }
+
+static void __stdargs MidiPlayerTask(void);
 
 /******************************************************************************/
 /*                                                                            */
@@ -551,6 +501,9 @@ __stdargs void __Mus_Play(int handle, int looping)
 
     HaltTask();
     song->state = PLAYING;
+    song->looping = !!looping;
+    song->done = false;
+    song->currentPtr.b = song->dataPtr.b + song->header.scorestart;
     currentSong = song;
     ResumeTask();
 }
@@ -579,7 +532,7 @@ __stdargs void __Mus_Resume(int handle)
     Song *song = (Song *)handle;
 
     HaltTask();
-    song->state = PAUSE;
+    song->state = PLAYING;
     ResumeTask();
 }
 
@@ -643,430 +596,309 @@ __stdargs int __Mus_Done(int handle)
 //}
 
 //// Write a key press event
-// static boolean WritePressKey(byte channel, byte key, byte velocity, const byte *midioutput)
-//{
-//    byte working = midi_presskey | channel;
+static inline void WritePressKey(byte channel, byte key, byte velocity)
+{
+    //     if (WriteTime(queuedtime, midioutput)) {
+    //         return true;
+    //     }
 
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = key & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = velocity & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    tracksize += 3;
-
-//    return false;
-//}
+    MidiMsg mm ={0};
+    mm.mm_Status = MS_NoteOn | channel;
+    mm.mm_Data1 = key & 0x7F;
+    mm.mm_Data2 = velocity & 0x7F;
+    PutMidiMsg(midiLink, &mm);
+}
 
 //// Write a key release event
-// static boolean WriteReleaseKey(byte channel, byte key, const byte *midioutput)
-//{
-//    byte working = midi_releasekey | channel;
+static inline void WriteReleaseKey(byte channel, byte key)
+{
+    //     if (WriteTime(queuedtime, midioutput)) {
+    //         return true;
+    //     }
 
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
+    MidiMsg mm ={0};
+    mm.mm_Status = MS_NoteOff | channel;
+    mm.mm_Data1 = key & 0x7F;
+    mm.mm_Data2 = 0;
 
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = key & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = 0;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    tracksize += 3;
-
-//    return false;
-//}
+    PutMidiMsg(midiLink, &mm);
+}
 
 //// Write a pitch wheel/bend event
-// static boolean WritePitchWheel(byte channel, short wheel, const byte *midioutput)
-//{
-//    byte working = midi_pitchwheel | channel;
+static boolean WritePitchWheel(byte channel, unsigned short wheel)
+{
+    //     if (WriteTime(queuedtime, midioutput)) {
+    //         return true;
+    //     }
 
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
+    // Pitch Bend Change. This message is sent to indicate a change in the pitch bender (wheel or lever, typically).
+    // The pitch bender is measured by a fourteen bit value. Center (no pitch change) is 2000H. Sensitivity is a
+    // function of the receiver, but may be set using RPN 0. (lllllll) are the least significant 7 bits. (mmmmmmm)
+    // are the most significant 7 bits.
 
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = wheel & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = (wheel >> 7) & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    tracksize += 3;
-//    return false;
-//}
+    MidiMsg mm ={0};
+    mm.mm_Status = MS_PitchBend | channel;
+    mm.mm_Data1 = wheel & 0x7F;         // LSB
+    mm.mm_Data2 = (wheel >> 7) & 0x7F;  // MSB
+}
 
 //// Write a patch change event
-// static boolean WriteChangePatch(byte channel, byte patch, const byte *midioutput)
-//{
-//    byte working = midi_changepatch | channel;
+static boolean WriteChangePatch(byte channel, byte patch)
+{
+    //     if (WriteTime(queuedtime, midioutput)) {
+    //         return true;
+    //     }
 
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = patch & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    tracksize += 2;
-
-//    return false;
-//}
+    MidiMsg mm ={0};
+    mm.mm_Status = MS_Prog | channel;
+    mm.mm_Data1 = patch & 0x7F;
+}
 
 //// Write a valued controller change event
 
-// static boolean WriteChangeController_Valued(byte channel, byte control, byte value, const byte *midioutput)
-//{
-//    byte working = midi_changecontroller | channel;
+static inline void WriteChangeController_Valued(byte channel, byte control, byte value)
+{
+    //    if (WriteTime(queuedtime, midioutput)) {
+    //        return true;
+    //    }
+    MidiMsg mm ={0};
+    mm.mm_Status = MS_Ctrl | channel;
+    mm.mm_Data1 = control & 0x7F;  // is & 7F really needed?
+    // Quirk in vanilla DOOM? MUS controller values should be
+    // 7-bit, not 8-bit.
+    //    // Fix on said quirk to stop MIDI players from complaining that
+    //    // the value is out of range:
+    mm.mm_Data2 = value & 0x80 ? 0x7F : value;
 
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
+    PutMidiMsg(midiLink, &mm);
+}
 
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    working = control & 0x7F;
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    // Quirk in vanilla DOOM? MUS controller values should be
-//    // 7-bit, not 8-bit.
-
-//    working = value;  // & 0x7F;
-
-//    // Fix on said quirk to stop MIDI players from complaining that
-//    // the value is out of range:
-
-//    if (working & 0x80) {
-//        working = 0x7F;
-//    }
-
-//    if (mem_fwrite(&working, 1, 1, midioutput) != 1) {
-//        return true;
-//    }
-
-//    tracksize += 3;
-
-//    return false;
-//}
-
-//// Write a valueless controller change event
-// static boolean WriteChangeController_Valueless(byte channel, byte control, const byte *midioutput)
-//{
-//    return WriteChangeController_Valued(channel, control, 0, midioutput);
-//}
+// Write a valueless controller change event
+static inline void WriteChangeController_Valueless(byte channel, byte control)
+{
+    return WriteChangeController_Valued(channel, control, 0);
+}
 
 //// Allocate a free MIDI channel.
+static byte AllocateMIDIChannel(void)
+{
+    byte result;
+    char max;
+    char i;
 
-// static int AllocateMIDIChannel(void)
-//{
-//    int result;
-//    int max;
-//    int i;
+    // Find the current highest-allocated channel.
 
-//    // Find the current highest-allocated channel.
+    max = -1;
 
-//    max = -1;
+    for (i = 0; i < NUM_CHANNELS; ++i) {
+        if (channel_map[i] > max) {
+            max = channel_map[i];
+        }
+    }
 
-//    for (i = 0; i < NUM_CHANNELS; ++i) {
-//        if (channel_map[i] > max) {
-//            max = channel_map[i];
-//        }
-//    }
+    // max is now equal to the highest-allocated MIDI channel.  We can
+    // now allocate the next available channel.  This also works if
+    // no channels are currently allocated (max=-1)
 
-//    // max is now equal to the highest-allocated MIDI channel.  We can
-//    // now allocate the next available channel.  This also works if
-//    // no channels are currently allocated (max=-1)
+    result = max + 1;
 
-//    result = max + 1;
+    // Don't allocate the MIDI percussion channel!
 
-//    // Don't allocate the MIDI percussion channel!
+    if (result == MIDI_PERCUSSION_CHAN) {
+        ++result;
+    }
 
-//    if (result == MIDI_PERCUSSION_CHAN) {
-//        ++result;
-//    }
-
-//    return result;
-//}
+    return result;
+}
 
 //// Given a MUS channel number, get the MIDI channel number to use
 //// in the outputted file.
 
-// static int GetMIDIChannel(int mus_channel, const byte *midioutput)
-//{
-//    // Find the MIDI channel to use for this MUS channel.
-//    // MUS channel 15 is the percusssion channel.
+static byte GetMIDIChannel(byte mus_channel)
+{
+    // Find the MIDI channel to use for this MUS channel.
+    // MUS channel 15 is the percusssion channel.
 
-//    if (mus_channel == MUS_PERCUSSION_CHAN) {
-//        return MIDI_PERCUSSION_CHAN;
-//    } else {
-//        // If a MIDI channel hasn't been allocated for this MUS channel
-//        // yet, allocate the next free MIDI channel.
+    if (mus_channel == MUS_PERCUSSION_CHAN) {
+        return MIDI_PERCUSSION_CHAN;
+    } else {
+        // If a MIDI channel hasn't been allocated for this MUS channel
+        // yet, allocate the next free MIDI channel.
 
-//        if (channel_map[mus_channel] == -1) {
-//            channel_map[mus_channel] = AllocateMIDIChannel();
+        if (channel_map[mus_channel] == -1) {
+            channel_map[mus_channel] = AllocateMIDIChannel();
 
-//            // First time using the channel, send an "all notes off"
-//            // event. This fixes "The D_DDTBLU disease" described here:
-//            // https://www.doomworld.com/vb/source-ports/66802-the
-//            WriteChangeController_Valueless(channel_map[mus_channel], 0x7b, midioutput);
-//        }
+            // First time using the channel, send an "all notes off"
+            // event. This fixes "The D_DDTBLU disease" described here:
+            // https://www.doomworld.com/vb/source-ports/66802-the
 
-//        return channel_map[mus_channel];
-//    }
-//}
+            WriteChangeController_Valueless(channel_map[mus_channel], MM_AllOff);
+        }
 
-//// Read a MUS file from a stream (musinput) and output a MIDI file to
-//// a stream (midioutput).
-////
-//// Returns 0 on success or 1 on failure.
+        return channel_map[mus_channel];
+    }
+}
 
-// boolean mus2mid(const byte *musinput, const byte *midioutput)
-//{
-//    // Header for the MUS file
-//    MusHeader musfileheader;
+static UBYTE ReadByte(MusData *data)
+{
+    return *(data->b++);
+}
 
-//    // Descriptor for the current MUS event
-//    byte eventdescriptor;
-//    int channel;  // Channel number
-//    musevent event;
+static void NewSong(Song *song)
+{
+    // Initialise channel map to mark all channels as unused.
+    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        channel_map[channel] = -1;
+    }
 
-//    // Bunch of vars read from MUS lump
-//    byte key;
-//    byte controllernumber;
-//    byte controllervalue;
+    if (song) {
+        // Seek to where the data is held
+        song->currentPtr.b = song->dataPtr.b + song->header.scorestart;
+        LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, RealTimeBase->rtb_Time + midiTics, PLAYER_Ready, TRUE, TAG_END);
+    }
+}
 
-//    // Buffer used for MIDI track size record
-//    byte tracksizebuffer[4];
+static void PlayNextEvent(Song *song)
+{
+    //    DEBUGPRINT(("PlayNextEvent()\n"));
 
-//    // Flag for when the score end marker is hit.
-//    int hitscoreend = 0;
+    byte key;
+    byte controllernumber;
+    byte controllervalue;
 
-//    // Temp working byte
-//    byte working;
-//    // Used in building up time delays
-//    unsigned int timedelay;
+    while (song->state == PLAYING) {
+        // Fetch channel number and event code:
+        byte eventdescriptor = ReadByte(&song->currentPtr);
 
-//    // Initialise channel map to mark all channels as unused.
+        byte channel = GetMIDIChannel(eventdescriptor & 0x0F);
+        musevent event = eventdescriptor & 0x70;
 
-//    for (channel = 0; channel < NUM_CHANNELS; ++channel) {
-//        channel_map[channel] = -1;
-//    }
+        switch (event) {
+        case mus_releasekey:
+            key = ReadByte(&song->currentPtr);
+            WriteReleaseKey(channel, key);
+            break;
 
-//    // Grab the header
+        case mus_presskey:
+            key = ReadByte(&song->currentPtr);
+            if (key & 0x80) {
+                // second byte has volume
+                channelvelocities[channel] = ReadByte(&song->currentPtr) & 0x7F;
+            }
+            WritePressKey(channel, key, channelvelocities[channel]);
+            break;
 
-//    if (!ReadMusHeader(musinput, &musfileheader)) {
-//        return true;
-//    }
+        case mus_pitchwheel:
+            key = ReadByte(&song->currentPtr);
+            WritePitchWheel(channel, (unsigned short)key * 64);
+            break;
 
-//#ifdef CHECK_MUS_HEADER
-//    // Check MUS header
-//    if (musfileheader.id[0] != 'M' || musfileheader.id[1] != 'U' || musfileheader.id[2] != 'S' ||
-//        musfileheader.id[3] != 0x1A) {
-//        return true;
-//    }
-//#endif
+        case mus_systemevent:
+            controllernumber = ReadByte(&song->currentPtr);
+            if (controllernumber >= 10 && controllernumber <= 14) {
+                WriteChangeController_Valueless(channel, controller_map[controllernumber]);
+            }
+            break;
 
-//    // Seek to where the data is held
-//    if (mem_fseek(musinput, (long)musfileheader.scorestart, MEM_SEEK_SET) != 0) {
-//        return true;
-//    }
+        case mus_changecontroller:
+            controllernumber = ReadByte(&song->currentPtr);
+            controllervalue = ReadByte(&song->currentPtr);
+            if (controllernumber == 0) {
+                WriteChangePatch(channel, controllervalue);
+            } else {
+                if (controllernumber >= 1 && controllernumber <= 9) {
+                    WriteChangeController_Valued(channel, controller_map[controllernumber], controllervalue);
+                }
+            }
+            break;
 
-//    // So, we can assume the MUS file is faintly legit. Let's start
-//    // writing MIDI data...
+        case mus_scoreend:
+            if (!song->looping) {
+                song->done = true;
+                song->state = STOPPED;
+            } else {
+                NewSong(song);
+                return;
+            }
+            break;
 
-//    mem_fwrite(midiheader, 1, sizeof(midiheader), midioutput);
-//    tracksize = 0;
+        default:
+            break;
+        }
 
-//    // Now, process the MUS file:
-//    while (!hitscoreend) {
-//        // Handle a block of events:
+        if (eventdescriptor & 0x80) {
+            // time delay, indicating we should wait for some time before playing the next
+            // note
+            // Now we need to read the time code:
+            // Used in building up time delays
+            unsigned int timedelay = 0;
+            while (true) {
+                byte working = ReadByte(&song->currentPtr);
+                timedelay = timedelay * 128 + (working & 0x7F);
+                if ((working & 0x80) == 0) {
+                    break;
+                }
+            }
+            timedelay = (timedelay * TICK_FREQ) / 140;
+            if (timedelay == 0)  {
+                timedelay = 1;
+            }
+            LONG res =
+                SetPlayerAttrs(player, PLAYER_AlarmTime, player->pl_AlarmTime + timedelay, PLAYER_Ready, TRUE, TAG_END);
+            return;
+        }
+    }
+}
 
-//        while (!hitscoreend) {
-//            // Fetch channel number and event code:
+static void __stdargs MidiPlayerTask(void)
+{
+    RestoreA4();
 
-//            if (mem_fread(&eventdescriptor, 1, 1, musinput) != 1) {
-//                return true;
-//            }
+    if (!InitMidiTask()) {
+        Signal(mainTask, SIGBREAKF_CTRL_C);
+        return;
+    }
 
-//            channel = GetMIDIChannel(eventdescriptor & 0x0F, midioutput);
-//            event = eventdescriptor & 0x70;
+    // Make sure the library does not get unloaded before MidiPlayerTask exits
+    struct Library *myDoomSndBase = OpenLibrary("doomsound.library", 0);
 
-//            switch (event) {
-//            case mus_releasekey:
-//                if (mem_fread(&key, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
+    Signal(mainTask, SIGBREAKF_CTRL_E);
 
-//                if (WriteReleaseKey(channel, key, midioutput)) {
-//                    return true;
-//                }
+    const ULONG signalBitMask = (1UL << playerSignalBit);
+    const ULONG signalMask = signalBitMask | SIGBREAKF_CTRL_C | SIGBREAKF_CTRL_E;
 
-//                break;
+    Song *playingSong = NULL;
 
-//            case mus_presskey:
-//                if (mem_fread(&key, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
+    while (true) {
+        ULONG signals = Wait(signalMask);
+        if (signals & SIGBREAKF_CTRL_C) {
+            break;
+        }
+        if (signals & SIGBREAKF_CTRL_E) {
+            // acknowledge we're stopping
 
-//                if (key & 0x80) {
-//                    if (mem_fread(&channelvelocities[channel], 1, 1, musinput) != 1) {
-//                        return true;
-//                    }
+            SetSignal(0, signalBitMask);
+            signals &= ~signalBitMask;
+            Signal(mainTask, SIGBREAKF_CTRL_E);
 
-//                    channelvelocities[channel] &= 0x7F;
-//                }
+            // wait for maintask to do its thing
+            Wait(SIGBREAKF_CTRL_E);
 
-//                if (WritePressKey(channel, key, channelvelocities[channel], midioutput)) {
-//                    return true;
-//                }
+            if (currentSong != playingSong) {
+                playingSong = (Song *)currentSong;
+                NewSong(playingSong);
+            }
+        }
+        if (signals & signalBitMask && playingSong) {
+            PlayNextEvent(playingSong);
+            if (playingSong->done) {
+                playingSong = NULL;
+            }
+        }
+    };
 
-//                break;
+    ShutDownMidiTask();
+    CloseLibrary(myDoomSndBase);
 
-//            case mus_pitchwheel:
-//                if (mem_fread(&key, 1, 1, musinput) != 1) {
-//                    break;
-//                }
-//                if (WritePitchWheel(channel, (short)(key * 64), midioutput)) {
-//                    return true;
-//                }
-
-//                break;
-
-//            case mus_systemevent:
-//                if (mem_fread(&controllernumber, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
-//                if (controllernumber < 10 || controllernumber > 14) {
-//                    return true;
-//                }
-
-//                if (WriteChangeController_Valueless(channel, controller_map[controllernumber], midioutput)) {
-//                    return true;
-//                }
-
-//                break;
-
-//            case mus_changecontroller:
-//                if (mem_fread(&controllernumber, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
-
-//                if (mem_fread(&controllervalue, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
-
-//                if (controllernumber == 0) {
-//                    if (WriteChangePatch(channel, controllervalue, midioutput)) {
-//                        return true;
-//                    }
-//                } else {
-//                    if (controllernumber < 1 || controllernumber > 9) {
-//                        return true;
-//                    }
-
-//                    if (WriteChangeController_Valued(channel, controller_map[controllernumber], controllervalue,
-//                                                     midioutput)) {
-//                        return true;
-//                    }
-//                }
-
-//                break;
-
-//            case mus_scoreend:
-//                hitscoreend = 1;
-//                break;
-
-//            default:
-//                return true;
-//                break;
-//            }
-
-//            if (eventdescriptor & 0x80) {
-//                break;
-//            }
-//        }
-//        // Now we need to read the time code:
-//        if (!hitscoreend) {
-//            timedelay = 0;
-//            for (;;) {
-//                if (mem_fread(&working, 1, 1, musinput) != 1) {
-//                    return true;
-//                }
-
-//                timedelay = timedelay * 128 + (working & 0x7F);
-//                if ((working & 0x80) == 0) {
-//                    break;
-//                }
-//            }
-//            queuedtime += timedelay;
-//        }
-//    }
-
-//    // End of track
-//    if (WriteEndTrack(midioutput)) {
-//        return true;
-//    }
-
-//    // Write the track size into the stream
-//    if (mem_fseek(midioutput, 18, MEM_SEEK_SET)) {
-//        return true;
-//    }
-
-//    tracksizebuffer[0] = (tracksize >> 24) & 0xff;
-//    tracksizebuffer[1] = (tracksize >> 16) & 0xff;
-//    tracksizebuffer[2] = (tracksize >> 8) & 0xff;
-//    tracksizebuffer[3] = tracksize & 0xff;
-
-//    if (mem_fwrite(tracksizebuffer, 1, 4, midioutput) != 4) {
-//        return true;
-//    }
-
-//    return false;
-//}
+    Signal(mainTask, SIGBREAKF_CTRL_E);
+}
