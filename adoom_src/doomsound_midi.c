@@ -644,6 +644,8 @@ static boolean WritePitchWheel(byte channel, unsigned short wheel)
     mm.mm_Status = MS_PitchBend | channel;
     mm.mm_Data1 = wheel & 0x7F;         // LSB
     mm.mm_Data2 = (wheel >> 7) & 0x7F;  // MSB
+
+    PutMidiMsg(midiLink, &mm);
 }
 
 //// Write a patch change event
@@ -656,6 +658,8 @@ static boolean WriteChangePatch(byte channel, byte patch)
     MidiMsg mm ={0};
     mm.mm_Status = MS_Prog | channel;
     mm.mm_Data1 = patch & 0x7F;
+
+    PutMidiMsg(midiLink, &mm);
 }
 
 //// Write a valued controller change event
