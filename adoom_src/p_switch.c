@@ -42,7 +42,7 @@ static const char rcsid[] = "$Id: p_switch.c,v 1.3 1997/01/28 22:08:29 b1 Exp $"
 //
 // CHANGE THE TEXTURE OF A WALL SWITCH TO ITS OPPOSITE
 //
-switchlist_t alphSwitchList[] = {
+FAR const switchlist_t alphSwitchList[] = {
     // Doom shareware episode 1 switches
     {"SW1BRCOM", "SW2BRCOM", 1},
     {"SW1BRN1", "SW2BRN1", 1},

@@ -31,9 +31,9 @@
 #endif
 
 #define MAXWADFILES 20
-extern char* wadfiles[MAXWADFILES];
+extern char const * wadfiles[MAXWADFILES];
 
-void D_AddFile(char* file);
+void D_AddFile(const char* file);
 
 //
 // D_DoomMain()

@@ -64,17 +64,17 @@ extern void** lumpcache;
 extern lumpinfo_t* lumpinfo;
 extern int numlumps;
 
-void W_InitMultipleFiles(char** filenames);
+void W_InitMultipleFiles(const char* const * filenames);
 void W_Reload(void);
 
-int W_CheckNumForName(char* name);
-int W_GetNumForName(char* name);
+int W_CheckNumForName(const char* name);
+int W_GetNumForName(const char* name);
 
 int W_LumpLength(REGD0(int lump));
 void W_ReadLump(REGD0(int lump), REGA0(void* dest));
 
 void* W_CacheLumpNum(REGD0(int lump), REGD1(int tag));
-void* W_CacheLumpName(char* name, int tag);
+void* W_CacheLumpName(const char* name, int tag);
 
 #endif
 //-----------------------------------------------------------------------------

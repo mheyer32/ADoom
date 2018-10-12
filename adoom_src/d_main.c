@@ -86,7 +86,7 @@ static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
 //
 void D_DoomLoop(void);
 
-char* wadfiles[MAXWADFILES];
+char const * wadfiles[MAXWADFILES];
 
 boolean devparm;      // started game with -devparm
 boolean nomonsters;   // checkparm of -nomonsters
@@ -501,7 +501,7 @@ void D_StartTitle(void)
 //
 // D_AddFile
 //
-void D_AddFile(char* file)
+void D_AddFile(const char* file)
 {
     int numwadfiles;
     char* newfile;
@@ -509,6 +509,8 @@ void D_AddFile(char* file)
     for (numwadfiles = 0; wadfiles[numwadfiles]; numwadfiles++)
         ;
 
+    //FIXME: is this ever getting freed?
+    // likely need an atexit() handler for it.
     newfile = malloc(strlen(file) + 1);
     strcpy(newfile, file);
 
