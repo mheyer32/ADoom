@@ -242,6 +242,9 @@ DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
 	$(CC) -v $(CFLAGS) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o bin/$@
 
+doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
+	$(CC) -v $(CFLAGS) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel  -c doomsound_midi.c  > $@
+
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
 	 $(LDFLAGS) -o $(OUT)test_fixed
