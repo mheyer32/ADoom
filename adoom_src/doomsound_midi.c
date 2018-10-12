@@ -132,12 +132,13 @@ typedef union {
 
 typedef struct
 {
-    MusHeader header;
-    MusData dataPtr;
     MusData currentPtr;
+    unsigned int currentTicks;
     SongState state;
     boolean looping;
     boolean done;
+    MusHeader header;
+    MusData dataPtr;
 } Song;
 
 volatile static Song *currentSong = NULL;
@@ -502,6 +503,7 @@ __stdargs void __Mus_Play(int handle, int looping)
     HaltTask();
     song->state = PLAYING;
     song->looping = !!looping;
+    song->currentTicks = 0;
     song->done = false;
     song->currentPtr.b = song->dataPtr.b + song->header.scorestart;
     currentSong = song;
@@ -514,6 +516,7 @@ __stdargs void __Mus_Stop(int handle)
 
     HaltTask();
     song->state = STOPPED;
+    song->currentTicks = 0;
     currentSong = NULL;
     ResumeTask();
 }
@@ -532,6 +535,7 @@ __stdargs void __Mus_Resume(int handle)
     Song *song = (Song *)handle;
 
     HaltTask();
+    song->currentTicks = 0;
     song->state = PLAYING;
     ResumeTask();
 }
@@ -746,15 +750,20 @@ static UBYTE ReadByte(MusData *data)
 
 static void NewSong(Song *song)
 {
-    // Initialise channel map to mark all channels as unused.
-    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        channel_map[channel] = -1;
-    }
-
     if (song) {
         // Seek to where the data is held
         song->currentPtr.b = song->dataPtr.b + song->header.scorestart;
-        LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, RealTimeBase->rtb_Time + midiTics, PLAYER_Ready, TRUE, TAG_END);
+        song->currentTicks = 0;
+
+        SetConductorState(player, CONDSTATE_RUNNING, song->currentTicks);
+        LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, midiTics, PLAYER_Ready, TRUE, TAG_END);
+    } else {
+
+    }
+
+    // Initialise channel map to mark all channels as unused.
+    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        channel_map[channel] = -1;
     }
 }
 
@@ -839,12 +848,11 @@ static void PlayNextEvent(Song *song)
                     break;
                 }
             }
-            timedelay = (timedelay * TICK_FREQ) / 140;
-            if (timedelay == 0)  {
-                timedelay = 1;
-            }
-            LONG res =
-                SetPlayerAttrs(player, PLAYER_AlarmTime, player->pl_AlarmTime + timedelay, PLAYER_Ready, TRUE, TAG_END);
+            // Advance global time in song
+            song->currentTicks += timedelay;
+            // convert MUS ticks into realtime.library ticks
+            ULONG alarmTime = (song->currentTicks * TICK_FREQ) / 140;
+            LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, alarmTime, PLAYER_Ready, TRUE, TAG_END);
             return;
         }
     }
@@ -887,6 +895,11 @@ static void __stdargs MidiPlayerTask(void)
             if (currentSong != playingSong) {
                 playingSong = (Song *)currentSong;
                 NewSong(playingSong);
+            } else {
+                if (playingSong && playingSong->currentTicks == 0) {
+                    // song time has been reset, so reset conductor time
+                    SetConductorState(player, CONDSTATE_RUNNING, 0);
+                }
             }
         }
         if (signals & signalBitMask && playingSong) {
