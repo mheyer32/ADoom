@@ -163,8 +163,8 @@ void I_Quit(void)
     extern void I_SetColour(int n, UBYTE r, UBYTE g, UBYTE b);
 
     D_QuitNetGame();
-    I_ShutdownSound();
     I_ShutdownMusic();
+    I_ShutdownSound();
     M_SaveDefaults();
     I_ShutdownGraphics();
     ShutdownTimer();

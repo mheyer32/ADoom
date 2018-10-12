@@ -18,6 +18,7 @@
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "s_sound.h"
 
 //#include "doomsound.h"
 #include "DoomSnd.h"
@@ -508,6 +509,7 @@ void I_InitMusic(void)
 void I_ShutdownMusic(void)
 {
     //  fprintf (stderr, "I_ShutdownMusic()\n");
+     S_StopMusic();
 }
 
 /**********************************************************************/
