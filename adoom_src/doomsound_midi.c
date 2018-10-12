@@ -188,6 +188,7 @@ void ShutDownMidiTask(void)
         FreeSignal(playerSignalBit);
     }
     if (midiNode) {
+        // FIXME: set reset sysex to device to get clean slate
         FlushMidi(midiNode);
         if (midiLink) {
             RemoveMidiLink(midiLink);
@@ -214,6 +215,8 @@ boolean InitMidiTask(void)
     if (!midiLink) {
         goto failure;
     }
+
+    // FIXME: set reset sysex to device to get clean slate
 
     // technically, the Task is supposed to open its own library bases...
     struct Task *playerTask = FindTask(NULL);
@@ -439,7 +442,7 @@ __stdargs int __Mus_Register(void *musdata)
     if (!playerTask) {
         mainTask = FindTask(NULL);
 
-        if ((playerTask = (struct Task *)CreateNewProcTags(NP_Name, (Tag) "DOOM Midi", NP_Priority, 10, NP_Entry,
+        if ((playerTask = (struct Task *)CreateNewProcTags(NP_Name, (Tag) "DOOM Midi", NP_Priority, 21, NP_Entry,
                                                            (Tag)MidiPlayerTask, NP_StackSize, 64000, TAG_END)) ==
             NULL) {
             return 0;
@@ -537,7 +540,6 @@ __stdargs int __Mus_Done(int handle)
     Song *song = (Song *)handle;
     return song->done;
 }
-
 
 // Write a key press event
 static inline void WritePressKey(byte channel, byte key, byte velocity)
@@ -682,11 +684,13 @@ static void NewSong(Song *song)
         SetConductorState(player, CONDSTATE_RUNNING, song->currentTicks);
         LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, midiTics, PLAYER_Ready, TRUE, TAG_END);
     } else {
-
     }
 
     // Initialise channel map to mark all channels as unused.
     for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        if (channel_map[channel] != -1) {
+            WriteChangeController_Valueless(channel_map[channel], MM_AllOff);
+        }
         channel_map[channel] = -1;
     }
 }
