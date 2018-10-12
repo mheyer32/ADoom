@@ -239,19 +239,19 @@ failure:
     return FALSE;
 }
 
-static void RestoreA4(void)
+static inline void RestoreA4(void)
 {
     __asm volatile("\tlea ___a4_init, a4");
 }
 
-static void HaltTask(void)
+static inline void HaltTask(void)
 {
     if (playerTask) {
         Signal(playerTask, SIGBREAKF_CTRL_E);
         Wait(SIGBREAKF_CTRL_E);
     }
 }
-static void ResumeTask(void)
+static inline void ResumeTask(void)
 {
     if (playerTask) {
         Signal(playerTask, SIGBREAKF_CTRL_E);
@@ -464,16 +464,8 @@ __stdargs int __Mus_Register(void *musdata)
         FreeVec(song);
         return 0;
     }
-    //    Mus_Resume(1);
-    //    Mus_Stop(1);
-    //    Mus_Unregister(1);
-
-    //    HaltTask();
-    //    currentMus = (const MusHeader*)musdata;
-    //    currentMusData = (const musevent*)((const byte*)currentMus + currentMus->scorestart);
 
     return (int)song;
-    //    return 0;
 }
 
 __stdargs void __Mus_Unregister(int handle)
@@ -546,81 +538,22 @@ __stdargs int __Mus_Done(int handle)
     return song->done;
 }
 
-/******************************************************************************/
-/*                                                                            */
-/* endtable marker (required!)                                                */
-/*                                                                            */
-/******************************************************************************/
 
-// Write timestamp to a MIDI file.
-
-// static boolean WriteTime(unsigned int time, const byte *midioutput)
-//{
-//    unsigned int buffer = time & 0x7F;
-//    byte writeval;
-
-//    while ((time >>= 7) != 0) {
-//        buffer <<= 8;
-//        buffer |= ((time & 0x7F) | 0x80);
-//    }
-
-//    for (;;) {
-//        writeval = (byte)(buffer & 0xFF);
-
-//        if (mem_fwrite(&writeval, 1, 1, midioutput) != 1) {
-//            return true;
-//        }
-
-//        ++tracksize;
-
-//        if ((buffer & 0x80) != 0) {
-//            buffer >>= 8;
-//        } else {
-//            queuedtime = 0;
-//            return false;
-//        }
-//    }
-//}
-
-//// Write the end of track marker
-// static boolean WriteEndTrack(const byte *midioutput)
-//{
-//    byte endtrack[] = {0xFF, 0x2F, 0x00};
-
-//    if (WriteTime(queuedtime, midioutput)) {
-//        return true;
-//    }
-
-//    if (mem_fwrite(endtrack, 1, 3, midioutput) != 3) {
-//        return true;
-//    }
-
-//    tracksize += 3;
-//    return false;
-//}
-
-//// Write a key press event
+// Write a key press event
 static inline void WritePressKey(byte channel, byte key, byte velocity)
 {
-    //     if (WriteTime(queuedtime, midioutput)) {
-    //         return true;
-    //     }
-
-    MidiMsg mm ={0};
+    MidiMsg mm = {0};
     mm.mm_Status = MS_NoteOn | channel;
     mm.mm_Data1 = key & 0x7F;
     mm.mm_Data2 = velocity & 0x7F;
+
     PutMidiMsg(midiLink, &mm);
 }
 
-//// Write a key release event
+// Write a key release event
 static inline void WriteReleaseKey(byte channel, byte key)
 {
-    //     if (WriteTime(queuedtime, midioutput)) {
-    //         return true;
-    //     }
-
-    MidiMsg mm ={0};
+    MidiMsg mm = {0};
     mm.mm_Status = MS_NoteOff | channel;
     mm.mm_Data1 = key & 0x7F;
     mm.mm_Data2 = 0;
@@ -628,19 +561,14 @@ static inline void WriteReleaseKey(byte channel, byte key)
     PutMidiMsg(midiLink, &mm);
 }
 
-//// Write a pitch wheel/bend event
-static boolean WritePitchWheel(byte channel, unsigned short wheel)
+// Write a pitch wheel/bend event
+static inline boolean WritePitchWheel(byte channel, unsigned short wheel)
 {
-    //     if (WriteTime(queuedtime, midioutput)) {
-    //         return true;
-    //     }
-
     // Pitch Bend Change. This message is sent to indicate a change in the pitch bender (wheel or lever, typically).
     // The pitch bender is measured by a fourteen bit value. Center (no pitch change) is 2000H. Sensitivity is a
     // function of the receiver, but may be set using RPN 0. (lllllll) are the least significant 7 bits. (mmmmmmm)
     // are the most significant 7 bits.
-
-    MidiMsg mm ={0};
+    MidiMsg mm = {0};
     mm.mm_Status = MS_PitchBend | channel;
     mm.mm_Data1 = wheel & 0x7F;         // LSB
     mm.mm_Data2 = (wheel >> 7) & 0x7F;  // MSB
@@ -648,34 +576,26 @@ static boolean WritePitchWheel(byte channel, unsigned short wheel)
     PutMidiMsg(midiLink, &mm);
 }
 
-//// Write a patch change event
-static boolean WriteChangePatch(byte channel, byte patch)
+// Write a patch change event
+static inline boolean WriteChangePatch(byte channel, byte patch)
 {
-    //     if (WriteTime(queuedtime, midioutput)) {
-    //         return true;
-    //     }
-
-    MidiMsg mm ={0};
+    MidiMsg mm = {0};
     mm.mm_Status = MS_Prog | channel;
     mm.mm_Data1 = patch & 0x7F;
 
     PutMidiMsg(midiLink, &mm);
 }
 
-//// Write a valued controller change event
-
+// Write a valued controller change event
 static inline void WriteChangeController_Valued(byte channel, byte control, byte value)
 {
-    //    if (WriteTime(queuedtime, midioutput)) {
-    //        return true;
-    //    }
-    MidiMsg mm ={0};
+    MidiMsg mm = {0};
     mm.mm_Status = MS_Ctrl | channel;
     mm.mm_Data1 = control & 0x7F;  // is & 7F really needed?
     // Quirk in vanilla DOOM? MUS controller values should be
     // 7-bit, not 8-bit.
-    //    // Fix on said quirk to stop MIDI players from complaining that
-    //    // the value is out of range:
+    // Fix on said quirk to stop MIDI players from complaining that
+    // the value is out of range:
     mm.mm_Data2 = value & 0x80 ? 0x7F : value;
 
     PutMidiMsg(midiLink, &mm);
@@ -747,7 +667,7 @@ static byte GetMIDIChannel(byte mus_channel)
     }
 }
 
-static UBYTE ReadByte(MusData *data)
+static inline UBYTE ReadByte(MusData *data)
 {
     return *(data->b++);
 }
@@ -773,8 +693,6 @@ static void NewSong(Song *song)
 
 static void PlayNextEvent(Song *song)
 {
-    //    DEBUGPRINT(("PlayNextEvent()\n"));
-
     byte key;
     byte controllernumber;
     byte controllervalue;
