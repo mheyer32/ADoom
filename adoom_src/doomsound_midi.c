@@ -421,7 +421,23 @@ __stdargs int __Sfx_Done(int cnum)
     return Fwd_Sfx_Done(cnum);
 }
 
-__stdargs void __Mus_SetVol(int vol) {}
+__stdargs void __Mus_SetVol(int vol)
+{
+    MidiMsg mm = {0};
+    mm.mm_Data1 = MC_Volume;
+    // DoomSound.library seems to accept 0..64
+    mm.mm_Data2 = vol * 2;
+    if (mm.mm_Data2 & 0x80) {
+        mm.mm_Data2 = 0x7F;
+    }
+
+    HaltTask();
+    for( byte c = 0; c < NUM_CHANNELS; ++c) {
+        mm.mm_Status = MS_Ctrl | c;
+        PutMidiMsg(midiLink, &mm);
+    }
+    ResumeTask();
+}
 
 boolean __stdargs ReadMusHeader(MusData *musdata, MusHeader *header)
 {
