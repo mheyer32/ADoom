@@ -89,12 +89,27 @@ typedef struct
 } MusHeader;
 
 // Cached channel velocities
-static byte channelvelocities[] = {127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127};
-static const byte controller_map[] = {0x00, 0x20, 0x01, 0x07, 0x0A, 0x0B, 0x5B, 0x5D,
-                                      0x40, 0x43, 0x78, 0x7B, 0x7E, 0x7F, 0x79};
+static const byte controller_map[] = {
+    MS_Prog,
+    MC_Bank /*FIXME: was 0x20; MUS file format says controller 1 is 'bank select' so MC_Bank seems the right choice? */,
+    MC_ModWheel,
+    MC_Volume,
+    MC_Pan,
+    MC_Expression,
+    MC_ExtDepth,
+    MC_ChorusDepth,
+    MC_Sustain,
+    MC_SoftPedal,
+    MC_Max /*120: all channels off*/,
+    MM_AllOff,
+    MM_Mono,
+    MM_Poly,
+    MM_ResetCtrl};
 
+static byte channelvelocities[NUM_CHANNELS];
+static byte channelVolumes[NUM_CHANNELS];
 static char channel_map[NUM_CHANNELS];
-static byte masterVolume;
+static byte masterVolume = 32;
 
 // This would require a multi-base library, since the mainTask would differ per application
 
@@ -134,6 +149,8 @@ typedef struct
 } Song;
 
 volatile static Song *currentSong = NULL;
+
+static void ResetChannels(void);
 
 const char *FindMidiDevice(void)
 {
@@ -180,6 +197,8 @@ void ShutDownMidiTask(void)
         FreeSignal(playerSignalBit);
     }
     if (midiNode) {
+        ResetChannels();
+
         // FIXME: set reset sysex to device to get clean slate
         FlushMidi(midiNode);
         if (midiLink) {
@@ -190,6 +209,9 @@ void ShutDownMidiTask(void)
         midiNode = NULL;
     }
 }
+
+static void SetMasterVolume(int volume);
+static inline void WriteChannelVolume(byte channel, byte volume);
 
 boolean InitMidiTask(void)
 {
@@ -227,6 +249,16 @@ boolean InitMidiTask(void)
 
     err = SetConductorState(player, CONDSTATE_RUNNING, 0);
 
+    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        channelvelocities[channel] = 127;
+        channelVolumes[channel] = 127;
+        channel_map[channel] = -1;
+    }
+    channel_map[MUS_PERCUSSION_CHAN] = MIDI_PERCUSSION_CHAN;
+
+    // start with a low, but audible volume
+    SetMasterVolume(masterVolume);
+
     return TRUE;
 
 failure:
@@ -252,8 +284,6 @@ static inline void ResumeTask(void)
         Signal(playerTask, SIGBREAKF_CTRL_E);
     }
 }
-
-static void SetMasterVolume(int volume);
 
 static void __stdargs MidiPlayerTask(void);
 
@@ -430,17 +460,10 @@ void SetMasterVolume(int volume)
 {
     masterVolume = volume;
 
-    MidiMsg mm = {0};
-    mm.mm_Data1 = MC_Volume;
-    // DoomSound.library seems to accept 0..64
-    mm.mm_Data2 = masterVolume * 2;
-    if (mm.mm_Data2 & 0x80) {
-        mm.mm_Data2 = 0x7F;
-    }
-
-    for (byte c = 0; c < NUM_CHANNELS; ++c) {
-        mm.mm_Status = MS_Ctrl | c;
-        PutMidiMsg(midiLink, &mm);
+    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        if (channel_map[channel] != -1) {
+            WriteChannelVolume(channel_map[channel], channelVolumes[channel]);
+        }
     }
 }
 
@@ -614,7 +637,7 @@ static inline void WriteChangeController_Valued(byte channel, byte control, byte
 {
     MidiMsg mm = {0};
     mm.mm_Status = MS_Ctrl | channel;
-    mm.mm_Data1 = control & 0x7F;  // is & 7F really needed?
+    mm.mm_Data1 = control;
     // Quirk in vanilla DOOM? MUS controller values should be
     // 7-bit, not 8-bit.
     // Fix on said quirk to stop MIDI players from complaining that
@@ -622,6 +645,14 @@ static inline void WriteChangeController_Valued(byte channel, byte control, byte
     mm.mm_Data2 = value & 0x80 ? 0x7F : value;
 
     PutMidiMsg(midiLink, &mm);
+}
+
+static inline void WriteChannelVolume(byte channel, byte volume)
+{
+    // affect channel volume by master volume
+    channelVolumes[channel] = volume;
+    volume = ((unsigned short)volume * masterVolume) / 64;
+    WriteChangeController_Valued(channel, MC_Volume, volume);
 }
 
 // Write a valueless controller change event
@@ -682,7 +713,6 @@ static byte GetMIDIChannel(byte mus_channel)
             // First time using the channel, send an "all notes off"
             // event. This fixes "The D_DDTBLU disease" described here:
             // https://www.doomworld.com/vb/source-ports/66802-the
-
             WriteChangeController_Valueless(channel_map[mus_channel], MM_AllOff);
         }
 
@@ -693,6 +723,20 @@ static byte GetMIDIChannel(byte mus_channel)
 static inline UBYTE ReadByte(MusData *data)
 {
     return *(data->b++);
+}
+
+static void ResetChannels(void)
+{
+    // Initialise channel map to mark all channels as unused.
+    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
+        if (channel_map[channel] != -1) {
+            WriteChangeController_Valueless(channel_map[channel], MM_ResetCtrl);
+            WriteChangeController_Valueless(channel_map[channel], MC_Max);
+            WriteChangeController_Valueless(channel_map[channel], MM_AllOff);
+        }
+        channel_map[channel] = -1;
+    }
+    channel_map[MUS_PERCUSSION_CHAN] = MIDI_PERCUSSION_CHAN;
 }
 
 static void NewSong(Song *song)
@@ -707,15 +751,8 @@ static void NewSong(Song *song)
     } else {
     }
 
-    // Initialise channel map to mark all channels as unused.
-    for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        if (channel_map[channel] != -1) {
-            WriteChangeController_Valueless(channel_map[channel], MM_AllOff);
-        }
-        channel_map[channel] = -1;
-    }
-
-    SetMasterVolume(masterVolume);
+    // Silence all channels
+    ResetChannels();
 }
 
 static void PlayNextEvent(Song *song)
@@ -765,7 +802,11 @@ static void PlayNextEvent(Song *song)
                 WriteChangePatch(channel, controllervalue);
             } else {
                 if (controllernumber >= 1 && controllernumber <= 9) {
-                    WriteChangeController_Valued(channel, controller_map[controllernumber], controllervalue);
+                    if (controllernumber == 3) {
+                        WriteChannelVolume(channel, controllervalue);
+                    } else {
+                        WriteChangeController_Valued(channel, controller_map[controllernumber], controllervalue);
+                    }
                 }
             }
             break;
@@ -833,11 +874,7 @@ static void __stdargs MidiPlayerTask(void)
         }
         if (signals & SIGBREAKF_CTRL_E) {
             // acknowledge we're stopping
-
-            SetSignal(0, signalBitMask);
-            signals &= ~signalBitMask;
             Signal(mainTask, SIGBREAKF_CTRL_E);
-
             // wait for maintask to do its thing
             Wait(SIGBREAKF_CTRL_E);
 
@@ -845,17 +882,15 @@ static void __stdargs MidiPlayerTask(void)
                 playingSong = (Song *)currentSong;
                 NewSong(playingSong);
             } else {
-                if (playingSong && playingSong->currentTicks == 0) {
+                if (playingSong && playingSong->state == PLAYING && playingSong->currentTicks == 0) {
                     // song time has been reset, so reset conductor time
                     SetConductorState(player, CONDSTATE_RUNNING, 0);
+                    LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, midiTics, PLAYER_Ready, TRUE, TAG_END);
                 }
             }
         }
-        if (signals & signalBitMask && playingSong) {
+        if ((signals & signalBitMask) && playingSong) {
             PlayNextEvent(playingSong);
-            if (playingSong->done) {
-                playingSong = NULL;
-            }
         }
     };
 
