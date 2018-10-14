@@ -1,25 +1,20 @@
+#provide these as env variables at commandline
+# i.e.  DEBUG=1 make all -j8
+DEBUG ?= 0
+BINDIR ?= bin
+USEIXEMUL ?= 1
+
 CC=m68k-amigaos-gcc
+STRIP=m68k-amigaos-strip
 PHXASS=vasmm68k_mot
 
 PREFIX = $(shell ./getprefix.sh "$(CC)")
 
-#-noixemul
-#-fbaserel
-#-mcrt=clib2
-#-mcrt=nix13
-#-msmall-code
-#-Wa,-adhln
-#-mregparm=4
-#-v   #verbose
-#-fstrength-reduce
-
 CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
-CLIB_LDFLAGS =
+CLIB_LDFLAGS = -mcrt=clib2
 
 NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
-NOIXEMUL_LDFLAGS =
-
-USEIXEMUL ?= 1
+NOIXEMUL_LDFLAGS = -noixemul
 
 ifeq ($(USEIXEMUL), 1)
 RUNTIME_CFLAGS = $(NOIXEMUL_CFLAGS)
@@ -29,39 +24,23 @@ else
 	RUNTIME_LDFLAGS = $(CLIB_LDFLAGS)
 endif
 
-#-fbbb=abcefimprs
-#-fbbb=
-#-fbbb=Enable Bebbo's optimizations.
-# +    enable all optimizations
-# a   commute add move instructions
-# b    use register for base addresses
-# c    convert load const and compare into a sub
-# e    eliminate dead assignments + redundant loads
-# f	   shrink stack frame
-# i    use post increment on addresses
-# m    merge add and move statements
-# p    propagate move assignment pairs out of loops
-# r    register renaming to maybe save registers
-# s    a strcpy optimization
-# v    be verbose
-# V    be very verbose
-# x    dump insns
-# Default: -fbbb=+ which yields -fbbb=abcefimprs
-
-#-v -fbbb=Vabcefimprs
-
-CFLAGS = $(RUNTIME_CFLAGS)
-CFLAGS += -fbaserel -m68030 -m68881 -g -msmall-code
-CFLAGS += -Ofast -fstrength-reduce -fomit-frame-pointer
-CFLAGS += -Werror -Wimplicit -Wstrict-prototypes
-#CFLAGS += -include "doomdef.h"
-
-#-DRANGECHECK
-CFLAGS += -DNDEBUG -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
-
+CFLAGS = $(RUNTIME_CFLAGS) -fbaserel -m68020-60 -msmall-code
+CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
+CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -m68882
+ifeq ($(DEBUG), 1)
+	CFLAGS += -Og -g -ggdb
+	LFLAGS += -g -ggdb
+	#-DRANGECHECK
+else
+	CFLAGS += -DNDEBUG -Ofast -fstrength-reduce -ffast-math -fomit-frame-pointer
+	# still provide symbols, will be stripped away  for target executable
+	CFLAGS += -g -ggdb
+	LFLAGS += -g -ggdb
+endif
+
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk-include
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
@@ -84,6 +63,7 @@ OBJS = \
 	amiga_data.o \
 	amiga_sight.o \
 	amiga_things.o \
+	amiga_main.o \
 	amiga_median.o \
 	amiga_timer.o \
 	amiga_video.o \
@@ -162,13 +142,13 @@ clean:
 	rm -f bin/ADoom
 	rm -f bin/doomsound_midi.library
 
-ADoom: DoomSnd.h $(OBJS) amiga_main.o Makefile
-	$(CC) $(CFLAGS) $(OBJS) amiga_main.o \
-	$(LDFLAGS) -o $(OUT)ADoom
+ADoom: DoomSnd.h $(OBJS)  Makefile
+		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
+		$(STRIP) --strip-debug --strip-unneeded $@ -o $(BINDIR)/$@
 
 # FIXME: this is very likely wrong.
-ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
-	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
+#ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
+#	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
 
 amiga_fixed.o: amiga_fixed.s
 	$(PHXASS) $(PFLAGS) amiga_fixed.s
@@ -240,7 +220,8 @@ DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
 
 doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o bin/$@
+	$(CC) -v $(CFLAGS) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
+	$(STRIP) --strip-debug --strip-unneeded $@ -o  $(BINDIR)/$@
 
 doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
 	$(CC) -v $(CFLAGS) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel  -c doomsound_midi.c  > $@
