@@ -1636,7 +1636,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 
 /**********************************************************************/
 //
-static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+static struct InputEvent * SAVEDS video_inputhandler(REG(a0, struct InputEvent *ie),
                                                               REG(a1, APTR data))
 {
     event_t event;
