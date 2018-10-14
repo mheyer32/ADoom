@@ -90,19 +90,11 @@ typedef struct
 
 // Cached channel velocities
 static byte channelvelocities[] = {127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127, 127};
-
-// Timestamps between sequences of MUS events
-
-static unsigned int queuedtime = 0;
-
-// Counter for the length of the track
-
-static unsigned int tracksize;
-
 static const byte controller_map[] = {0x00, 0x20, 0x01, 0x07, 0x0A, 0x0B, 0x5B, 0x5D,
                                       0x40, 0x43, 0x78, 0x7B, 0x7E, 0x7F, 0x79};
 
 static char channel_map[NUM_CHANNELS];
+static byte masterVolume;
 
 // This would require a multi-base library, since the mainTask would differ per application
 
@@ -260,6 +252,8 @@ static inline void ResumeTask(void)
         Signal(playerTask, SIGBREAKF_CTRL_E);
     }
 }
+
+static void SetMasterVolume(int volume);
 
 static void __stdargs MidiPlayerTask(void);
 
@@ -423,20 +417,31 @@ __stdargs int __Sfx_Done(int cnum)
 
 __stdargs void __Mus_SetVol(int vol)
 {
+    if (playerTask && midiLink) {
+        HaltTask();
+        SetMasterVolume(vol);
+        ResumeTask();
+    } else {
+        masterVolume = vol;
+    }
+}
+
+void SetMasterVolume(int volume)
+{
+    masterVolume = volume;
+
     MidiMsg mm = {0};
     mm.mm_Data1 = MC_Volume;
     // DoomSound.library seems to accept 0..64
-    mm.mm_Data2 = vol * 2;
+    mm.mm_Data2 = masterVolume * 2;
     if (mm.mm_Data2 & 0x80) {
         mm.mm_Data2 = 0x7F;
     }
 
-    HaltTask();
-    for( byte c = 0; c < NUM_CHANNELS; ++c) {
+    for (byte c = 0; c < NUM_CHANNELS; ++c) {
         mm.mm_Status = MS_Ctrl | c;
         PutMidiMsg(midiLink, &mm);
     }
-    ResumeTask();
 }
 
 boolean __stdargs ReadMusHeader(MusData *musdata, MusHeader *header)
@@ -709,6 +714,8 @@ static void NewSong(Song *song)
         }
         channel_map[channel] = -1;
     }
+
+    SetMasterVolume(masterVolume);
 }
 
 static void PlayNextEvent(Song *song)
