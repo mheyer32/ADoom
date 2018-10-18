@@ -562,7 +562,7 @@ _R_RenderMaskedSegRange:
 		lsr.l	d5,d0
 		cmp.l	#MAXLIGHTSCALE,d0
 		bmi.b	.rrl_IndexOK
-		moveq	#48,d0	;saves us a branch
+		moveq	#MAXLIGHTSCALE-1,d0	;saves us a branch
 .rrl_IndexOK:
 		move.l	(a5,d0.l*4),_dc_colormap(a4)
 
