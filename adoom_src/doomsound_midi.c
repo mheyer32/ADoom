@@ -295,6 +295,8 @@ static void __stdargs MidiPlayerTask(void);
 /*                                                                            */
 /******************************************************************************/
 
+__stdargs void __UserLibCleanup(void);
+
 __stdargs int __UserLibInit(struct Library *myLib)
 {
     /* setup your library base - to access library functions over *this* basePtr! */
@@ -315,26 +317,11 @@ __stdargs int __UserLibInit(struct Library *myLib)
         goto failure;
     }
 
-    return 1;  // success!
+    return 0;  // success!
 
 failure:
-    if (DOSBase) {
-        CloseLibrary(&DOSBase->dl_lib);
-        DOSBase = NULL;
-    }
-    if (DoomSndFwdBase) {
-        CloseLibrary(DoomSndFwdBase);
-        DoomSndFwdBase = NULL;
-    }
-    if (CamdBase) {
-        CloseLibrary(CamdBase);
-        CamdBase = NULL;
-    }
-    if (RealTimeBase) {
-        CloseLibrary(&RealTimeBase->rtb_LibNode);
-        RealTimeBase = NULL;
-    }
-    return 0;
+    __UserLibCleanup();
+    return -5;
 }
 
 /******************************************************************************/
