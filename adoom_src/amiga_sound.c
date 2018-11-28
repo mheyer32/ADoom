@@ -18,6 +18,7 @@
 #include "m_misc.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "s_sound.h"
 
 //#include "doomsound.h"
 #include "DoomSnd.h"
@@ -175,12 +176,15 @@ void I_InitSound(void)
     // Secure and configure sound device first.
     fprintf(stderr, "I_InitSound: ");
 
-    if ((DoomSndBase = OpenLibrary("doomsound.library", 37)) != NULL) {
+    if ((DoomSndBase = OpenLibrary("doomsound_midi.library", 0)) == NULL) {
+        DoomSndBase = OpenLibrary("doomsound.library", 37);
+    }
+    if (DoomSndBase) {
         Sfx_SetVol(64);
         Mus_SetVol(64);
         numChannels = 16;
     } else {
-        fprintf(stderr, " Cannot open doomsound.library, music not available.\n");
+        fprintf(stderr, " Cannot open doomsound_midi.library, music not available.\n");
         fprintf(stderr, "I_InitSound: ");
     }
 
@@ -216,7 +220,7 @@ void I_InitSound(void)
 
     clock_constant = 3579545; /* NTSC */
     if (GfxBase) {
-        if ((GfxBase->DisplayFlags & REALLY_PAL) == 0) {
+        if (GfxBase->DisplayFlags & REALLY_PAL) {
             clock_constant = 3546895; /* PAL */
         }
     } else {
@@ -508,6 +512,7 @@ void I_InitMusic(void)
 void I_ShutdownMusic(void)
 {
     //  fprintf (stderr, "I_ShutdownMusic()\n");
+     S_StopMusic();
 }
 
 /**********************************************************************/

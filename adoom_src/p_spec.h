@@ -149,8 +149,8 @@ void P_SpawnGlowingLight(sector_t* sector);
 //
 typedef struct
 {
-    char name1[9];
-    char name2[9];
+    const char name1[9];
+    const char name2[9];
     short episode;
 
 } switchlist_t;

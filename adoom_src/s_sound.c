@@ -501,7 +501,7 @@ void S_SetMusicVolume(int volume)
         I_Error("Attempt to set music volume at %d", volume);
     }
 
-    I_SetMusicVolume(127);
+//    I_SetMusicVolume(127); // why is this here?
     I_SetMusicVolume(volume);
     snd_MusicVolume = volume;
 }

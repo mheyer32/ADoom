@@ -78,8 +78,9 @@ int weirdaspect;
 
 #define NUMPALETTES 14
 
+#ifdef INDIVISION
 // Palette translation for Indivision GFX
-static byte ptranslate[128] = {
+static const byte ptranslate[128] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x70, 0x71, 0x72,
     0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7a, 0x7b, 0x7c, 0x7d, 0x7e, 0x7f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25,
     0x26, 0x27, 0x28, 0x29, 0x2a, 0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
@@ -88,7 +89,6 @@ static byte ptranslate[128] = {
     0x3f, 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x50, 0x51,
     0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5a, 0x5b, 0x5c, 0x5d, 0x5e, 0x5f,
 };
-#ifdef INDIVISION
 int video_indigfx = 0;  // Indivision GFX mode
 #endif
 ULONG gfxlength = 0;
@@ -136,7 +136,7 @@ static int video_f_cache_mode;
 static int video_c_cache_mode;
 static struct RastPort video_temprp;
 static struct BitMap video_tmp_bm = {0, 0, 0, 0, 0, {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}};
-static UWORD CHIP emptypointer[] = {
+static const UWORD CHIP emptypointer[] = {
     0x0000, 0x0000, /* reserved, must be NULL */
     0x0000, 0x0000, /* 1 row of image data */
     0x0000, 0x0000  /* reserved, must be NULL */
@@ -151,8 +151,7 @@ static struct MsgPort *ih_mp = NULL;
 static struct IOStdReq *ih_io = NULL;
 static BOOL inputhandler_is_open = FALSE;
 
-static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
-                                                              REG(a1, APTR data));
+static struct InputEvent *SAVEDS video_inputhandler(REG(a0, struct InputEvent *ie), REG(a1, APTR data));
 static int xlate[0x68] = {'`',
                           '1',
                           '2',
@@ -454,7 +453,7 @@ static void video_do_fps(struct RastPort *rp, int yoffset)
 // SIGBREAKF_CTRL_F and SIGBREAKF_CTRL_C are used for synchronisation
 // with the main task.
 
-static void SAVEDS INTERRUPT video_flipscreentask(void)
+static void SAVEDS video_flipscreentask(void)
 {
     ULONG sig;
     struct MsgPort *video_dispport, *video_safeport;
@@ -536,7 +535,6 @@ static void SAVEDS INTERRUPT video_flipscreentask(void)
     if (video_safeport != NULL)
         DeletePort(video_safeport);
     Signal(video_maintask, SIGBREAKF_CTRL_F);
-    Wait(0);
 }
 
 /**********************************************************************/
@@ -913,7 +911,7 @@ void I_InitGraphics(void)
     }
 
     if (!M_CheckParm("-mousepointer"))
-        SetPointer(video_window, emptypointer, 1, 16, 0, 0);
+        SetPointer(video_window, (UWORD*)emptypointer, 1, 16, 0, 0);
 
     I_RecalcPalettes();
 
@@ -938,6 +936,7 @@ void I_InitGraphics(void)
         ih_io->io_Data = input_handler;
         ih_io->io_Command = IND_ADDHANDLER;
         DoIO((struct IORequest *)ih_io);
+        //FIXME: if it wasn't for this, I could make xlate const
         xlate[0x66] = KEY_RCTRL;
     }
 
@@ -1080,7 +1079,6 @@ void I_ShutdownGraphics(void)
     if (video_fliptask != NULL) {
         Signal(video_fliptask, SIGBREAKF_CTRL_C);
         Wait(SIGBREAKF_CTRL_F);
-        DeleteTask(video_fliptask);
         video_fliptask = NULL;
     }
     if (video_is_using_blitter) {
@@ -1638,7 +1636,7 @@ int xlate_key(UWORD rawkey, UWORD qualifier, APTR eventptr)
 
 /**********************************************************************/
 //
-static struct InputEvent *SAVEDS INTERRUPT video_inputhandler(REG(a0, struct InputEvent *ie),
+static struct InputEvent * SAVEDS video_inputhandler(REG(a0, struct InputEvent *ie),
                                                               REG(a1, APTR data))
 {
     event_t event;

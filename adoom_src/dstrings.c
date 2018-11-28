@@ -23,12 +23,14 @@
 
 static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
 
+#include "amiga_macros.h"
+
 #ifdef __GNUG__
 #pragma implementation "dstrings.h"
 #endif
 #include "dstrings.h"
 
-char* endmsg[NUM_QUITMESSAGES + 1] = {
+FAR char* endmsg[NUM_QUITMESSAGES + 1] = {
     // DOOM1
     QUITMSG, "please don't leave, there's more\ndemons to toast!",
     "let's beat it -- this is turning\ninto a bloodbath!", "i wouldn't leave if i were you.\ndos is much worse.",

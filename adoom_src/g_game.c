@@ -362,7 +362,9 @@ void G_BuildTiccmd(ticcmd_t* cmd)
         }
     }
 
-    forward += mousey;
+    // don't use mouse for moving forward/backward
+    // forward += mousey;
+
     if (strafe)
         side += mousex * 2;
     else

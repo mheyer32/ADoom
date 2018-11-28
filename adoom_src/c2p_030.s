@@ -1,4 +1,4 @@
-		mc68020
+		mc68030
 		section	.text,code
 
 		include "funcdef.i"
