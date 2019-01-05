@@ -20,15 +20,16 @@ def buildStep(ext) {
 	}
 
 	if (!env.CHANGE_ID) {
-		sh "mv adoom_src/bin/ADoom publishing/deploy/adoom/adoom.$ext"
-		//sh "cp publishing/amiga-spec/adoom.info publishing/deploy/adoom/adoom.$ext.info"
+		sh "mkdir -p publishing/deploy/adoom/$ext/"
+		sh "mv adoom_src/bin/* publishing/deploy/adoom/$ext/"
 	}
 }
 
 node {
 	try{
+		slackSend color: "good", message: "Build Started: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
+		
 		stage('Checkout and pull') {
-			slackSend color: "good", message: "Build Started: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 			properties([pipelineTriggers([githubPush()])])
 			if (env.CHANGE_ID) {
 				echo 'Trying to build pull request'
@@ -52,20 +53,24 @@ node {
 			if (env.TAG_NAME) {
 				sh "echo $TAG_NAME > publishing/deploy/STABLE"
 				sh "ssh $DEPLOYHOST mkdir -p public_html/downloads/releases/adoom/$TAG_NAME"
-				sh "scp publishing/deploy/adoom/* $DEPLOYHOST:~/public_html/downloads/releases/adoom/$TAG_NAME/"
+				sh "scp -r publishing/deploy/adoom/* $DEPLOYHOST:~/public_html/downloads/releases/adoom/$TAG_NAME/"
 				sh "scp publishing/deploy/STABLE $DEPLOYHOST:~/public_html/downloads/releases/adoom/"
 			} else if (env.BRANCH_NAME.equals('master')) {
+				def deploy_url = sh (
+				    script: 'echo "/downloads/nightly/adoom/`date +\'%Y\'`/`date +\'%m\'`/`date +\'%d\'`/"',
+				    returnStdout: true
+				).trim()
 				sh "date +'%Y-%m-%d %H:%M:%S' > publishing/deploy/BUILDTIME"
 				sh "ssh $DEPLOYHOST mkdir -p public_html/downloads/nightly/adoom/`date +'%Y'`/`date +'%m'`/`date +'%d'`/"
-				sh "scp publishing/deploy/adoom/* $DEPLOYHOST:~/public_html/downloads/nightly/adoom/`date +'%Y'`/`date +'%m'`/`date +'%d'`/"
+				sh "scp -r publishing/deploy/adoom/* $DEPLOYHOST:~/public_html/downloads/nightly/adoom/`date +'%Y'`/`date +'%m'`/`date +'%d'`/"
 				sh "scp publishing/deploy/BUILDTIME $DEPLOYHOST:~/public_html/downloads/nightly/adoom/"
 			}
 			slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}"
 		}
 	
 	} catch(err) {
+		slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 		currentBuild.result = 'FAILURE'
-		slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}"
 		notify('Build failed')
 		throw err
 	}
