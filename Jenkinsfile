@@ -28,6 +28,7 @@ def buildStep(ext) {
 node {
 	try{
 		stage('Checkout and pull') {
+			slackSend color: "good", message: "Build Started: ${env.JOB_NAME} #${env.BUILD_NUMBER} (<${env.BUILD_URL}|Open>)"
 			properties([pipelineTriggers([githubPush()])])
 			if (env.CHANGE_ID) {
 				echo 'Trying to build pull request'
@@ -59,10 +60,12 @@ node {
 				sh "scp publishing/deploy/adoom/* $DEPLOYHOST:~/public_html/downloads/nightly/adoom/`date +'%Y'`/`date +'%m'`/`date +'%d'`/"
 				sh "scp publishing/deploy/BUILDTIME $DEPLOYHOST:~/public_html/downloads/nightly/adoom/"
 			}
+			slackSend color: "good", message: "Build Succeeded: ${env.JOB_NAME}"
 		}
 	
 	} catch(err) {
 		currentBuild.result = 'FAILURE'
+		slackSend color: "danger", message: "Build Failed: ${env.JOB_NAME}"
 		notify('Build failed')
 		throw err
 	}
