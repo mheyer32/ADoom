@@ -21,6 +21,7 @@ def buildStep(ext) {
 
 	if (!env.CHANGE_ID) {
 		sh "mkdir -p publishing/deploy/adoom/$ext/"
+		sh "echo '$ext,' > publishing/deploy/adoom/TARGETS"
 		sh "mv adoom_src/bin/* publishing/deploy/adoom/$ext/"
 	}
 }
