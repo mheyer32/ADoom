@@ -13,7 +13,7 @@ def notify(status){
 }
 
 def buildStep(ext) {
-	sh "rm -rfv adoom_src/bin"
+	sh "rm -rfv adoom_src/bin/*"
 
 	dir("adoom_src") {
 		sh "make clean && make all -j8"
