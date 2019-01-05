@@ -13,6 +13,7 @@ def notify(status){
 }
 
 def buildStep(ext) {
+	sh "rm -rfv adoom_src/ADoom adoom_src/doomsound_midi.library adoom_src/empty.txt"
 	sh "rm -rfv adoom_src/bin/*"
 
 	dir("adoom_src") {
