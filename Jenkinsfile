@@ -16,7 +16,7 @@ def buildStep(ext) {
 	sh "rm -rfv adoom_src/bin"
 
 	dir("adoom_src") {
-		sh "make -j8"
+		sh "make all -j8"
 	}
 
 	if (!env.CHANGE_ID) {
