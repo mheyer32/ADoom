@@ -14,7 +14,10 @@ def notify(status){
 
 def buildStep(ext) {
 	sh "rm -rfv adoom_src/bin"
-	sh "cd adoom_src && make -j8"
+
+	dir("adoom_src") {
+		sh "make -j8"
+	}
 
 	if (!env.CHANGE_ID) {
 		sh "mv adoom_src/bin/ADoom publishing/deploy/adoom/adoom.$ext"
