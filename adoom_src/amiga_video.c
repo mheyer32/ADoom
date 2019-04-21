@@ -700,6 +700,9 @@ void I_InitGraphics(void)
 
             video_oscan_height = dimsinfo.MaxOScan.MaxY - dimsinfo.MaxOScan.MinY + 1;
 
+           SCREENWIDTH = dimsinfo.Nominal.MaxX - dimsinfo.Nominal.MinX + 1;
+           SCREENHEIGHT = dimsinfo.Nominal.MaxY - dimsinfo.Nominal.MinY + 1;
+
             video_is_cyber_mode = 0;
             if (CyberGfxBase != NULL)
                 video_is_cyber_mode = IsCyberModeID(mode);

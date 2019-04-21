@@ -483,14 +483,14 @@ void V_Init(void)
         p = M_CheckParm("-width");
         if (p && p < myargc - 1)
             SCREENWIDTH = atoi(myargv[p + 1]);
-        else
-            SCREENWIDTH = 320;
+//        else
+//            SCREENWIDTH = 320;
 
         p = M_CheckParm("-height");
         if (p && p < myargc - 1)
             SCREENHEIGHT = atoi(myargv[p + 1]);
-        else
-            SCREENHEIGHT = 200;
+//        else
+//            SCREENHEIGHT = 200;
 
 #ifdef GRAFFITI
     }
@@ -498,8 +498,7 @@ void V_Init(void)
 
     printf("Resolution: %d x %d\n", SCREENWIDTH, SCREENHEIGHT);
 
-    if (SCREENWIDTH < 320 || SCREENWIDTH > MAXSCREENWIDTH || SCREENWIDTH % 16 != 0 || SCREENHEIGHT < 200 ||
-        SCREENHEIGHT > MAXSCREENHEIGHT)
+    if (SCREENWIDTH > MAXSCREENWIDTH || SCREENWIDTH % 16 != 0 || SCREENHEIGHT > MAXSCREENHEIGHT)
         I_Error("Resolution out of range or width is not a multiple of 16");
 
     if ((SCREENHEIGHT * 8) == (SCREENWIDTH * 5))
