@@ -30,7 +30,7 @@ CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
 ifeq ($(DEBUG), 1)
-	CFLAGS += -Og -g -ggdb
+	CFLAGS += -DDEBUG -Og -g -ggdb -ffast-math -fno-omit-frame-pointer
 	LFLAGS += -g -ggdb
 	#-DRANGECHECK
 else
