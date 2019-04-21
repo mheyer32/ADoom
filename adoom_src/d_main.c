@@ -1065,15 +1065,15 @@ void D_DoomMain(void)
     printf("R_Init: Init DOOM refresh daemon - ");
     R_Init();
 
-    printf("\nP_Init: Init Playloop state.\n");
-    P_Init();
-
     printf("I_Init: Setting up machine state.\n");
     I_Init();
 
         // init subsystems
     printf("V_Init: allocate screens.\n");
     V_Init();
+
+    printf("\nP_Init: Init Playloop state.\n");
+    P_Init();
 
     printf("D_CheckNetGame: Checking network game status.\n");
     D_CheckNetGame();

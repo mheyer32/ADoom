@@ -72,8 +72,8 @@ volatile struct Custom *const custom = (struct Custom *)0xdff000;
 
 extern int cpu_type;
 
-int SCREENWIDTH;
-int SCREENHEIGHT;
+int SCREENWIDTH = 320;
+int SCREENHEIGHT = 200;
 int weirdaspect;
 
 #define NUMPALETTES 14
