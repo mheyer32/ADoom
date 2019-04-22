@@ -28,7 +28,7 @@ endif
 CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-CFLAGS += -fbaserel -m68020-60 -msmall-code
+CFLAGS += -fbaserel -m68030 -msmall-code
 CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
 
 #Always	provide symbols, will be stripped away  for target executable
