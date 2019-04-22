@@ -3,6 +3,7 @@
 DEBUG ?= 0
 BINDIR ?= bin
 USEIXEMUL ?= 1
+PROFILE  ?= 0
 
 CC=m68k-amigaos-gcc
 STRIP=m68k-amigaos-strip
@@ -24,20 +25,33 @@ else
 	RUNTIME_LDFLAGS = $(CLIB_LDFLAGS)
 endif
 
-CFLAGS = $(RUNTIME_CFLAGS) -fbaserel -m68020-60 -msmall-code
-CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
-CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
+CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
+CFLAGS += -fbaserel -m68020-60 -msmall-code
+CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
+
+#Always	provide symbols, will be stripped away  for target executable
+CFLAGS += -g -ggdb
+LFLAGS += -g -ggdb
+
 ifeq ($(DEBUG), 1)
-	CFLAGS += -DDEBUG -Og -g -ggdb -ffast-math -fno-omit-frame-pointer
-	LFLAGS += -g -ggdb
+	CFLAGS += -DDEBUG -Og -ffast-math -fno-omit-frame-pointer
 	#-DRANGECHECK
 else
-	CFLAGS += -DNDEBUG -Ofast -fstrength-reduce -ffast-math -fomit-frame-pointer
-	# still provide symbols, will be stripped away  for target executable
-	CFLAGS += -g -ggdb
-	LFLAGS += -g -ggdb
+	CFLAGS += -DNDEBUG -Ofast -fstrength-reduce -ffast-math
+	ifeq ($(PROFILE), 0)
+		CFLAGS +=-fomit-frame-pointer
+	endif
+endif
+
+CFLAGS_DOOMSOUND := $(CFLAGS)
+
+CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
+
+ifeq ($(PROFILE), 1)
+	CFLAGS += -pg
+	LFLAGS += -pg
 endif
 
 PFLAGS = -Fhunk -phxass -nosym -ldots -m68030
@@ -139,12 +153,16 @@ all:	ADoom doomsound_midi.library
 
 clean:
 	rm -f *.o
-	rm -f bin/ADoom
-	rm -f bin/doomsound_midi.library
+	rm -f ADoom
+	rm -f doomsound_midi.library
 
 ADoom: DoomSnd.h $(OBJS)  Makefile
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
 		$(STRIP) --strip-debug --strip-unneeded $@ -o $(BINDIR)/$@
+
+profile:
+	m68k-amigaos-gprof --brief ADoom $(BINDIR)/gmon.out | gprof2dot.py | dot -s -Tpdf -oADoom.pdf
+
 
 # FIXME: this is very likely wrong.
 #ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
@@ -220,11 +238,11 @@ DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
 
 doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
+	$(CC) -v $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
 	$(STRIP) --strip-debug --strip-unneeded $@ -o  $(BINDIR)/$@
 
 doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel  -c doomsound_midi.c  > $@
+	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel -c doomsound_midi.c  > $@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
