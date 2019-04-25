@@ -72,8 +72,8 @@ volatile struct Custom *const custom = (struct Custom *)0xdff000;
 
 extern int cpu_type;
 
-int SCREENWIDTH;
-int SCREENHEIGHT;
+int SCREENWIDTH = 320;
+int SCREENHEIGHT = 200;
 int weirdaspect;
 
 #define NUMPALETTES 14
@@ -699,6 +699,9 @@ void I_InitGraphics(void)
             }
 
             video_oscan_height = dimsinfo.MaxOScan.MaxY - dimsinfo.MaxOScan.MinY + 1;
+
+           SCREENWIDTH = dimsinfo.Nominal.MaxX - dimsinfo.Nominal.MinX + 1;
+           SCREENHEIGHT = dimsinfo.Nominal.MaxY - dimsinfo.Nominal.MinY + 1;
 
             video_is_cyber_mode = 0;
             if (CyberGfxBase != NULL)
