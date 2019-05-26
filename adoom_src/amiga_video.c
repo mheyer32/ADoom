@@ -607,8 +607,8 @@ void I_InitGraphics(void)
             if ((video_screen =
                      OpenScreenTags(NULL, SA_Type, CUSTOMSCREEN | CUSTOMBITMAP, SA_DisplayID, 0x00000000, SA_DClip,
                                     (ULONG)&rect, SA_Width, SCREENWIDTH, SA_Height, SCREENHEIGHT, SA_Depth, video_depth,
-                                    SA_Font, &topaz8, SA_Draggable, FALSE, SA_AutoScroll, FALSE, SA_Exclusive, TRUE,
-                                    SA_Quiet, TRUE, SA_BitMap, &video_bitmap[0], /* custom bitmap, contiguous planes */
+                                    SA_Font, (Tag)&topaz8, SA_Draggable, FALSE, SA_AutoScroll, FALSE, SA_Exclusive, TRUE,
+                                    SA_Quiet, TRUE, SA_BitMap, (Tag)&video_bitmap[0], /* custom bitmap, contiguous planes */
                                     TAG_DONE, 0)) == NULL) {
                 I_Error("OpenScreen() for Indivision GFX failed");
             }

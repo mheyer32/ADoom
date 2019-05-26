@@ -39,7 +39,7 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -Og -ffast-math -fno-omit-frame-pointer
 	#-DRANGECHECK
 else
-	CFLAGS += -DNDEBUG -Ofast -fstrength-reduce -ffast-math
+	CFLAGS += -DNDEBUG -Os -fstrength-reduce -ffast-math
 	ifeq ($(PROFILE), 0)
 		CFLAGS +=-fomit-frame-pointer
 	endif
@@ -47,7 +47,7 @@ endif
 
 CFLAGS_DOOMSOUND := $(CFLAGS)
 
-CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
+CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API -DINDIVISION
 
 ifeq ($(PROFILE), 1)
 	CFLAGS += -pg
@@ -99,6 +99,7 @@ OBJS = \
 	d_net.o \
 	d_items.o \
 	g_game.o \
+	indivision.o \
 	m_menu.o \
 	m_misc.o \
 	m_bbox.o \
@@ -168,33 +169,6 @@ profile:
 #ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
 #	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
 
-amiga_fixed.o: amiga_fixed.s
-	$(PHXASS) $(PFLAGS) amiga_fixed.s
-
-amiga_draw.o: amiga_draw.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_draw.s
-
-amiga_plane.o: amiga_plane.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_plane.s
-
-amiga_segs.o: amiga_segs.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_segs.s
-
-amiga_data.o: amiga_data.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_data.s
-
-amiga_wad.o: amiga_wad.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_wad.s
-
-amiga_sight.o: amiga_sight.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_sight.s
-
-amiga_things.o: amiga_things.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_things.s
-
-amiga_music.o: amiga_music.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_music.s
-
 c2p_8_020.o: c2p_020.s Makefile
 	$(PHXASS) $(PFLAGS) -Ddepth=8 -o c2p_8_020.o c2p_020.s
 
@@ -213,23 +187,14 @@ c2p_6_040.o: c2p_040.s Makefile
 #c2p_8_akiko.o: c2p_akiko.s smakefile
 #	macro68 $(MFLAGS) -D "depth=8" c2p_akiko.s -o c2p_8_akiko.o
 
-c2p8_040_amlaukka.o: c2p8_040_amlaukka.s Makefile
-	$(PHXASS) $(PFLAGS) c2p8_040_amlaukka.s
-
-amiga_mmu.o: amiga_mmu.s  Makefile
-	$(PHXASS) $(PFLAGS) amiga_mmu.s
-
-amiga_sega.o: amiga_sega.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_sega.s
-
-#amiga_net.o: amiga_net.c
-#	$(CC) $(CFLAGS) $<
-
 %.o:	%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.s:	%.c Makefile
 	$(CC) $(CFLAGS) -Wa,-adhln -g -c $<  > $@
+
+%.o: %.s | Makefile
+	$(PHXASS) $(PFLAGS) $^
 
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
