@@ -446,10 +446,7 @@ void SetMasterVolume(int volume)
     masterVolume = volume;
 
     for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        byte mappedChannel = channel_map[channel];
-        if (mappedChannel != -1) {
-            WriteChannelVolume(mappedChannel, channelVolumes[mappedChannel]);
-        }
+        WriteChannelVolume(channel, channelVolumes[channel]);
     }
 }
 
