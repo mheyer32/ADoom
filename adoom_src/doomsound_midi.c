@@ -254,8 +254,6 @@ boolean InitMidiTask(void)
         channelVolumes[channel] = 127;
         channel_map[channel] = -1;
     }
-    channel_map[MUS_PERCUSSION_CHAN] = MIDI_PERCUSSION_CHAN;
-
     // start with a low, but audible volume
     SetMasterVolume(masterVolume);
 
@@ -678,6 +676,7 @@ static byte AllocateMIDIChannel(void)
         ++result;
     }
 
+    assert(result < NUM_CHANNELS);
     return result;
 }
 
@@ -724,7 +723,6 @@ static void ResetChannels(void)
         }
         channel_map[channel] = -1;
     }
-    channel_map[MUS_PERCUSSION_CHAN] = MIDI_PERCUSSION_CHAN;
 }
 
 static void NewSong(Song *song)
