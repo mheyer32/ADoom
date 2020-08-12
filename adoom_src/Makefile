@@ -11,10 +11,10 @@ PHXASS=vasmm68k_mot
 
 PREFIX = $(shell ./getprefix.sh "$(CC)")
 
-CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
+CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2
 CLIB_LDFLAGS = -mcrt=clib2
 
-NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL
 NOIXEMUL_LDFLAGS = -noixemul
 
 ifeq ($(USEIXEMUL), 1)
@@ -28,7 +28,7 @@ endif
 CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-CFLAGS += -fbaserel -m68030 -msmall-code
+CFLAGS += -fbaserel -m68030 -msmall-code -mregparm=4
 CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
 
 #Always	provide symbols, will be stripped away  for target executable
@@ -207,7 +207,7 @@ doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
 	$(STRIP) --strip-debug --strip-unneeded $@ -o  $(BINDIR)/$@
 
 doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel -c doomsound_midi.c  > $@
+	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c doomsound_midi.c  > $@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
