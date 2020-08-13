@@ -45,9 +45,9 @@ else
 	endif
 endif
 
-CFLAGS_DOOMSOUND := $(CFLAGS)
-
 CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API -DINDIVISION
+
+CFLAGS_DOOMSOUND := $(CFLAGS)
 
 ifeq ($(PROFILE), 1)
 	CFLAGS += -pg
