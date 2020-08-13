@@ -718,7 +718,6 @@ static byte GetMIDIChannel(byte mus_channel)
             // event. This fixes "The D_DDTBLU disease" described here:
             // https://www.doomworld.com/vb/source-ports/66802-the
             WriteChangeController_Valueless(g_channelMap[mus_channel], MM_AllOff);
-            WriteChannelVolume(g_channelMap[mus_channel], 127);
         }
 
         return g_channelMap[mus_channel];
@@ -734,17 +733,9 @@ static void ResetChannels(void)
 {
     // Initialise channel map to mark all channels as unused.
     for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        byte midiChannel = g_channelMap[channel];
-        if (midiChannel != -1) {
-            WriteChangeController_Valueless(midiChannel, MM_AllOff);
-
-            // I don't know if Doom may use an initial song to program some patches
-            // and controllers, assuming these will not change between songs, so
-            // for now, don't reset controllers
-            //            WriteChangeController_Valueless(midiChannel, MM_ResetCtrl);
-            //            WriteChangeController_Valueless(midiChannel, MC_Max);
-            //            WriteChangeController_Valued(midiChannel, MC_Volume, 127);
-        }
+        WriteChangeController_Valueless(channel, MM_AllOff);
+        WriteChangeController_Valueless(channel, MM_ResetCtrl);
+        WriteChannelVolume(channel, 127);
         g_channelMap[channel] = -1;
     }
 }
