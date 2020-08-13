@@ -62,6 +62,18 @@ struct Library *DoomSndFwdBase = NULL;
 struct RealTimeBase *RealTimeBase = NULL;
 struct DosLibrary *DOSBase = NULL;
 
+static inline struct ExecBase * getSysBase(void)
+{
+    return SysBase;
+}
+#define LOCAL_SYSBASE() struct ExecBase * const SysBase = getSysBase()
+
+static inline struct Library * getCamdBase(void)
+{
+    return CamdBase;
+}
+#define LOCAL_CAMDBASE() struct Library * const CamdBase = getCamdBase()
+
 #define NUM_CHANNELS 16
 
 #define MIDI_PERCUSSION_CHAN 9
@@ -179,6 +191,8 @@ static void ResetChannels(void);
 
 const char *FindMidiDevice(void)
 {
+    LOCAL_CAMDBASE();
+
     static char _outport[128] = "";
     char *retname = NULL;
 
@@ -213,6 +227,8 @@ const char *FindMidiDevice(void)
 
 void ShutDownMidi(void)
 {
+    LOCAL_CAMDBASE();
+
     if (g_player) {
         SetConductorState(g_player, CONDSTATE_STOPPED, 0);
         DeletePlayer(g_player);
@@ -236,10 +252,11 @@ void ShutDownMidi(void)
 }
 
 static void SetMasterVolume(int volume);
-static void WriteChannelVolume(byte channel, byte volume);
 
 boolean InitMidi(void)
 {
+    LOCAL_CAMDBASE();
+
     g_midiNode = CreateMidi(MIDI_MsgQueue, 0L, MIDI_SysExSize, 0, MIDI_Name, (Tag) "DOOM Midi Out", TAG_END);
     if (!g_midiNode) {
         goto failure;
@@ -296,15 +313,20 @@ static inline void RestoreA4(void)
 
 static void SendPlayerMessage(PlayerCommand command, int data)
 {
-    if (g_playerMsgPort) {
+    struct MsgPort * const mainMsgPort = g_mainMsgPort;
+    struct MsgPort * const playerMsgPort = g_playerMsgPort;
+
+    if (playerMsgPort) {
+        LOCAL_SYSBASE();
+
         PlayerMessage msg;
         msg.msg.mn_Length = sizeof(msg);
-        msg.msg.mn_ReplyPort = g_mainMsgPort;
+        msg.msg.mn_ReplyPort = mainMsgPort;
         msg.code = command;
         msg.data = data;
-        PutMsg(g_playerMsgPort, &msg.msg);
-        WaitPort(g_mainMsgPort);
-        GetMsg(g_mainMsgPort);
+        PutMsg(playerMsgPort, &msg.msg);
+        WaitPort(mainMsgPort);
+        GetMsg(mainMsgPort);
     }
 }
 
@@ -327,19 +349,24 @@ __stdargs int __UserLibInit(struct Library *myLib)
 
     /* !!! required !!! */
     SysBase = *(struct ExecBase **)4L;
-    if ((RealTimeBase = (struct RealTimeBase *)OpenLibrary("realtime.library", 0)) == NULL) {
-        goto failure;
-    }
-    if ((CamdBase = OpenLibrary("camd.library", 37L)) == NULL) {
-        goto failure;
-    }
-    if ((DoomSndFwdBase = OpenLibrary("doomsound.library", 0)) == NULL) {
-        goto failure;
-    }
-    if ((DOSBase = (struct DosLibrary *)OpenLibrary("dos.library", 0)) == NULL) {
-        goto failure;
-    }
 
+    {
+        LOCAL_SYSBASE();
+
+        if ((RealTimeBase = (struct RealTimeBase *)OpenLibrary("realtime.library", 0)) == NULL) {
+            goto failure;
+        }
+        if ((CamdBase = OpenLibrary("camd.library", 37L)) == NULL) {
+            goto failure;
+        }
+        if ((DoomSndFwdBase = OpenLibrary("doomsound.library", 0)) == NULL) {
+            goto failure;
+        }
+        if ((DOSBase = (struct DosLibrary *)OpenLibrary("dos.library", 0)) == NULL) {
+            goto failure;
+        }
+
+    }
     return 0;  // success!
 
 failure:
@@ -377,6 +404,8 @@ failure:
 
 __stdargs void __UserLibCleanup(void)
 {
+    LOCAL_SYSBASE();
+
     if (g_playerTask) {
         Signal(g_playerTask, SIGBREAKF_CTRL_C);
         g_playerTask = NULL;
@@ -593,29 +622,29 @@ __stdargs int __Mus_Done(int handle)
 }
 
 // Write a key press event
-static inline void WritePressKey(byte channel, byte key, byte velocity)
+static inline void WritePressKey(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte key, byte velocity)
 {
     MidiMsg mm = {0};
     mm.mm_Status = MS_NoteOn | channel;
     mm.mm_Data1 = key & 0x7F;
     mm.mm_Data2 = velocity & 0x7F;
 
-    PutMidiMsg(g_midiLink, &mm);
+    PutMidiMsg(midiLink, &mm);
 }
 
 // Write a key release event
-static inline void WriteReleaseKey(byte channel, byte key)
+static inline void WriteReleaseKey(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte key)
 {
     MidiMsg mm = {0};
     mm.mm_Status = MS_NoteOff | channel;
     mm.mm_Data1 = key & 0x7F;
     mm.mm_Data2 = 0;
 
-    PutMidiMsg(g_midiLink, &mm);
+    PutMidiMsg(midiLink, &mm);
 }
 
 // Write a pitch wheel/bend event
-static inline boolean WritePitchWheel(byte channel, unsigned short wheel)
+static inline boolean WritePitchWheel(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, unsigned short wheel)
 {
     // Pitch Bend Change. This message is sent to indicate a change in the pitch bender (wheel or lever, typically).
     // The pitch bender is measured by a fourteen bit value. Center (no pitch change) is 2000H. Sensitivity is a
@@ -626,21 +655,21 @@ static inline boolean WritePitchWheel(byte channel, unsigned short wheel)
     mm.mm_Data1 = wheel & 0x7F;         // LSB
     mm.mm_Data2 = (wheel >> 7) & 0x7F;  // MSB
 
-    PutMidiMsg(g_midiLink, &mm);
+    PutMidiMsg(midiLink, &mm);
 }
 
 // Write a patch change event
-static inline boolean WriteChangePatch(byte channel, byte patch)
+static inline boolean WriteChangePatch(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte patch)
 {
     MidiMsg mm = {0};
     mm.mm_Status = MS_Prog | channel;
     mm.mm_Data1 = patch & 0x7F;
 
-    PutMidiMsg(g_midiLink, &mm);
+    PutMidiMsg(midiLink, &mm);
 }
 
 // Write a valued controller change event
-static inline void WriteChangeController_Valued(byte channel, byte control, byte value)
+static inline void WriteChangeController_Valued(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte control, byte value)
 {
     MidiMsg mm = {0};
     mm.mm_Status = MS_Ctrl | channel;
@@ -651,22 +680,22 @@ static inline void WriteChangeController_Valued(byte channel, byte control, byte
     // the value is out of range:
     mm.mm_Data2 = value & 0x80 ? 0x7F : value;
 
-    PutMidiMsg(g_midiLink, &mm);
+    PutMidiMsg(midiLink, &mm);
 }
 
 // expects volume to be in 0...0x7f range
-static void WriteChannelVolume(byte channel, byte volume)
+static void WriteChannelVolume(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte volume)
 {
     // affect channel volume by master volume
     g_channelVolumes[channel] = volume;
     byte channelVolume = (volume * g_masterVolume) / 64;
-    WriteChangeController_Valued(channel, MC_Volume, channelVolume);
+    WriteChangeController_Valued(CamdBase, midiLink, channel, MC_Volume, channelVolume);
 }
 
 // Write a valueless controller change event
-static inline void WriteChangeController_Valueless(byte channel, byte control)
+static inline void WriteChangeController_Valueless(struct Library * const CamdBase, struct MidiLink * const midiLink, byte channel, byte control)
 {
-    return WriteChangeController_Valued(channel, control, 0);
+    return WriteChangeController_Valued(CamdBase, midiLink, channel, control, 0);
 }
 
 //// Allocate a free MIDI channel.
@@ -700,7 +729,7 @@ static byte AllocateMIDIChannel(void)
 }
 
 // Given a MUS channel number, get the MIDI channel number to use
-static byte GetMIDIChannel(byte mus_channel)
+static byte GetMIDIChannel(struct Library * const CamdBase, struct MidiLink * const midiLink,  byte mus_channel)
 {
     // Find the MIDI channel to use for this MUS channel.
     // MUS channel 15 is the percusssion channel.
@@ -717,25 +746,28 @@ static byte GetMIDIChannel(byte mus_channel)
             // First time using the channel, send an "all notes off"
             // event. This fixes "The D_DDTBLU disease" described here:
             // https://www.doomworld.com/vb/source-ports/66802-the
-            WriteChangeController_Valueless(g_channelMap[mus_channel], MM_AllOff);
+            WriteChangeController_Valueless(CamdBase, midiLink, g_channelMap[mus_channel], MM_AllOff);
         }
 
         return g_channelMap[mus_channel];
     }
 }
 
-static inline UBYTE ReadByte(MusData *data)
+static inline UBYTE ReadByte(MusData * const data)
 {
     return *(data->b++);
 }
 
 static void ResetChannels(void)
 {
+    LOCAL_CAMDBASE();
+    struct MidiLink * const midiLink = g_midiLink;
+
     // Initialise channel map to mark all channels as unused.
     for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        WriteChangeController_Valueless(channel, MM_AllOff);
-        WriteChangeController_Valueless(channel, MM_ResetCtrl);
-        WriteChannelVolume(channel, 127);
+        WriteChangeController_Valueless(CamdBase, midiLink, channel, MM_AllOff);
+        WriteChangeController_Valueless(CamdBase, midiLink, channel, MM_ResetCtrl);
+        WriteChannelVolume(CamdBase, midiLink, channel, 127);
         g_channelMap[channel] = -1;
     }
 }
@@ -749,11 +781,14 @@ static void RewindSong(Song *song)
 
 static void RestartPlayTime(Song *song)
 {
-    song->currentTicks = 0;
-    //    SetConductorState(g_player, CONDSTATE_SHUTTLE, 0);
-    SetConductorState(g_player, CONDSTATE_RUNNING, 0);
+    LOCAL_CAMDBASE();
 
-    LONG res = SetPlayerAttrs(g_player, PLAYER_AlarmTime, 0, PLAYER_Ready, TRUE, TAG_END);
+    song->currentTicks = 0;
+
+    struct Player * const player = g_player;
+
+    SetConductorState(player, CONDSTATE_RUNNING, 0);
+    LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, 0, PLAYER_Ready, TRUE, TAG_END);
 }
 
 static void PlaySong(Song *song)
@@ -778,18 +813,21 @@ static void StopSong(Song *song)
 
 static void PlayNextEvent(Song *song)
 {
+    LOCAL_CAMDBASE();
+    struct MidiLink * const midiLink = g_midiLink;
+
     while (song->state == PLAYING) {
         boolean loopSong = false;
         // Fetch channel number and event code:
         byte eventdescriptor = ReadByte(&song->currentPtr);
 
-        byte channel = GetMIDIChannel(eventdescriptor & 0x0F);
+        byte channel = GetMIDIChannel(CamdBase, midiLink, eventdescriptor & 0x0F);
         musevent event = eventdescriptor & 0x70;
 
         switch (event) {
         case mus_releasekey: {
             byte key = ReadByte(&song->currentPtr);
-            WriteReleaseKey(channel, key);
+            WriteReleaseKey(CamdBase, midiLink, channel, key);
         } break;
 
         case mus_presskey: {
@@ -798,20 +836,20 @@ static void PlayNextEvent(Song *song)
                 // second byte has volume
                 g_channelVelocities[channel] = ReadByte(&song->currentPtr) & 0x7F;
             }
-            WritePressKey(channel, key, g_channelVelocities[channel]);
+            WritePressKey(CamdBase, midiLink, channel, key, g_channelVelocities[channel]);
             //            FPrintf(Output(), "mus_presskey.... %lu \n", (unsigned)key);
         } break;
 
         case mus_pitchwheel: {
             byte bend = ReadByte(&song->currentPtr);
-            WritePitchWheel(channel, (unsigned short)bend * 64);
+            WritePitchWheel(CamdBase, midiLink, channel, (unsigned short)bend * 64);
             //            FPrintf(Output(), "mus_pitchwheel.... %lu \n", (long)bend);
         } break;
 
         case mus_systemevent: {
             byte controllernumber = ReadByte(&song->currentPtr);
             if (controllernumber >= 10 && controllernumber <= 14) {
-                WriteChangeController_Valueless(channel, g_controllerMap[controllernumber]);
+                WriteChangeController_Valueless(CamdBase, midiLink, channel, g_controllerMap[controllernumber]);
             }
             //            FPrintf(Output(), "mus_systemevent.... %lu \n", (long)controllernumber);
         } break;
@@ -825,13 +863,13 @@ static void PlayNextEvent(Song *song)
 
             if (controllernumber == 0) {
                 //                FPrintf(Output(), "WriteChangePatch.... \n");
-                WriteChangePatch(channel, controllervalue);
+                WriteChangePatch(CamdBase, midiLink, channel, controllervalue);
             } else {
                 if (controllernumber >= 1 && controllernumber <= 9) {
                     if (controllernumber == 3) {
-                        WriteChannelVolume(channel, controllervalue);
+                        WriteChannelVolume(CamdBase, midiLink, channel, controllervalue);
                     } else {
-                        WriteChangeController_Valued(channel, g_controllerMap[controllernumber], controllervalue);
+                        WriteChangeController_Valued(CamdBase, midiLink, channel, g_controllerMap[controllernumber], controllervalue);
                     }
                 }
             }
@@ -877,7 +915,9 @@ static void PlayNextEvent(Song *song)
             song->currentTicks += timedelay;
             // convert MUS ticks into realtime.library ticks
             ULONG alarmTime = (song->currentTicks * TICK_FREQ) / 140;
-            if (alarmTime < g_player->pl_MetricTime) {
+
+            struct Player * const player = g_player;
+            if (alarmTime < player->pl_MetricTime) {
                 // If song time has fallen behind wallclock, reset player time to catch up
                 RestartPlayTime(song);
                 alarmTime = 0;
@@ -887,7 +927,7 @@ static void PlayNextEvent(Song *song)
                 // rewind here, to not disturb parsing the even delay
                 RewindSong(song);
             }
-            LONG res = SetPlayerAttrs(g_player, PLAYER_AlarmTime, alarmTime, PLAYER_Ready, TRUE, TAG_END);
+            LONG res = SetPlayerAttrs(player, PLAYER_AlarmTime, alarmTime, PLAYER_Ready, TRUE, TAG_END);
             return;
 
         } else {
@@ -902,10 +942,13 @@ static void PlayNextEvent(Song *song)
 
 void SetMasterVolume(int volume)
 {
+    LOCAL_CAMDBASE();
+    struct MidiLink * const midiLink = g_midiLink;
+
     g_masterVolume = volume;
 
     for (char channel = 0; channel < NUM_CHANNELS; ++channel) {
-        WriteChannelVolume(channel, g_channelVolumes[channel]);
+        WriteChannelVolume(CamdBase, midiLink, channel, g_channelVolumes[channel]);
     }
     //    for (char channel = 0; channel < NUM_CHANNELS; ++channel) {
     //        char midiChannel = channel_map[channel];
@@ -920,6 +963,8 @@ static void __stdargs MidiPlayerTask(void)
 {
     RestoreA4();
 
+    LOCAL_SYSBASE();
+
     if (!InitMidi()) {
         Signal(g_MainTask, SIGBREAKF_CTRL_C);
         return;
@@ -930,6 +975,7 @@ static void __stdargs MidiPlayerTask(void)
         Signal(g_MainTask, SIGBREAKF_CTRL_C);
         return;
     }
+    struct MsgPort * const playerMsgPort = g_playerMsgPort;
 
     // Make sure the library does not get unloaded before MidiPlayerTask exits
     struct Library *myDoomSndBase = OpenLibrary("doomsound.library", 0);
@@ -938,7 +984,7 @@ static void __stdargs MidiPlayerTask(void)
     Signal(g_MainTask, SIGBREAKF_CTRL_E);
 
     const ULONG playerSignalBitMask = (1UL << g_playerSignalBit);
-    const ULONG playerMsgMask = (1UL << g_playerMsgPort->mp_SigBit);
+    const ULONG playerMsgMask = (1UL << playerMsgPort->mp_SigBit);
     const ULONG signalMask = playerSignalBitMask | playerMsgMask | SIGBREAKF_CTRL_C;
 
     Song *playingSong = NULL;
@@ -950,7 +996,7 @@ static void __stdargs MidiPlayerTask(void)
         }
         if (signals & playerMsgMask) {
             PlayerMessage *msg = NULL;
-            while (msg = (PlayerMessage *)GetMsg(g_playerMsgPort)) {
+            while (msg = (PlayerMessage *)GetMsg(playerMsgPort)) {
                 switch (msg->code) {
                 case PC_PLAY:
                     playingSong = (Song *)msg->data;
@@ -978,13 +1024,14 @@ static void __stdargs MidiPlayerTask(void)
 
     {
         struct Message *msg = NULL;
-        while (msg = GetMsg(g_playerMsgPort)) /* Make sure port is empty. */
+        while (msg = GetMsg(playerMsgPort)) /* Make sure port is empty. */
         {
             ReplyMsg(msg);
         }
     }
 
-    DeletePort(g_playerMsgPort);
+    DeletePort(playerMsgPort);
+    g_playerMsgPort = NULL;
 
     ShutDownMidi();
     CloseLibrary(myDoomSndBase);
