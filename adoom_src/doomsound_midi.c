@@ -116,7 +116,7 @@ static const byte g_controllerMap[] = {
     MM_Poly,
     MM_ResetCtrl};
 
-static byte channelVolumes[NUM_CHANNELS];
+static byte g_channelVolumes[NUM_CHANNELS];
 static byte g_channelVelocities[NUM_CHANNELS];
 static signed char g_channelMap[NUM_CHANNELS];
 static unsigned int g_masterVolume = 32;
@@ -275,7 +275,7 @@ boolean InitMidi(void)
     //    err = SetConductorState(player, CONDSTATE_RUNNING, 0);
 
     for (byte channel = 0; channel < NUM_CHANNELS; ++channel) {
-        channelVolumes[channel] = 127;
+        g_channelVolumes[channel] = 127;
         g_channelVelocities[channel] = 127;
         g_channelMap[channel] = -1;
     }
@@ -658,8 +658,8 @@ static inline void WriteChangeController_Valued(byte channel, byte control, byte
 static void WriteChannelVolume(byte channel, byte volume)
 {
     // affect channel volume by master volume
-    channelVolumes[channel] = volume;
-    byte channelVolume = (volume * g_masterVolume) / 63;
+    g_channelVolumes[channel] = volume;
+    byte channelVolume = (volume * g_masterVolume) / 64;
     WriteChangeController_Valued(channel, MC_Volume, channelVolume);
 }
 
@@ -914,7 +914,7 @@ void SetMasterVolume(int volume)
     g_masterVolume = volume;
 
     for (char channel = 0; channel < NUM_CHANNELS; ++channel) {
-        WriteChannelVolume(channel, 127);
+        WriteChannelVolume(channel, g_channelVolumes[channel]);
     }
     //    for (char channel = 0; channel < NUM_CHANNELS; ++channel) {
     //        char midiChannel = channel_map[channel];
