@@ -54,7 +54,7 @@ ifeq ($(PROFILE), 1)
 	LFLAGS += -pg
 endif
 
-PFLAGS = -Fhunk -phxass -nosym -ldots -m68030
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -linedebug
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk-include
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
@@ -150,16 +150,17 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
 #$(info $(OBJS))
 
-all:	ADoom doomsound_midi.library
+all:	ADoom doomsound_midi.library NullModem
 
 clean:
 	rm -f *.o
 	rm -f ADoom
 	rm -f doomsound_midi.library
+	rm -f NullModem
 
 ADoom: DoomSnd.h $(OBJS)  Makefile
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
-		$(STRIP) --strip-debug --strip-unneeded $@ -o $(BINDIR)/$@
+		$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 profile:
 	m68k-amigaos-gprof --brief ADoom $(BINDIR)/gmon.out | gprof2dot.py | dot -s -Tpdf -oADoom.pdf
@@ -196,6 +197,9 @@ c2p_6_040.o: c2p_040.s Makefile
 %.o: %.s | Makefile
 	$(PHXASS) $(PFLAGS) $^
 
+%.o: %.ASM | Makefile
+	$(PHXASS) $(PFLAGS) -sc $^
+
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
 
@@ -204,7 +208,7 @@ DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 
 doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
 	$(CC) -v $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
-	$(STRIP) --strip-debug --strip-unneeded $@ -o  $(BINDIR)/$@
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
 
 doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
 	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c doomsound_midi.c  > $@
@@ -212,6 +216,10 @@ doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
 	 $(LDFLAGS) -o $(OUT)test_fixed
+
+NullModem: INTERNAL.o | Makefile
+	$(CC) -v -g -ggdb -nostdlib -nostartfiles -nodefaultlibs -o $@ $^ -lamiga
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
 
 #############################################################
 #
