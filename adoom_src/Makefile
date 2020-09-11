@@ -29,7 +29,7 @@ CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
 CFLAGS += -fbaserel -m68030 -msmall-code -mregparm=4
-CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
+CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -Wdouble-promotion -fstrict-aliasing
 
 #Always	provide symbols, will be stripped away  for target executable
 CFLAGS += -g -ggdb
