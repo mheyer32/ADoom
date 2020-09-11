@@ -372,7 +372,7 @@ int W_GetNumForName(const char* name)
     i = W_CheckNumForName(name);
 
     if (i == -1)
-        I_Error("W_GetNumForName: %s not found!", name);
+        I_Error("W_GetNumForName: '%s' not found!", name);
 
     return i;
 }
