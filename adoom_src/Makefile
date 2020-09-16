@@ -150,15 +150,16 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
 #$(info $(OBJS))
 
-all:	ADoom doomsound_midi.library NullModem
+all:	ADoom doomsound_midi.library NullModem CAMDoomSound
 
 clean:
 	rm -f *.o
 	rm -f ADoom
 	rm -f doomsound_midi.library
 	rm -f NullModem
+	rm -f CAMDoomSound
 
-ADoom: DoomSnd.h $(OBJS)  Makefile
+ADoom: $(OBJS) | DoomSnd.h  Makefile
 		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
 		$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
@@ -206,20 +207,24 @@ DoomSnd.h: doomsound.fd doomsound.h Makefile
 DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
 
-doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
+doomsound_midi.library: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
+	$(CC) $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel -o $@ $^
 	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
 
-doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c doomsound_midi.c  > $@
+doomsound_midi.s: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
+	$(CC) $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c $^  > $@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
 	 $(LDFLAGS) -o $(OUT)test_fixed
 
 NullModem: INTERNAL.o | Makefile
-	$(CC) -v -g -ggdb -nostdlib -nostartfiles -nodefaultlibs -o $@ $^ -lamiga
+	$(CC) -g -ggdb -nostdlib -nostartfiles -nodefaultlibs -o $@ $^ -lamiga
 	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
+
+CAMDoomSound: camdoom.c musplay.c | Makefile
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wno-strict-prototypes -o $@ $^
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 #############################################################
 #
