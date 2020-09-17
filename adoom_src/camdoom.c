@@ -83,7 +83,7 @@ void shutdown(void)
                 break;
             }
             Permit();
-            Printf("Waiting for Replay to end\n");
+            Printf("Waiting for replay to end.\n");
             Flush(Output());
             Delay(50);
         }
@@ -105,14 +105,23 @@ void shutdown(void)
         CloseLibrary((struct Library *)RealTimeBase);
         RealTimeBase = NULL;
     }
+
+    Printf("Exiting.");
 }
 
 int __stdargs main(int argc, char *argv[])
 {
     atexit(&shutdown);
 
+    const char *libName = "doomsound.library";
+    if (argc > 1)
+    {
+        libName = argv[1];
+    }
+
     int rval = 5;
-    if ((DoomSndBase = OpenLibrary("doomsound.library", 37)) == NULL) {
+    if ((DoomSndBase = OpenLibrary(libName, 0)) == NULL) {
+        Printf("Could not open '%s'.\n", (ULONG)libName);
         return rval;
     }
 
@@ -122,19 +131,20 @@ int __stdargs main(int argc, char *argv[])
     }
 
     if ((CamdBase = OpenLibrary("camd.library", 0)) == NULL) {
+        Printf("Could not open 'camd.library'.\n");
         return rval;
     }
     if ((RealTimeBase = (struct RealTimeBase *)OpenLibrary("realtime.library", 0)) == NULL) {
+        Printf("Could not open 'realtime.library'.\n");
         return rval;
     }
 
     rval = 0;
 
-    Printf("doomsound.library patched to play music via CAMD.\n Press RETURN to undo the patch and exit.");
+    Printf("%s patched to play music via CAMD.\n Press RETURN to undo the patch and exit.", (ULONG)libName);
     Flush(Output());
 
     getchar();
 
-    Printf("Exiting.");
     return rval;
 }
