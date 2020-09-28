@@ -6,13 +6,9 @@ char __stdiov37[] = "/AUTO/CLOSE/WAIT";
 #include <proto/dos.h>
 #include <proto/exec.h>
 #include <proto/realtime.h>
-
-#include <stabs.h>
+#include <clib/alib_stdio_protos.h>
 
 #include "amiga_macros.h"
-
-#include <stdio.h>
-#include <stdlib.h>
 
 extern __stdargs void __Mus_SetVol(int vol);
 extern __stdargs int __Mus_Register(void *musdata);
@@ -111,7 +107,7 @@ void shutdown(void)
 
 int __stdargs main(int argc, char *argv[])
 {
-    atexit(&shutdown);
+//    atexit(&shutdown);
 
     const char *libName = "doomsound.library";
     if (argc > 1)
@@ -122,7 +118,8 @@ int __stdargs main(int argc, char *argv[])
     int rval = 5;
     if ((DoomSndBase = OpenLibrary(libName, 0)) == NULL) {
         Printf("Could not open '%s'.\n", (ULONG)libName);
-        return rval;
+        rval = 0;
+        goto shutdown;
     }
 
     int numFns = sizeof(fnTable) / sizeof(fnTable[0]);
@@ -132,11 +129,13 @@ int __stdargs main(int argc, char *argv[])
 
     if ((CamdBase = OpenLibrary("camd.library", 0)) == NULL) {
         Printf("Could not open 'camd.library'.\n");
-        return rval;
+        rval = 0;
+        goto shutdown;
     }
     if ((RealTimeBase = (struct RealTimeBase *)OpenLibrary("realtime.library", 0)) == NULL) {
         Printf("Could not open 'realtime.library'.\n");
-        return rval;
+        rval = 0;
+        goto shutdown;
     }
 
     rval = 0;
@@ -145,6 +144,10 @@ int __stdargs main(int argc, char *argv[])
     Flush(Output());
 
     getchar();
+
+shutdown:
+
+    shutdown();
 
     return rval;
 }
