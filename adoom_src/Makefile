@@ -160,7 +160,7 @@ clean:
 	rm -f CAMDoomSound
 
 ADoom: $(OBJS) | DoomSnd.h  Makefile
-		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
+		$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map=ADoom.map $(OBJS) -o $@
 		$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 profile:
