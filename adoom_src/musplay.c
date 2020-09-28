@@ -68,7 +68,6 @@ typedef struct
         // and 135-181 for standard MIDI percussion (notes 35-81 on channel 10).
 } MusHeader;
 
-// Cached channel velocities
 static const byte g_controllerMap[] = {
     MS_Prog,
     MC_Bank /*FIXME: was 0x20; MUS file format says controller 1 is 'bank select' so MC_Bank seems the right choice? */,
