@@ -462,6 +462,7 @@ void* W_CacheLumpName(const char* name, int tag)
 //
 // W_Profile
 //
+#ifndef NDEBUG
 FAR int info[2500][10];
 int profilecount;
 
@@ -513,3 +514,4 @@ void W_Profile(void)
     }
     fclose(f);
 }
+#endif
