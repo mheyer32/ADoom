@@ -10,15 +10,15 @@
 ; ---------------------------------------------------------------------
 
 ; void __asm c2p_020 (register __a2 UBYTE *fBUFFER,
-;                     register __a4 PLANEPTR *planes,
+;                     register __a6 PLANEPTR *planes,
 ;                     register __d0 ULONG signals1,
 ;                     register __d1 ULONG signals2,
 ;                     register __d4 ULONG signals3,
 ;                     register __d2 ULONG pixels,     // width*height
 ;                     register __d3 ULONG offset,     // byte offset into plane
 ;                     register __a1 UBYTE *xlate,
-;                     register __a5 struct Task *othertask,
-;                     register __a0 UBYTE *chipbuffer); // 2*width*height
+;                     register __d5 struct Task *othertask,
+;                     register __a3 UBYTE *chipbuffer); // 2*width*height
 ;
 ; Pipelined CPU+blitter 8-plane chunky to planar converter.
 ; Optimised for 68020/30 with fastmem.
@@ -105,9 +105,9 @@ _c2p_6_020:
 		move.l	a3,(buff2-mybltnode,a0)
 		adda.l	d2,a3
 		move.l	a3,(buff3-mybltnode,a0)
-		move.l	a5,(othertask-mybltnode,a0)
+		move.l	d5,(othertask-mybltnode,a0)
 		move.l	a2,(chunky-mybltnode,a0)
-		move.l	a4,(planes-mybltnode,a0)
+		move.l	a6,(planes-mybltnode,a0)
 		move.l	d0,(signals1-mybltnode,a0)
 		move.l	d1,(signals2-mybltnode,a0)
 		move.l	d4,(signals3-mybltnode,a0)

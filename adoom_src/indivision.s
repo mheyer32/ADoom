@@ -19,7 +19,7 @@
 		xdef	_indivision_initscreen
 		xdef	_indivision_gfxcopy
 
-		section text,code
+		section .text,code
 ;******************************************************************************
 
 ;void __asm indivision_core(register __a0 ULONG indivisioncpldbase

@@ -231,6 +231,8 @@ void I_Error(char *error, ...)
         G_CheckDemoStatus();
 
     D_QuitNetGame();
+    I_ShutdownMusic();
+    I_ShutdownSound();
     I_ShutdownGraphics();
 
     exit(20);

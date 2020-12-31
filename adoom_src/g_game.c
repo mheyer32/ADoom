@@ -20,7 +20,7 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: g_game.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -1473,12 +1473,13 @@ void G_TimeDemo(char* name)
 
 boolean G_CheckDemoStatus(void)
 {
-    int endtime;
-
     if (timingdemo) {
-        endtime = I_GetTime();
-        I_Error("timed %i gametics in %i realtics (%5.1f fps)", gametic, endtime - starttime,
-                (35.0 * (double)gametic) / (double)(endtime - starttime));
+        int endtime = I_GetTime();
+        float fps = (35.0f * gametic) / (endtime - starttime);
+        int intFps = (int)fps;
+        int fracFps = (int)((fps - (int)(fps)) * 100.0f);
+
+        I_Error("timed %i gametics in %i realtics (%i.%i fps)", gametic, endtime - starttime, intFps, fracFps);
     }
 
     if (demoplayback) {

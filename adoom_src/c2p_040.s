@@ -13,7 +13,7 @@
 ;void __asm c2p_6_040 (register __a0 UBYTE *chunky_data,
 ;                      register __a1 PLANEPTR raster,
 ;                      register __a2 UBYTE *compare_buffer,
-;                      register __a4 UBYTE *xlate,
+;                      register __a3 UBYTE *xlate,
 ;                      register __d1 ULONG plsiz,
 ;                      register __d2 BOOL force_update);
 
@@ -78,6 +78,7 @@ start:		movem.l	d2-d7/a2-a6,-(sp)
 
 	ifle depth-6
 		move.w	d2,(44,sp)	; video_force_update
+		move.l a3,a4		; xlate is expected in a4, but can't pass it in a4 register because of -fbaserel
 	endc
 
 ; a0 = chunky buffer

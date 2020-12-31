@@ -21,7 +21,7 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
+
 
 #ifdef NORMALUNIX
 #ifndef __SASC
@@ -372,7 +372,7 @@ int W_GetNumForName(const char* name)
     i = W_CheckNumForName(name);
 
     if (i == -1)
-        I_Error("W_GetNumForName: %s not found!", name);
+        I_Error("W_GetNumForName: '%s' not found!", name);
 
     return i;
 }
@@ -462,6 +462,7 @@ void* W_CacheLumpName(const char* name, int tag)
 //
 // W_Profile
 //
+#ifndef NDEBUG
 FAR int info[2500][10];
 int profilecount;
 
@@ -513,3 +514,4 @@ void W_Profile(void)
     }
     fclose(f);
 }
+#endif

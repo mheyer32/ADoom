@@ -75,10 +75,8 @@ int STDARGS main(int argc, char *argv[])
     /* these command line arguments each take a value */
     static char *settings[] = {
         "-screenmode", "-taskpriority", "-heapsize", "-cpu", "-forceversion", "-width", "-height", "-file", "-deh",
-        "-waddir", "-timedemo", "-skill", "-episode", "-timer", "-statcopy", "-record", "-playdemo", "-timedemo",
-        "-loadgame",
-        "-config"
-        "-turbo",
+        "-waddir", "-timedemo", "-skill", "-episode", "-timer", "-statcopy", "-record", "-playdemo", "-loadgame",
+        "-config", "-turbo",
     };
 
     printf("%s\n", &amigaversion[6]);

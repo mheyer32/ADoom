@@ -11,10 +11,10 @@ PHXASS=vasmm68k_mot
 
 PREFIX = $(shell ./getprefix.sh "$(CC)")
 
-CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2 -mregparm=4
+CLIB_CFLAGS = -mcrt=clib2 -DUSECLIB2
 CLIB_LDFLAGS = -mcrt=clib2
 
-NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL -mregparm=4
+NOIXEMUL_CFLAGS = -noixemul -DUSENOIXEMUL
 NOIXEMUL_LDFLAGS = -noixemul
 
 ifeq ($(USEIXEMUL), 1)
@@ -28,8 +28,8 @@ endif
 CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-CFLAGS += -fbaserel -m68030 -msmall-code
-CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -fstrict-aliasing
+CFLAGS += -fbaserel -m68030 -msmall-code -mregparm=4
+CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -Wdouble-promotion -fstrict-aliasing
 
 #Always	provide symbols, will be stripped away  for target executable
 CFLAGS += -g -ggdb
@@ -39,22 +39,22 @@ ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -Og -ffast-math -fno-omit-frame-pointer
 	#-DRANGECHECK
 else
-	CFLAGS += -DNDEBUG -Ofast -fstrength-reduce -ffast-math
+	CFLAGS += -DNDEBUG -Os -fstrength-reduce -ffast-math
 	ifeq ($(PROFILE), 0)
 		CFLAGS +=-fomit-frame-pointer
 	endif
 endif
 
-CFLAGS_DOOMSOUND := $(CFLAGS)
+CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API -DINDIVISION
 
-CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API
+CFLAGS_DOOMSOUND := $(CFLAGS)
 
 ifeq ($(PROFILE), 1)
 	CFLAGS += -pg
 	LFLAGS += -pg
 endif
 
-PFLAGS = -Fhunk -phxass -nosym -ldots -m68030
+PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -linedebug
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk-include
 PFLAGS += -I$(PREFIX)/m68k-amigaos/ndk/include
 
@@ -99,6 +99,7 @@ OBJS = \
 	d_net.o \
 	d_items.o \
 	g_game.o \
+	indivision.o \
 	m_menu.o \
 	m_misc.o \
 	m_bbox.o \
@@ -149,16 +150,18 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
 #$(info $(OBJS))
 
-all:	ADoom doomsound_midi.library
+all:	ADoom doomsound_midi.library NullModem CAMDoomSound
 
 clean:
 	rm -f *.o
 	rm -f ADoom
 	rm -f doomsound_midi.library
+	rm -f NullModem
+	rm -f CAMDoomSound
 
-ADoom: DoomSnd.h $(OBJS)  Makefile
-		$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) -o $@
-		$(STRIP) --strip-debug --strip-unneeded $@ -o $(BINDIR)/$@
+ADoom: $(OBJS) | DoomSnd.h  Makefile
+		$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map=ADoom.map $(OBJS) -o $@
+		$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 profile:
 	m68k-amigaos-gprof --brief ADoom $(BINDIR)/gmon.out | gprof2dot.py | dot -s -Tpdf -oADoom.pdf
@@ -167,33 +170,6 @@ profile:
 # FIXME: this is very likely wrong.
 #ADoom_SndSrvr: ADoom_SndSrvr.s Makefile
 #	$(PHXASS) $(PFLAGS) -o ADoom_SndSrvr ADoom_SndSrvr.s
-
-amiga_fixed.o: amiga_fixed.s
-	$(PHXASS) $(PFLAGS) amiga_fixed.s
-
-amiga_draw.o: amiga_draw.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_draw.s
-
-amiga_plane.o: amiga_plane.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_plane.s
-
-amiga_segs.o: amiga_segs.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_segs.s
-
-amiga_data.o: amiga_data.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_data.s
-
-amiga_wad.o: amiga_wad.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_wad.s
-
-amiga_sight.o: amiga_sight.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_sight.s
-
-amiga_things.o: amiga_things.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_things.s
-
-amiga_music.o: amiga_music.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_music.s
 
 c2p_8_020.o: c2p_020.s Makefile
 	$(PHXASS) $(PFLAGS) -Ddepth=8 -o c2p_8_020.o c2p_020.s
@@ -213,23 +189,17 @@ c2p_6_040.o: c2p_040.s Makefile
 #c2p_8_akiko.o: c2p_akiko.s smakefile
 #	macro68 $(MFLAGS) -D "depth=8" c2p_akiko.s -o c2p_8_akiko.o
 
-c2p8_040_amlaukka.o: c2p8_040_amlaukka.s Makefile
-	$(PHXASS) $(PFLAGS) c2p8_040_amlaukka.s
-
-amiga_mmu.o: amiga_mmu.s  Makefile
-	$(PHXASS) $(PFLAGS) amiga_mmu.s
-
-amiga_sega.o: amiga_sega.s Makefile
-	$(PHXASS) $(PFLAGS) amiga_sega.s
-
-#amiga_net.o: amiga_net.c
-#	$(CC) $(CFLAGS) $<
-
 %.o:	%.c Makefile
 	$(CC) $(CFLAGS) -c $< -o $@
 
 %.s:	%.c Makefile
 	$(CC) $(CFLAGS) -Wa,-adhln -g -c $<  > $@
+
+%.o: %.s | Makefile
+	$(PHXASS) $(PFLAGS) $^
+
+%.o: %.ASM | Makefile
+	$(PHXASS) $(PFLAGS) -sc $^
 
 DoomSnd.h: doomsound.fd doomsound.h Makefile
 	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
@@ -237,16 +207,24 @@ DoomSnd.h: doomsound.fd doomsound.h Makefile
 DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
 	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
 
-doomsound_midi.library: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel doomsound_midi.c -o $@
-	$(STRIP) --strip-debug --strip-unneeded $@ -o  $(BINDIR)/$@
+doomsound_midi.library: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
+	$(CC) $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel -o $@ $^
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
 
-doomsound_midi.s: DoomSndFwd.h doomsound_midi.c Makefile
-	$(CC) -v $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -fbaserel -c doomsound_midi.c  > $@
+doomsound_midi.s: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
+	$(CC) $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c $^  > $@
 
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
 	 $(LDFLAGS) -o $(OUT)test_fixed
+
+NullModem: INTERNAL.o | Makefile
+	$(CC) -g -ggdb -nostdlib -nostartfiles -nodefaultlibs -o $@ $^ -lamiga
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
+
+CAMDoomSound: camdoom.c musplay.c | Makefile
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wno-strict-prototypes -o $@ $^
+	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 #############################################################
 #

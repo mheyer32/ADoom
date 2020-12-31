@@ -23,7 +23,7 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: dehacked.c,v 0.3 1998/03/08 23:05:00 b1 Exp $";
+
 
 #include <ctype.h>
 #include <stdlib.h>

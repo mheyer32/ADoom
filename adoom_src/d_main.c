@@ -24,7 +24,7 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: d_main.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
+
 
 #define BGCOLOR 7
 #define FGCOLOR 8
@@ -545,19 +545,18 @@ void IdentifyVersion(void)
     char doomwaddir[256];
     char home[256];
 
+    strcpy(doomwaddir, DIRSTRING);
+
 #ifdef AMIGA
-    if (getenv("DOOMWADDIR") != NULL) {
+    p = M_CheckParm("-waddir");
+    if (p) {
+        strcpy(doomwaddir, myargv[p + 1]);
+        if (doomwaddir[strlen(doomwaddir) - 1] != '/' && doomwaddir[strlen(doomwaddir) - 1] != ':')
+            strcat(doomwaddir, "/");
+    } else if (getenv("DOOMWADDIR") != NULL) {
         strcpy(doomwaddir, getenv("DOOMWADDIR"));
         if (doomwaddir[strlen(doomwaddir) - 1] != '/' && doomwaddir[strlen(doomwaddir) - 1] != ':')
             strcat(doomwaddir, "/");
-    } else {
-        strcpy(doomwaddir, DIRSTRING);
-        p = M_CheckParm("-waddir");
-        if (p) {
-            strcpy(doomwaddir, myargv[p + 1]);
-            if (doomwaddir[strlen(doomwaddir) - 1] != '/' && doomwaddir[strlen(doomwaddir) - 1] != ':')
-                strcat(doomwaddir, "/");
-        }
     }
 #else
     if (getenv("DOOMWADDIR"))
