@@ -464,7 +464,9 @@ static void SAVEDS video_flipscreentask(void)
     struct EClockVal start_time;
     int i;
 
-    video_sigbit3_mask = 1 << video_sigbit3;
+    if ((video_sigbit3 = AllocSignal(-1)) != -1) {
+        video_sigbit3_mask = 1 << video_sigbit3;
+    }
     Signal(video_maintask, SIGBREAKF_CTRL_F);
 
     video_dispport = CreatePort(NULL, 0);
@@ -478,7 +480,7 @@ static void SAVEDS video_flipscreentask(void)
     safe_signal = 1 << video_safeport->mp_SigBit;
     display_signal = 1 << video_dispport->mp_SigBit;
 
-    going = (video_dispport != NULL) && (video_safeport != NULL);
+    going = (video_dispport != NULL) && (video_safeport != NULL) && (video_sigbit3 != -1);
     while (going) {
         sig = Wait(video_sigbit3_mask | SIGBREAKF_CTRL_C);
         if (sig & video_sigbit3_mask) {
@@ -534,6 +536,10 @@ static void SAVEDS video_flipscreentask(void)
         DeletePort(video_dispport);
     if (video_safeport != NULL)
         DeletePort(video_safeport);
+    if (video_sigbit3 != -1) {
+        FreeSignal(video_sigbit3);
+        video_sigbit3 = -1;
+    }
     Signal(video_maintask, SIGBREAKF_CTRL_F);
 }
 
@@ -883,8 +889,7 @@ void I_InitGraphics(void)
 
     if (video_is_native_mode) {
         if (video_is_using_blitter) {
-            if ((video_sigbit1 = AllocSignal(-1)) == -1 || (video_sigbit2 = AllocSignal(-1)) == -1 ||
-                (video_sigbit3 = AllocSignal(-1)) == -1)
+            if ((video_sigbit1 = AllocSignal(-1)) == -1 || (video_sigbit2 = AllocSignal(-1)) == 1 )
                 I_Error("Can't allocate signal!\n");
             Signal(video_maintask, (1 << video_sigbit1) | (1 << video_sigbit2));
             /* initial state is finished */
@@ -1094,10 +1099,6 @@ void I_ShutdownGraphics(void)
             Wait(1 << video_sigbit2);  // wait for last c2p8 to completely finish
             FreeSignal(video_sigbit2);
             video_sigbit2 = -1;
-        }
-        if (video_sigbit3 != -1) {
-            FreeSignal(video_sigbit3);
-            video_sigbit3 = -1;
         }
     }
     if (video_window != NULL) {
