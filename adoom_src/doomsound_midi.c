@@ -41,6 +41,8 @@ const UWORD LibRevision = 1;
 struct Library *DoomSndFwdBase = NULL;
 struct Library *DoomSndBase = NULL;
 struct ExecBase *SysBase = NULL;
+struct DosLibrary * DOSBase = NULL;
+
 extern struct Library *CamdBase;
 
 extern struct Task *g_playerTask;
