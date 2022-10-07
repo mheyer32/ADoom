@@ -636,7 +636,7 @@ _R_MapPlane:
 		add.l	_viewangle(a4),d4
 		moveq	#ANGLETOFINESHIFT,d1
 		lsr.l	d1,d4
-		move.l	_finecosine(a4),a0
+		move.l	_finecosine,a0
 		move.l	(a0,d4.l*4),d0
 		move.l	d3,d1
 		jsr	(a1)
