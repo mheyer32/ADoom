@@ -1475,9 +1475,9 @@ boolean G_CheckDemoStatus(void)
 {
     if (timingdemo) {
         int endtime = I_GetTime();
-        float fps = (35.0f * gametic) / (endtime - starttime);
-        int intFps = (int)fps;
-        int fracFps = (int)((fps - (int)(fps)) * 100.0f);
+        int fps = (256 * 35 * gametic) / (endtime - starttime);
+        int intFps = fps/256;
+        int fracFps = ((fps - (fps)) * 100.0f)/256;
 
         I_Error("timed %i gametics in %i realtics (%i.%i fps)", gametic, endtime - starttime, intFps, fracFps);
     }
