@@ -28,12 +28,12 @@ endif
 CFLAGS  = $(RUNTIME_CFLAGS)
 LDFLAGS = $(RUNTIME_LDFLAGS)
 
-CFLAGS += -fbaserel -m68030 -msmall-code -mregparm=4
+CFLAGS += -fbaserel -m68020-60 -mtune=68030 -msmall-code -mregparm=4 -msoft-float
 CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -Wdouble-promotion -fstrict-aliasing
 
 #Always	provide symbols, will be stripped away  for target executable
 CFLAGS += -g -ggdb
-LFLAGS += -g -ggdb
+LDFLAGS += -g -ggdb
 
 ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -Og -ffast-math -fno-omit-frame-pointer
@@ -45,13 +45,13 @@ else
 	endif
 endif
 
-CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API -DINDIVISION
+CFLAGS += -D__BIG_ENDIAN__ -DNORMALUNIX -DAMIGA -Diabs=abs -D__NO_NET_API -DINDIVISION -include "amiga_macros.h"
 
 CFLAGS_DOOMSOUND := $(CFLAGS)
 
 ifeq ($(PROFILE), 1)
 	CFLAGS += -pg
-	LFLAGS += -pg
+	LDFLAGS += -pg
 endif
 
 PFLAGS = -Fhunk -phxass -nosym -ldots -m68030 -linedebug
