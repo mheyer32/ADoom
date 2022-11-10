@@ -33,7 +33,7 @@ CFLAGS += -Werror -Wimplicit -Wstrict-prototypes -Wdouble-promotion -fstrict-ali
 
 #Always	provide symbols, will be stripped away  for target executable
 CFLAGS += -g -ggdb
-LDFLAGS += -g -ggdb
+LDFLAGS += -g -ggdb 
 
 ifeq ($(DEBUG), 1)
 	CFLAGS += -DDEBUG -Og -ffast-math -fno-omit-frame-pointer
@@ -150,14 +150,13 @@ OUTOBJS = $(addprefix $(INTERMEDIATE), $(OBJS))
 
 #$(info $(OBJS))
 
-all:	ADoom doomsound_midi.library NullModem CAMDoomSound
+all: ADoom 
+	 $(MAKE) --directory=./camd_tools --file Makefile
 
 clean:
 	rm -f *.o
 	rm -f ADoom
-	rm -f doomsound_midi.library
-	rm -f NullModem
-	rm -f CAMDoomSound
+	$(MAKE) --directory=./camd_tools --file Makefile clean
 
 ADoom: $(OBJS) | DoomSnd.h  Makefile
 		$(CC) $(CFLAGS) $(LDFLAGS) -Wl,-Map=ADoom.map $(OBJS) -o $@
@@ -201,30 +200,9 @@ c2p_6_040.o: c2p_040.s Makefile
 %.o: %.ASM | Makefile
 	$(PHXASS) $(PFLAGS) -sc $^
 
-DoomSnd.h: doomsound.fd doomsound.h Makefile
-	fd2pragma --infile doomsound.fd --clib doomsound.h --externc --special 47
-
-DoomSndFwd.h: doomsound_fwd.fd doomsound_fwd.h Makefile
-	fd2pragma --infile doomsound_fwd.fd --clib doomsound_fwd.h --externc --special 47
-
-doomsound_midi.library: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
-	$(CC) $(CFLAGS_DOOMSOUND) -I./ -ramiga-lib -fbaserel -o $@ $^
-	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
-
-doomsound_midi.s: doomsound_midi.c musplay.c | DoomSndFwd.h Makefile
-	$(CC) $(CFLAGS_DOOMSOUND) -Wa,-adhln -g -I./ -ramiga-lib -c $^  > $@
-
 test_fixed:	test_fixed.o amiga_fixed.o Makefile
 	$(CC) $(CFLAGS) test_fixed.o amiga_fixed.o \
 	 $(LDFLAGS) -o $(OUT)test_fixed
-
-NullModem: INTERNAL.o | Makefile
-	$(CC) -g -ggdb -nostdlib -nostartfiles -nodefaultlibs -o $@ $^ -lamiga
-	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o  $(BINDIR)/$@
-
-CAMDoomSound: camdoom.c musplay.c | Makefile
-	$(CC) $(CFLAGS) $(LDFLAGS) -Wno-strict-prototypes -o $@ $^
-	$(STRIP) --strip-debug --strip-unneeded --strip-all $@ -o $(BINDIR)/$@
 
 #############################################################
 #
